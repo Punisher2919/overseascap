@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8">
+    <title>Admin Reviews - Overseas Cap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- MATCHING DASHBOARD STAGING --- */
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 10px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 1000;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .small-swal-title {
+            font-size: 18px !important;
+            font-weight: bold !important;
+            padding-top: 10px !important;
+        }
+        .small-swal-text {
+            font-size: 13px !important;
+            margin: 10px 0 !important;
+        }
+        .small-swal-button {
+            font-size: 12px !important;
+            padding: 8px 20px !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logo-main { font-size: 26px; font-weight: bold; }
+        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            align-items: center;
+            transition: all 0.4s ease-in-out;
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        nav.menu-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        nav a {
+            color: #000;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        nav a:hover { color: #a67c52; }
+
+        .menu-toggle-btn {
+            cursor: pointer;
+            font-size: 22px;
+            margin-left: 25px;
+            color: #333;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .menu-toggle-btn:hover { color: #a67c52; }
+
+        /* --- MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: flex;
+            padding: 20px 50px;
+            gap: 25px; 
+            overflow: hidden; 
+            align-items: flex-start;
+        }
+
+        .content-left {
+            flex: 3; 
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: 100%;
+            padding-right: 15px;
+        }
+        .content-left::-webkit-scrollbar { width: 5px; }
+        .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+
+        .page-title {
+            color: #bc9c7e;
+            letter-spacing: 3px;
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .admin-sub-label {
+            color: #a67c52;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* --- REVIEW CARDS --- */
+        .reviews-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px;
+            padding-bottom: 20px;
+        }
+
+        .review-card {
+            background-color: #a67c52;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: slideFadeUp 0.5s ease-out forwards;
+            opacity: 0;
+            position: relative;
+        }
+        
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(166, 124, 82, 0.3);
+        }
+
+        .delete-review-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: color 0.2s;
+            font-size: 14px;
+        }
+        .delete-review-btn:hover { color: #ff4444; }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            line-height: 1.3;
+            padding-right: 25px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .review-profile-pic {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.3);
+            background-color: #fff;
+        }
+
+        .stars { color: #FFD700; font-size: 11px; text-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        
+        .review-content-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .review-image-thumb {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+        }
+
+        .review-body { 
+            flex: 1;
+            font-style: italic; 
+            font-size: 13px; 
+            line-height: 1.4;
+            opacity: 0.95; 
+            word-wrap: break-word;
+            padding-left: 10px;
+            border-left: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .admin-reply-box {
+            background: rgba(0,0,0,0.15); 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            margin-top: 5px;
+            border: 1px dashed rgba(255, 215, 0, 0.4);
+        }
+
+        .review-footer { 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            opacity: 0.7; 
+            text-align: right;
+            margin-top: auto;
+        }
+
+        @keyframes slideFadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        {% for r in reviews %}
+        .review-card:nth-child({{ loop.index }}) { animation-delay: {{ loop.index0 * 0.1 }}s; }
+        {% endfor %}
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            flex: 1;
+            min-width: 220px;
+            max-width: 250px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .sidebar-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-list a {
+            text-decoration: none;
+            color: #333;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            transition: 0.3s;
+        }
+
+        .nav-list a:hover { color: #a67c52; padding-left: 5px; }
+
+        .reply-form {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .reply-input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 11px;
+            outline: none;
+        }
+        .reply-input::placeholder { color: rgba(255,255,255,0.6); }
+
+        .reply-btn {
+            background: #fff;
+            color: #a67c52;
+            border: none;
+            padding: 0 15px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        /* --- NEW FILTER STYLE --- */
+        .rating-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            outline: none;
+            background-color: #fcfcfc;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-wrapper">
+            <div class="logo-text">
+                <span class="logo-main">Overseas Cap</span>
+                <span class="logo-admin">ADMIN</span>
+            </div>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; width: auto;">
+        </div>
+
+        <div style="display: flex; align-items: center;">
+            <nav id="topNav">
+                <a href="{{ url_for('admin_dashboard') }}">DASHBOARD</a>
+                <a href="{{ url_for('admin_products') }}">PRODUCTS</a>
+                <a href="{{ url_for('admin_orders') }}">ORDERS</a>
+                <a href="{{ url_for('admin_inventory') }}">INVENTORY</a>
+                <a href="{{ url_for('admin_customers') }}">CUSTOMERS</a>
+                <a href="{{ url_for('admin_reviews') }}" style="color: #bc9c7e;">REVIEWS</a>
+                <a href="/logout" onclick="return confirmLogout(event)" style="color: #ff5722;">LOGOUT</a>
+            </nav>
+            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-left">
+            <div class="page-title">Reviews</div>
+            <div class="admin-sub-label">CUSTOMER FEEDBACK MONITOR</div>
+            
+            <div class="reviews-container" id="reviewsList">
+                {% for r in reviews %}
+                <div class="review-card" data-rating="{{ r.rating }}" id="review-{{ r.id }}">
+                    <i class="fas fa-trash delete-review-btn" onclick="deleteReview({{ r.id }})"></i>
+                    
+                    <div class="review-header">
+                        <span class="user-info">
+                            <img src="{{ url_for('static', filename='profile_pics/' + r.user.profile_pic) if r.user.profile_pic else url_for('static', filename='default_profile.png') }}" class="review-profile-pic" alt="User Pic">
+                            <span>
+                                {{ r.user.username }}<br>
+                                <small style="font-size: 10px; color: rgba(255,255,255,0.7);">Item: {{ r.product_type }}</small>
+                            </span>
+                        </span>
+                        <span class="stars">
+                            {% for i in range(r.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                        </span>
+                    </div>
+                    
+                    <div class="review-content-wrapper">
+                        {% if r.review_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + r.review_image) }}"
+                             class="review-image-thumb" 
+                             onclick="Swal.fire({imageUrl: this.src, showConfirmButton: false, background: 'transparent'})">
+                        {% endif %}
+                        <div class="review-body">"{{ r.comment }}"</div>
+                    </div>
+
+                    {% if r.admin_reply %}
+                        <div class="admin-reply-box">
+                            <strong style="color: #FFD700; letter-spacing: 1px;">OFFICIAL REPLY:</strong><br>
+                            <span style="display: inline-block; margin-top: 4px;">{{ r.admin_reply }}</span>
+                        </div>
+                    {% else %}
+                        <form class="reply-form" action="{{ url_for('reply_review', review_id=r.id) }}" method="POST">
+                            <input type="text" name="reply_text" class="reply-input" placeholder="Write an official response..." required>
+                            <button type="submit" class="reply-btn">SEND</button>
+                        </form>
+                    {% endif %}
+
+                    <div class="review-footer">
+                        <i class="far fa-calendar-alt"></i> {{ r.date_posted.strftime('%m/%d/%y') if r.date_posted else 'N/A' }}
+                    </div>
+                </div>
+                {% else %}
+                <div style="grid-column: span 2; text-align: center; padding: 50px; background: white; border-radius: 20px; border: 1px dashed #ccc;">
+                    <i class="fas fa-comment-slash" style="font-size: 30px; color: #ccc; margin-bottom: 10px;"></i>
+                    <p style="color: #999; margin: 0;">No customer reviews found in the system.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span>FILTER BY RATING</span>
+                <i class="fas fa-filter"></i>
+            </div>
+            <div class="sidebar-box">
+                <select id="ratingFilter" class="rating-select" onchange="filterReviews()">
+                    <option value="all">View All Reviews</option>
+                    <option value="5">★★★★★ (5 Stars)</option>
+                    <option value="4">★★★★☆ (4 Stars)</option>
+                    <option value="3">★★★☆☆ (3 Stars)</option>
+                    <option value="2">★★☆☆☆ (2 Stars)</option>
+                    <option value="1">★☆☆☆☆ (1 Star)</option>
+                </select>
+            </div>
+
+            <div class="sidebar-header">
+                <span>REVIEW ACTIONS</span>
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="sidebar-box">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('export_reviews_csv') }}">Export Feedback <i class="fas fa-file-export"></i></a></li>
+                    <li><a href="#" onclick="clearAllReviews()" style="color: #ff5722;">Delete All Reviews <i class="fas fa-trash-alt"></i></a></li>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Back to Dashboard <i class="fas fa-home"></i></a></li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        function deleteReview(reviewId) {
+            Swal.fire({
+                title: 'Delete Review?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#a67c52',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/review/delete/${reviewId}`;
+                }
+            });
+        }
+
+        function clearAllReviews() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to delete ALL customer reviews!",
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Yes, DELETE ALL'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ url_for('admin_clear_reviews') }}";
+                }
+            });
+        }
+
+        function filterReviews() {
+            const selectedRating = document.getElementById('ratingFilter').value;
+            const reviews = document.querySelectorAll('.review-card');
+            
+            reviews.forEach(card => {
+                const cardRating = card.getAttribute('data-rating');
+                if (selectedRating === 'all' || cardRating === selectedRating) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Logout?',
+                text: "You will need to login again.",
+                icon: 'warning',
+                iconColor: '#a67c52',
+                width: '300px',
+                padding: '1.5rem',
+                showCancelButton: true,
+                confirmButtonColor: '#a67c52',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                background: '#fff',
+                borderRadius: '15px',
+                customClass: {
+                    title: 'small-swal-title',
+                    htmlContainer: 'small-swal-text',
+                    confirmButton: 'small-swal-button',
+                    cancelButton: 'small-swal-button'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) { window.location.href = "/logout"; }
+            })
+        }
+
+        function toggleMenu() {
+            const nav = document.getElementById('topNav');
+            nav.classList.toggle('menu-hidden');
+        }
+    </script>
+</body>
+</html>

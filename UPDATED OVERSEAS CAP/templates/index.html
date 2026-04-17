@@ -1,0 +1,29 @@
+<nav>
+    <h1>Overseas Cap</h1>
+    <a href="/">HOME</a>
+    <a href="/order">CUSTOMER ORDER</a>
+    <a href="/contact">CONTACT</a>
+</nav>
+
+<aside class="search-filter">
+    <h3>SEARCH FILTER</h3>
+    <label>Price Range</label>
+    <input type="number" placeholder="PMIN">
+    <input type="number" placeholder="PMAX">
+    <button>APPLY</button>
+</aside>
+
+<section class="products">
+    {% for product in products %}
+    <div class="product-card">
+        <h4>{{ product.name }}</h4>
+        <p>Rating: ★★★★★</p>
+        <p>{{ product.price }}</p>
+    </div>
+    {% endfor %}
+</section>
+
+<footer>
+    <p>ABOUT US: MAYPAJO TAWILIS PARKING</p>
+    <p>SHOPEE.PH/JEANODRI | FACEBOOK.COM/JEANODRI</p>
+</footer>

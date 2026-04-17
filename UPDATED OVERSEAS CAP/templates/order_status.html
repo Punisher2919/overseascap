@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Status - Overseas Cap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #bc9c7e;
+            --primary-light: #fcf9f6;
+            --primary-dark: #a67c52;
+            --primary-glow: rgba(188, 156, 126, 0.3);
+            --text-dark: #333;
+            --text-muted: #bbb;
+            --bg: #f8f8f8;
+            --white: #fff;
+            --ease-out: cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        @keyframes containerEntry {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes stepFade {
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .status-card { 
+            background: var(--white); 
+            border-radius: 20px; 
+            width: 800px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            animation: containerEntry 0.8s var(--ease-out) forwards;
+            opacity: 0;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- LEFT PANEL --- */
+        .details-panel {
+            background: #fafaf8;
+            padding: 35px;
+            width: 55%; 
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            animation: stepFade 0.6s ease forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        .back-link { 
+            color: var(--primary); 
+            text-decoration: none; 
+            font-size: 10px; 
+            font-weight: bold; 
+            letter-spacing: 1.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            transition: 0.2s;
+        }
+        .back-link:hover { opacity: 0.7; transform: translateX(-3px); }
+
+        .status-label { 
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .status-label.pending { background: #fdf6ec; color: #e67e22; }
+        .status-label.delivered { background: #e8f5e9; color: #27ae60; }
+        .status-label.delivery { background: var(--primary-light); color: var(--primary); }
+
+        .details-panel h1 { 
+            margin: 0; 
+            font-size: 24px; 
+            color: var(--text-dark); 
+            font-weight: 800;
+        }
+
+        /* --- ORDER INFO GRID --- */
+        .order-meta {
+            margin: 15px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .meta-item { display: flex; flex-direction: column; gap: 2px; }
+        .meta-item label { font-size: 9px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; }
+        .meta-item span { font-size: 11px; color: #555; font-weight: 600; }
+
+        /* --- TRACKER --- */
+        .premium-tracker { margin-top: auto; position: relative; padding-left: 5px; }
+        .tracker-line {
+            position: absolute;
+            left: 12px;
+            top: 10px;
+            height: calc(100% - 20px);
+            width: 2px;
+            background: #eee;
+        }
+        .tracker-line.active { background: var(--primary); }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            animation: stepFade 0.4s ease forwards;
+        }
+        .step:last-child { padding-bottom: 0; }
+        .step::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--white);
+            border: 2px solid #eee;
+            border-radius: 50%;
+        }
+        .step.active::before { background: var(--primary); border-color: var(--primary); }
+        .step-content { display: flex; align-items: center; gap: 8px; }
+        .step-content i { font-size: 11px; color: #ccc; }
+        .step-content span { font-size: 11px; color: #ccc; }
+        .step.active .step-content i, .step.active .step-content span { color: var(--text-dark); font-weight: 600; }
+
+        /* --- RIGHT PANEL --- */
+        .action-panel { 
+            flex: 1;
+            padding: 40px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: stepFade 0.8s ease forwards;
+            animation-delay: 1.2s;
+            opacity: 0;
+        }
+
+        .info-msg-box {
+            background: #fafafa;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .info-msg-box i { font-size: 18px; color: var(--primary); margin-bottom: 10px; display: block; }
+
+        .feedback-section { width: 100%; }
+        .feedback-section h3 { font-size: 14px; margin: 0 0 15px 0; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .feedback-card { 
+            background: var(--primary-light); 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-size: 12px;
+            border: 1px solid #f0eae0;
+        }
+        .star-rating { color: #FFD700; font-size: 11px; margin-bottom: 5px; }
+
+        .review-img {
+            display: block;
+            margin: 10px auto;
+            max-width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: 8px;
+            background-color: var(--white);
+        }
+
+        .admin-response { 
+            margin-top: 10px; 
+            padding: 10px; 
+            background: var(--white); 
+            border-radius: 6px;
+            font-size: 11px;
+            color: #666;
+            border-left: 3px solid var(--primary);
+        }
+
+        select, textarea { 
+            width: 100%; 
+            border: 1px solid #eee; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        textarea { height: 80px; resize: none; }
+        
+        .btn-submit { 
+            background: var(--primary); 
+            color: var(--white); 
+            border: none; 
+            padding: 12px; 
+            width: 100%; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            font-size: 11px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-submit:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+    <div class="status-card">
+        <div class="details-panel">
+            <a href="{{ url_for('customer_profile') }}" class="back-link">
+                <i class="fas fa-chevron-left"></i> BACK TO PROFILE
+            </a>
+            
+            <div class="status-label {{ 'pending' if order.status == 'PENDING' else 'delivery' if order.status == 'ON DELIVERY' else 'delivered' }}">
+                {{ order.status }}
+            </div>
+            
+            <h1>Order #{{ order.id }}</h1>
+            <p style="color: var(--primary); font-weight: bold; font-size: 13px; margin-bottom: 5px;">{{ order.product_type }}</p>
+
+            <div class="order-meta">
+                <div class="meta-item">
+                    <label>Selected Color</label>
+                    <span>{{ order.color_type }}</span>
+                </div>
+                <div class="meta-item">
+                    <label>Selected Size</label>
+                    <span>{{ order.size_type }}</span>
+                </div>
+                <div class="meta-item">
+                    <label>Quantity</label>
+                    <span>{{ order.quantity }} pc(s)</span>
+                </div>
+                <div class="meta-item">
+                    <label>Payment Method</label>
+                    <span>{{ order.payment_method }}</span>
+                </div>
+                
+                <div class="meta-item" style="grid-column: span 2; border-top: 1px dashed #eee; padding-top: 10px; margin-top: 5px;">
+                    <label>Shipping To</label>
+                    <span>{{ order.customer_name }}</span>
+                    <span style="font-weight: normal; color: #888;">{{ order.address }}</span>
+                </div>
+                
+                {% if order.remarks %}
+                <div class="meta-item" style="grid-column: span 2;">
+                    <label>My Remarks</label>
+                    <span style="font-style: italic; font-weight: 400; font-size: 10px;">"{{ order.remarks }}"</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="premium-tracker">
+                <div class="tracker-line {{ 'active' if order.status == 'DONE' or order.status == 'COMPLETED' }}"></div>
+                <div class="step {{ 'active' if order.status in ['PENDING', 'ON DELIVERY', 'DONE', 'COMPLETED'] }}">
+                    <div class="step-content">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Order Received</span>
+                    </div>
+                </div>
+                <div class="step {{ 'active' if order.status in ['ON DELIVERY', 'DONE', 'COMPLETED'] }}" style="animation-delay: 0.6s;">
+                    <div class="step-content">
+                        <i class="fas fa-truck-pickup"></i>
+                        <span>In Transit</span>
+                    </div>
+                </div>
+                <div class="step {{ 'active' if order.status in ['DONE', 'COMPLETED'] }}" style="animation-delay: 1.0s;">
+                    <div class="step-content">
+                        <i class="fas fa-check-double"></i>
+                        <span>Delivered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-panel">
+            {% if order.status in ['DONE', 'COMPLETED'] %}
+                <div class="feedback-section">
+                    {% if review %}
+                        <h3>Your Feedback</h3>
+                        <div class="feedback-card">
+                            <div class="star-rating">
+                                {% for i in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                            </div>
+                            <p style="margin: 0; color: #555; line-height: 1.5;">"{{ review.comment }}"</p>
+                            
+                            {% if review.review_image %}
+                                <img src="{{ url_for('static', filename='uploads/' + review.review_image) }}" class="review-img" alt="Review Image">
+                            {% endif %}
+                            
+                            {% if review.admin_reply %}
+                            <div class="admin-response">
+                                <strong style="display: block; color: var(--primary); font-size: 9px; margin-bottom: 4px;">SHOP RESPONSE</strong>
+                                {{ review.admin_reply }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <h3>Rate This Product</h3>
+                        <form action="{{ url_for('submit_review') }}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <select name="rating">
+                                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                <option value="4">⭐⭐⭐⭐ Good</option>
+                                <option value="3">⭐⭐⭐ Average</option>
+                                <option value="2">⭐⭐ Poor</option>
+                                <option value="1">⭐ Bad</option>
+                            </select>
+                            <textarea name="comment" placeholder="How was the quality and fit of your cap?" required></textarea>
+                            <label style="font-size: 9px; font-weight: bold; color: #bbb; display: block; margin-bottom: 5px;">ADD PHOTO (OPTIONAL)</label>
+                            <input type="file" name="review_image" accept="image/*" style="font-size: 10px; margin-bottom: 5px; color: #888;">
+                            <button type="submit" class="btn-submit">SUBMIT REVIEW</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="info-msg-box">
+                    <i class="fas fa-clock"></i>
+                    Feedback and ratings will be available once the order is delivered successfully.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

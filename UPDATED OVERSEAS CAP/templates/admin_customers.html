@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Customer List - Overseas Cap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- UNIFORM STAGING --- */
+        html, body {
+            height: 100vh; width: 100vw; margin: 0; padding: 0;
+            overflow: hidden; background-color: #f8f8f8;
+            font-family: Arial, sans-serif; display: flex; flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 10px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 1000;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .logo-main { font-size: 26px; font-weight: bold; }
+        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            align-items: center;
+            transition: all 0.4s ease-in-out;
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        nav.menu-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        nav a { color: #000; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
+        nav a:hover { color: #a67c52; }
+
+        .menu-toggle-btn {
+            cursor: pointer;
+            font-size: 22px;
+            margin-left: 25px;
+            color: #333;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .menu-toggle-btn:hover { color: #a67c52; }
+        .menu-toggle-btn:active { transform: scale(0.9); }
+
+        /* --- MAIN LAYOUT --- */
+        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        
+        .content-left { flex: 3; display: flex; flex-direction: column; overflow: hidden; }
+        .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; }
+
+        /* --- CUSTOMER TABLE SECTION --- */
+        .table-container {
+            background: #a67c52; 
+            color: white; 
+            border-radius: 30px; 
+            padding: 30px; 
+            flex: 1; 
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideUpFade 0.6s ease-out;
+        }
+
+        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { 
+            padding: 15px; 
+            text-transform: uppercase; 
+            font-size: 12px;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.05);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        tr { transition: background 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        tr:hover { background: rgba(255, 255, 255, 0.08); }
+        td { padding: 15px 10px; font-size: 14px; vertical-align: middle; }
+
+        .customer-info { display: flex; align-items: center; gap: 12px; }
+        .avatar-circle {
+            width: 38px; height: 38px; background: rgba(255,255,255,0.15);
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; color: white; border: 1px solid rgba(255,255,255,0.3);
+            overflow: hidden;
+        }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+        .msg-badge {
+            background: #ffeb3b; color: #333; padding: 4px 8px;
+            border-radius: 50px; font-size: 10px; font-weight: bold;
+        }
+
+        .action-btn {
+            background: white; color: #a67c52; border: none;
+            padding: 8px 15px; border-radius: 8px; cursor: pointer;
+            font-size: 11px; font-weight: bold; transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .action-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .view-req-btn { background: #222; color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .view-req-btn:hover { background: #000; color: white; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { flex: 1; max-width: 280px; animation: fadeInRight 0.5s ease-out; }
+        .sidebar-header { font-weight: bold; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-box { 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+
+        .stats-item { margin-bottom: 15px; }
+        .stats-item span { display: block; font-size: 10px; color: #888; font-weight: bold; text-transform: uppercase; }
+        .stats-item div { font-size: 18px; font-weight: bold; color: #a67c52; }
+
+        .export-btn {
+            width: 100%; background: #a67c52; color: white; border: none; 
+            padding: 12px; cursor: pointer; font-weight: bold; border-radius: 8px;
+            text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;
+        }
+        .export-btn:hover { background: #8e6843; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-wrapper">
+            <div class="logo-text">
+                <span class="logo-main">Overseas Cap</span>
+                <span class="logo-admin">ADMIN</span>
+            </div>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; width: auto;">
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+            <nav id="topNav">
+                <a href="{{ url_for('admin_dashboard') }}">DASHBOARD</a>
+                <a href="{{ url_for('admin_products') }}">PRODUCTS</a>
+                <a href="{{ url_for('admin_orders') }}">ORDERS</a>
+                <a href="{{ url_for('admin_inventory') }}">INVENTORY</a>
+                <a href="{{ url_for('admin_customers') }}" style="color: #bc9c7e;">CUSTOMERS</a>
+                <a href="{{ url_for('admin_reviews') }}">REVIEWS</a>
+                <a href="/logout" onclick="confirmLogout(event)" style="color: #ff5722;">LOGOUT</a>
+            </nav>
+            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-left">
+            <div class="page-title">Customer Management</div>
+            <div class="admin-sub-label">ACTIVE CLIENTS & DESIGN REQUESTS</div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Profile</th>
+                            <th>Contact Info</th>
+                            <th>Account Status</th>
+                            <th>Request Status</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr onclick="showCustomerProfile('{{ user.id }}')" style="cursor:pointer;">
+                            <td>
+                                <div class="customer-info">
+                                    <div class="avatar-circle">
+                                        {% if user.profile_pic %}
+                                            <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" alt="P">
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='blank-profile.png') }}" alt="P">
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:bold;">{{ user.full_name }}</div>
+                                        <div style="font-size:11px; opacity: 0.8;">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ user.contact }}</td>
+                            <td><span style="color: #fff; font-weight: bold; font-size: 11px;">● ACTIVE</span></td>
+                            <td>
+                                {% set ns = namespace(found_msg=none) %}
+                                {% for msg in messages %}
+                                    {% if msg.user_id == user.id %}
+                                        {% set ns.found_msg = msg %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if ns.found_msg %}
+                                    {% if not ns.found_msg.reply %}
+                                        <span class="msg-badge">NEW MESSAGE</span>
+                                    {% else %}
+                                        <span style="font-size: 11px; opacity: 0.8; font-weight: bold;">Replied</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span style="font-size: 11px; opacity: 0.6;">No pending req</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                {% if ns.found_msg %}
+                                    <button class="action-btn view-req-btn" 
+                                            onclick="event.stopPropagation(); viewConversationMessenger('{{ user.id }}', '{{ user.full_name | replace("'", "\\'") }}')">
+                                        <i class="fas fa-comment-dots"></i> VIEW CONVO
+                                    </button>
+                                {% else %}
+                                    <button class="action-btn" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                                        <i class="fas fa-envelope"></i> NO MSG
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span>CLIENT OVERVIEW</span>
+                <i class="fas fa-users" style="color: #a67c52;"></i>
+            </div>
+            <div class="sidebar-box">
+                <div class="stats-item">
+                    <span>TOTAL REGISTERED</span>
+                    <div>{{ stats.total_users }} Users</div>
+                </div>
+                <div class="stats-item">
+                    <span>NEW MESSAGES</span>
+                    <div style="color: #d33;">{{ stats.unread_msgs }} Pending</div>
+                </div>
+                <div class="stats-item">
+                    <span>BULK ORDER CLIENTS</span>
+                    <div>{{ stats.bulk_clients }} Clients</div>
+                </div>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                <button class="export-btn" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> Export PDF List
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <div id="pdf-content" style="display:none; padding: 50px; font-family: 'Times New Roman', serif; background: white; color: #000;">
+        <div style="border-bottom: 3px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <h1 style="margin:0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px;">Overseas Cap</h1>
+                    <p style="margin:2px 0; font-size: 12px; font-style: italic;">Official Customer Database Record</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin:0; font-size: 10px; font-weight: bold;">DATE: <span id="pdf-date"></span></p>
+                    <p style="margin:0; font-size: 10px; font-weight: bold;">DOCUMENT ID: #OC-{{ range(1000, 9999) | random }}</p>
+                </div>
+            </div>
+        </div>
+        <div id="pdf-body"></div>
+        <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 10px; font-size: 9px; text-align: center; color: #777;">
+            This is an automated system report. Confidential. &copy; Overseas Cap Management.
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.getElementById('topNav');
+            nav.classList.toggle('menu-hidden');
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Logout?',
+                text: "You will need to login again.",
+                icon: 'warning',
+                iconColor: '#a67c52',
+                width: '300px',
+                showCancelButton: true,
+                confirmButtonColor: '#a67c52',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = "/logout";
+            });
+        }
+
+        async function exportToPDF() {
+            Swal.fire({
+                title: 'Generating Report...',
+                text: 'Processing official data profiles.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const userIds = [{% for user in users %}"{{ user.id }}",{% endfor %}];
+                const pdfBody = document.getElementById('pdf-body');
+                pdfBody.innerHTML = '';
+                document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+                for (let id of userIds) {
+                    const response = await fetch(`/admin/get_customer_details/${id}`);
+                    const data = await response.json();
+
+                    let orderRows = data.orders.map(o => `
+                        <tr style="border-bottom: 0.5px solid #eee;">
+                            <td style="padding:5px;">#ORD-${o.id}</td>
+                            <td style="padding:5px;">${o.product_name || o.product_type}</td>
+                            <td style="padding:5px;">${o.color || 'N/A'}</td>
+                            <td style="padding:5px;">${o.size || 'N/A'}</td>
+                            <td style="padding:5px;">${o.quantity}</td>
+                            <td style="padding:5px; font-weight:bold;">${o.status}</td>
+                        </tr>
+                    `).join('');
+
+                    pdfBody.innerHTML += `
+                        <div style="margin-bottom: 40px; page-break-inside: avoid;">
+                            <div style="background: #f4f4f4; padding: 10px; border-left: 5px solid #333; margin-bottom: 10px;">
+                                <h2 style="margin:0; font-size: 16px; text-transform: uppercase;">Customer: ${data.full_name}</h2>
+                                <p style="margin:0; font-size: 11px;">Unique Identifier: #UID-${id}</p>
+                            </div>
+                            <table style="width:100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px;">
+                                <tr>
+                                    <td style="width:15%; font-weight:bold; padding:4px;">EMAIL:</td><td style="padding:4px;">${data.email}</td>
+                                    <td style="width:15%; font-weight:bold; padding:4px;">CONTACT:</td><td style="padding:4px;">${data.contact}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:bold; padding:4px;">ADDRESS:</td><td colspan="3" style="padding:4px;">${data.address}</td>
+                                </tr>
+                            </table>
+                            <h3 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Transaction Logs:</h3>
+                            <table style="width:100%; border-collapse: collapse; font-size: 10px; border: 1px solid #ddd;">
+                                <thead style="background:#eee;">
+                                    <tr>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Order Ref.</th>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Product</th>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Color</th>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Size</th>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Qty</th>
+                                        <th style="padding:6px; text-align:left; border: 1px solid #ddd;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${orderRows || '<tr><td colspan="6" style="text-align:center; padding:10px; color:#999;">No transaction history found.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                const element = document.getElementById('pdf-content');
+                element.style.display = 'block'; 
+
+                const opt = {
+                    margin: 15,
+                    filename: 'Customer_Data_Report.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                await html2pdf().set(opt).from(element).save();
+                element.style.display = 'none'; 
+                Swal.close();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'Failed to generate professional report.', 'error');
+            }
+        }
+
+        function showCustomerProfile(userId) {
+            fetch(`/admin/get_customer_details/${userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    let orderRows = data.orders.map(o => `
+                        <tr style="font-size:12px; border-bottom:1px solid #eee;">
+                            <td style="padding:5px;">#${o.id}</td>
+                            <td>${o.product_name || o.product_type}</td>
+                            <td>${o.color || '-'}</td>
+                            <td>${o.size || '-'}</td>
+                            <td>${o.quantity}</td>
+                            <td><b style="color:${o.status === 'COMPLETED' ? 'green' : 'orange'}">${o.status}</b></td>
+                        </tr>
+                    `).join('');
+
+                    const profileImg = data.profile_pic ? '/static/profile_pics/' + data.profile_pic : '/static/blank-profile.png';
+
+                    Swal.fire({
+                        title: `<span style="color:#a67c52">${data.full_name}</span>`,
+                        width: '600px',
+                        html: `
+                            <div style="text-align:left; font-size:14px;">
+                                <div style="display:flex; justify-content:center; margin-bottom:15px;">
+                                    <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; border:2px solid #a67c52;">
+                                        <img src="${profileImg}" style="width:100%; height:100%; object-fit:cover;">
+                                    </div>
+                                </div>
+                                <p><b>Email:</b> ${data.email}</p>
+                                <p><b>Contact:</b> ${data.contact}</p>
+                                <p><b>Address:</b> ${data.address}</p>
+                                <hr>
+                                <p><b>Purchase History:</b></p>
+                                <div style="max-height: 200px; overflow-y: auto;">
+                                    <table style="width:100%; border-collapse:collapse;">
+                                        <thead><tr style="text-align:left; font-size:11px; color:#888;">
+                                            <th>ID</th><th>Product</th><th>Color</th><th>Size</th><th>Qty</th><th>Status</th>
+                                        </tr></thead>
+                                        <tbody>${orderRows || '<tr><td colspan="6">No orders yet.</td></tr>'}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonColor: '#a67c52'
+                    });
+                });
+        }
+
+        function viewConversationMessenger(userId, userName) {
+            fetch(`/admin/get_convo_history/${userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    let chatHtml = `<div id="chatBox" style="text-align:left; max-height:300px; overflow-y:auto; padding:10px; background:#f9f9f9; border-radius:10px; border: 1px solid #eee;">`;
+                    if (data.history.length === 0) {
+                        chatHtml += `<p style="text-align:center; color:#888; font-size:12px;">No messages yet.</p>`;
+                    } else {
+                        data.history.forEach(m => {
+                            chatHtml += `<div style="margin-bottom:15px;"><div style="background:#eee; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;"><strong>${m.sender}:</strong> ${m.text}</div>${m.reply ? `<div style="text-align:right; margin-top:5px;"><div style="background:#a67c52; color:white; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;">${m.reply}</div></div>` : ''}</div>`;
+                        });
+                    }
+                    chatHtml += `</div><textarea id="newReply" style="width:100%; height: 60px; margin-top:10px; padding:10px; border-radius:5px; border:1px solid #ddd; resize:none;" placeholder="Type your reply here..."></textarea>`;
+
+                    Swal.fire({
+                        title: `Chat with ${userName}`,
+                        html: chatHtml,
+                        showCancelButton: true,
+                        confirmButtonText: 'Send Reply',
+                        confirmButtonColor: '#a67c52',
+                        didOpen: () => { const cb = document.getElementById('chatBox'); cb.scrollTop = cb.scrollHeight; }
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const replyText = document.getElementById('newReply').value;
+                            if (!replyText || data.history.length === 0) return;
+                            fetch(`/admin/reply_customer_msg/${data.history[data.history.length - 1].id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reply: replyText })
+                            }).then(() => {
+                                viewConversationMessenger(userId, userName);
+                                location.reload();
+                            });
+                        }
+                    });
+                });
+        }
+    </script>
+</body>
+</html>

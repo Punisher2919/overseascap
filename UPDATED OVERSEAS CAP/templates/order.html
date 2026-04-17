@@ -1,0 +1,24 @@
+<h2>ADMIN PANEL - DASHBOARD</h2>
+<div class="stats">
+    <div>TOTAL ORDERS: 120</div>
+    <div>PENDING: 25</div>
+    <div>COMPLETED: 95</div>
+</div>
+
+<h3>MONTHLY ORDER REPORT</h3>
+<table>
+    <tr>
+        <th>ORDER ID</th>
+        <th>CLIENT NAME</th>
+        <th>PRODUCT</th>
+        <th>STATUS</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.id }}</td>
+        <td>{{ order.client }}</td>
+        <td>{{ order.product }}</td>
+        <td>{{ order.status }}</td>
+    </tr>
+    {% endfor %}
+</table>

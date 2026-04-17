@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway - Overseas Cap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #bc9c7e;
+            --primary-dark: #a67c52;
+            --accent: #ff5722;
+            --bg: #f4f4f4;
+            --warning: #d9534f;
+        }
+
+        /* Entry Animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Button Shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Subtle Pulse for Account Box */
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(188, 156, 126, 0.2); }
+            70% { box-shadow: 0 0 0 10px rgba(188, 156, 126, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(188, 156, 126, 0); }
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background: var(--bg);
+        }
+
+        .payment-card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            text-align: center; 
+            width: 100%;
+            max-width: 380px;
+            border-top: 6px solid var(--primary);
+            margin: 20px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .method-title { 
+            color: var(--primary-dark); 
+            font-size: 20px; 
+            font-weight: 800; 
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instruction {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .acc-box {
+            background: #fff9f4;
+            border: 1.5px dashed var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            animation: softPulse 2s infinite;
+        }
+
+        .acc-number { 
+            font-size: 26px; 
+            font-weight: 900; 
+            color: #222; 
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #eee;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover { 
+            background: var(--primary);
+            color: white; 
+            transform: translateY(-50%) scale(1.1) rotate(10deg);
+        }
+
+        .upload-section { 
+            margin: 10px 0 20px 0; 
+            text-align: left; 
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: #fff;
+            transform: scale(1.02);
+        }
+
+        /* When file is added */
+        .upload-section.active {
+            border-color: #2ecc71;
+            background: #f0fff4;
+        }
+
+        .upload-warning {
+            color: var(--warning);
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .submit-btn { 
+            background: var(--accent);
+            background: linear-gradient(90deg, var(--accent) 0%, #ff7043 50%, var(--accent) 100%);
+            background-size: 200% auto;
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            width: 100%; 
+            font-weight: 800; 
+            font-size: 14px;
+            cursor: pointer; 
+            border-radius: 10px; 
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+            text-transform: uppercase;
+        }
+
+        .submit-btn:hover { 
+            animation: shimmer 1.5s infinite linear;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .cancel-link {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #999;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .cancel-link:hover { 
+            color: var(--primary-dark);
+            transform: translateX(-5px);
+        }
+
+        /* Shake animation for errors */
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-card">
+        <div class="method-title">Pay via {{ method }}</div>
+        <p class="instruction">Send the exact amount to:</p>
+        
+        <div class="acc-box">
+            <p class="acc-number" id="accNum">0993541325</p>
+            <button class="copy-btn" onclick="copyAcc()" title="Copy Number">
+                <i class="fas fa-copy"></i>
+            </button>
+            <p class="acc-name">Overseas Cap</p>
+        </div>
+
+        <form id="productPaymentForm" enctype="multipart/form-data">
+            <input type="hidden" name="payment_method" value="{{ method }}">
+            
+            <div class="upload-warning animate__animated animate__pulse animate__infinite">
+                <i class="fas fa-exclamation-circle"></i> Required: Upload screenshot first
+            </div>
+
+            <div class="upload-section" id="dropZone" onclick="document.getElementById('screenshotInput').click()">
+                <label><i class="fas fa-cloud-upload-alt"></i> UPLOAD PAYMENT PROOF</label>
+                <input type="file" name="payment_screenshot" id="screenshotInput" accept="image/*" required hidden onchange="updateFileName()">
+                <div id="file-name-display">No file chosen</div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                CONFIRM & PLACE ORDER
+            </button>
+        </form>
+
+        <a href="javascript:history.back()" class="cancel-link">
+            <i class="fas fa-arrow-left"></i> Back to Product
+        </a>
+    </div>
+
+    <script>
+        function copyAcc() {
+            const num = document.getElementById('accNum').innerText;
+            navigator.clipboard.writeText(num);
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Number copied!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+
+        function updateFileName() {
+            const input = document.getElementById('screenshotInput');
+            const display = document.getElementById('file-name-display');
+            const section = document.getElementById('dropZone');
+            
+            if (input.files.length > 0) {
+                display.innerHTML = `<i class="fas fa-check-circle" style="color: #2ecc71"></i> ${input.files[0].name}`;
+                section.classList.add('active');
+                section.classList.remove('shake');
+            } else {
+                display.innerText = "No file chosen";
+                section.classList.remove('active');
+            }
+        }
+
+        document.getElementById('productPaymentForm').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('screenshotInput');
+            const section = document.getElementById('dropZone');
+
+            if (fileInput.files.length === 0) {
+                section.classList.add('shake');
+                setTimeout(() => section.classList.remove('shake'), 500);
+                
+                Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Missing Proof', 
+                    text: 'Please upload a screenshot of your transaction first.',
+                    confirmButtonColor: '#bc9c7e'
+                });
+                return;
+            }
+
+            const confirmAction = await Swal.fire({
+                title: 'Confirm Payment?',
+                text: "By clicking yes, you confirm that you have sent the correct amount.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#bc9c7e',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, I have paid'
+            });
+
+            if (!confirmAction.isConfirmed) return;
+
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESSING...';
+            btn.disabled = true;
+
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('/product_payment_gateway?method={{ method }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Order placed! We will verify your payment shortly.',
+                        confirmButtonColor: '#bc9c7e'
+                    }).then(() => {
+                        window.location.href = "{{ url_for('home') }}";
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: result.message });
+                    btn.innerText = 'CONFIRM & PLACE ORDER';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Connection Failed', text: 'Please check your internet.' });
+                btn.innerText = 'CONFIRM & PLACE ORDER';
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

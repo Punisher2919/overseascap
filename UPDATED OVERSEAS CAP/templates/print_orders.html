@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Report - {{ stats.generated_at }}</title>
+    <style>
+        /* Define Portrait Print Settings */
+        @page {
+            size: Portrait;
+            margin: 20mm;
+        }
+
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Professional Header */
+        .header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 3px solid #bc9c7e; /* Using your brand color */
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: 28px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #2c3e50;
+        }
+
+        .header-info { text-align: right; }
+        .header-info p { margin: 2px 0; font-size: 14px; color: #7f8c8d; }
+
+        /* Statistics/Summary Section */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #bc9c7e;
+            border-radius: 4px;
+        }
+
+        .summary-box span { display: block; font-size: 12px; color: #7f8c8d; text-transform: uppercase; }
+        .summary-box strong { font-size: 18px; color: #2c3e50; }
+
+        /* Table Styling */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        th { 
+            background-color: #f8f9fa; 
+            color: #2c3e50;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 2px solid #dee2e6;
+            padding: 12px 10px;
+        }
+
+        td { 
+            padding: 12px 10px; 
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+
+        /* Status Pill Styling */
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d4edda; color: #155724; }
+
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Overseas Cap</h1>
+                <p style="margin-top: 5px; color: #bc9c7e; font-weight: bold;">Master Order Report</p>
+            </div>
+            <div class="header-info">
+                <p><strong>Date:</strong> {{ stats.generated_at }}</p>
+                <p><strong>Reference:</strong> #REP-{{ stats.generated_at.split(' ')[0] }}</p>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box">
+                <span>Total Orders</span>
+                <strong>{{ orders|length }}</strong>
+            </div>
+            <div class="summary-box">
+                <span>Report Scope</span>
+                <strong>Daily Operations</strong>
+            </div>
+            <div class="summary-box">
+                <span>Authorization</span>
+                <strong>Admin Verified</strong>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Order ID</th>
+                    <th style="width: 25%;">Customer Name</th>
+                    <th style="width: 30%;">Product Specification</th>
+                    <th style="width: 10%;">Qty</th>
+                    <th style="width: 20%;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>#CUST-{{ order.id }}</strong></td>
+                    <td>{{ order.customer_name }}</td>
+                    <td>
+                        {{ order.product_type }}<br>
+                        <small style="color: #666;">
+                            Color: {{ order.color_type }} | Size: {{ order.size_type }}
+                        </small>
+                    </td>
+                    <td>{{ order.quantity }}</td>
+                    <td>
+                        <span class="status {% if order.status == 'Completed' %}status-completed{% else %}status-pending{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 10px; font-size: 11px; color: #999; text-align: center;">
+            This is a computer-generated document. No signature required. 
+            &copy; {{ stats.generated_at[:4] }} Overseas Cap Shop.
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

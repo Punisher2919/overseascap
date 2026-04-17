@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overseas Cap - Customer Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* --- STAGE 1: GLOBAL & ANIMATIONS --- */
+        html, body {
+            height: 100vh; width: 100vw; margin: 0; padding: 0;
+            overflow: hidden; 
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalSlide {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- STAGE 2: NAVIGATION --- */
+        header {
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0; 
+            z-index: 100;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo { font-size: 26px; font-weight: bold; color: #000; text-decoration: none; }
+        
+        .search-container {
+            border: 1px solid #000;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+        .search-container input { border: none; outline: none; width: 100%; font-size: 13px; }
+        .search-container button { background: none; border: none; cursor: pointer; color: #000; }
+
+        nav { display: flex; align-items: center; transition: all 0.4s ease-in-out; }
+        nav.menu-hidden { opacity: 0; transform: translateX(20px); visibility: hidden; pointer-events: none; }
+        
+        nav a {
+            color: #000;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        nav a:hover { color: #bc9c7e; }
+
+        .menu-toggle-btn { cursor: pointer; font-size: 20px; margin-left: 20px; color: #333; transition: 0.3s; }
+        .menu-toggle-btn:hover { color: #bc9c7e; }
+
+        /* --- STAGE 3: MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: flex;
+            padding: 20px 50px;
+            gap: 30px;
+            overflow: hidden; 
+            animation: fadeIn 0.7s ease-out;
+        }
+
+        .content-left {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for the left content */
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .content-left::-webkit-scrollbar {
+            width: 6px;
+        }
+        .content-left::-webkit-scrollbar-thumb {
+            background-color: #bc9c7e;
+            border-radius: 10px;
+        }
+
+        .resizable-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-title {
+            color: #bc9c7e;
+            letter-spacing: 3px;
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        /* --- STAGE 4: PROFILE CONTAINER --- */
+        #profileSection {
+            display: flex;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 20px 30px; 
+            gap: 30px;
+            align-items: center;
+            flex-shrink: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            min-height: 280px; /* Changed height to min-height */
+        }
+
+        .profile-image-box {
+            width: 120px; 
+            height: 120px; 
+            background-color: #fcf9f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #bc9c7e;
+            overflow: hidden;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+        .profile-image-box i { font-size: 50px; color: #bc9c7e; }
+
+        .user-info-text {
+            color: #bc9c7e;
+            font-size: 11px; 
+            font-weight: bold;
+            line-height: 1.5; 
+            text-transform: uppercase;
+        }
+
+        .user-info-text input {
+            margin-bottom: 10px; 
+            width: 100%;
+            border-radius: 4px;
+            padding: 8px;
+            border: 1px solid #eee;
+            background-color: #fafafa;
+            outline: none;
+        }
+
+        .update-btn {
+            background: #bc9c7e; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            cursor: pointer; 
+            margin-top: 5px; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            text-transform: uppercase; 
+            font-size: 11px;
+        }
+
+        /* --- STAGE 5: ORDER HISTORY --- */
+        #orderSection {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .order-history-title {
+            color: #bc9c7e;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #bc9c7e;
+            padding-bottom: 5px;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .order-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .order-table th {
+            text-align: left; padding: 12px 10px;
+            background: #bc9c7e; color: white;
+        }
+        .order-table td { padding: 12px 10px; border-bottom: 1px solid #f9f9f9; }
+
+        .clickable-row { cursor: pointer; transition: background 0.2s; }
+        .clickable-row:hover { background-color: #fcf9f6; }
+
+        .status-pill-user {
+            padding: 4px 10px; border-radius: 20px;
+            font-weight: bold; font-size: 10px;
+            text-transform: uppercase; color: white;
+            display: inline-block; text-align: center; min-width: 85px;
+        }
+        .status-pending { background: #e67e22; }
+        .status-delivery { background: #bc9c7e; }
+        .status-done { background: #27ae60; }
+
+        .rate-btn {
+            display:block; font-size: 10px; margin-top: 5px; 
+            cursor: pointer; background: #fcf9f6; color: #bc9c7e; 
+            border: 1px solid #bc9c7e; padding: 5px; border-radius: 3px; 
+            font-weight: bold; width: 100%;
+        }
+
+        /* --- STAGE 6: SIDEBAR --- */
+        .sidebar { flex: 1; max-width: 250px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 14px; }
+        .sidebar-box {
+            background: #fff; border: 1px solid #eee; padding: 20px;
+            color: #bc9c7e; font-weight: bold; font-size: 22px;
+            text-align: center; border-radius: 8px;
+        }
+
+        .admin-reply-box {
+            background: #fff; border: 1px solid #eee; padding: 15px;
+            border-radius: 8px; font-size: 13px; flex-grow: 1;
+        }
+
+        .about-us-sidebar {
+            background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px;
+        }
+        .about-us-sidebar h4 {
+            font-size: 12px; color: #bc9c7e; letter-spacing: 2px;
+            text-transform: uppercase; margin: 0 0 10px 0; border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 5px;
+        }
+        .social-links { display: flex; flex-direction: column; gap: 8px; }
+        .social-links a {
+            font-size: 10px; color: #444; text-decoration: none; font-weight: bold;
+            display: flex; align-items: center; gap: 8px; transition: color 0.3s;
+        }
+        .social-links a i { color: #bc9c7e; width: 15px; text-align: center; }
+        .social-links a:hover { color: #bc9c7e; }
+
+        .small-swal-title { font-size: 18px !important; font-weight: bold !important; }
+        .small-swal-text { font-size: 13px !important; }
+        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <a href="/home" class="logo">Overseas Cap</a>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 35px; width: auto;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <form action="{{ url_for('home') }}" method="GET" class="search-container">
+                <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            
+            <nav id="topNav">
+                <a href="{{ url_for('home') }}">HOME</a>
+                <a href="{{ url_for('custom_order') }}">CUSTOM ORDER</a>
+                <a href="{{ url_for('contact') }}">CONTACT</a>
+                <a href="{{ url_for('customer_profile') }}" style="color: #ff5722;">CUSTOMER</a>
+                <a href="#" onclick="confirmLogout(event)" style="color: #ff5722; font-weight: bold;">
+                    <i class="fas fa-sign-out-alt"></i> LOGOUT
+                </a>
+            </nav>
+            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-left">
+            <div class="page-title">WELCOME, {{ user.full_name if user.full_name != 'NOT SET' else user.username }}</div>
+            
+            <div class="resizable-stack">
+                <div id="profileSection">
+                     <form method="POST" enctype="multipart/form-data" style="flex: 1; display: flex; align-items: center; gap: 30px;">
+                        <div style="text-align: center;">
+                            <div class="profile-image-box">
+                                {% if user.profile_pic and user.profile_pic != 'default.png' %}
+                                    <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='blank-profile.png') }}" 
+                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
+                        </div>
+                            <div style="margin-top: 12px;">
+                                <label style="font-size: 9px; color: #bc9c7e; font-weight: bold; display: block; margin-bottom: 5px;">CHANGE PHOTO:</label>
+                                <input type="file" name="profile_pic" accept="image/*" style="font-size: 10px; width: 160px;">
+                            </div>
+                        </div>
+                        
+                        <div style="flex: 1;">
+                            <div class="user-info-text">
+                                <label>FULL NAME</label>
+                                <input type="text" name="full_name" value="{{ user.full_name }}">
+                                
+                                <label>CONTACT NO</label>
+                                <input type="text" name="contact" value="{{ user.contact }}">
+                                
+                                <label>ADDRESS</label>
+                                <input type="text" name="address" value="{{ user.address }}">
+                            </div>
+                            <button type="submit" class="update-btn">UPDATE PROFILE</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="orderSection">
+                    <div class="order-history-title"><i class="fas fa-truck-loading"></i> MY RECENT ORDERS</div>
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Date</th>
+                                <th style="text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in user_orders %}
+                            <tr class="clickable-row" onclick="window.location.href='{{ url_for('order_status', order_id=order.id) }}'">
+                                <td>
+                                    <span style="color: #bc9c7e; font-weight: bold;">
+                                        #{{ order.id }} <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                                    </span>
+                                </td>
+                                <td>{{ order.product_type }}</td>
+                                <td>{{ order.date_ordered.strftime('%m/%d/%y') if order.date_ordered else 'N/A' }}</td>
+                                <td style="text-align: center;">
+                                    {% if order.status == 'DONE' %}
+                                        <span class="status-pill-user status-done">DELIVERED</span>
+                                        <button class="rate-btn" onclick="event.stopPropagation(); openReviewModal('{{ order.id }}', '{{ order.product_type }}')">
+                                            <i class="fas fa-pen"></i> RATE & REVIEW
+                                        </button>
+                                    {% else %}
+                                        <span class="status-pill-user {% if order.status == 'PENDING' %}status-pending{% else %}status-delivery{% endif %}">
+                                            {{ order.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999; padding: 40px;">No orders found yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+        </div> 
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span>ACCOUNT STATS</span>
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="sidebar-box">
+                <div style="font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase;">TOTAL ORDERS</div>
+                {{ user_orders|length }}
+            </div>
+
+            <div class="admin-reply-box">
+                <div style="color: #bc9c7e; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px;">
+                    <i class="fas fa-bell"></i> ADMIN REPLIES
+                </div>
+                <div style="max-height: 200px; overflow-y: auto;">
+                    {% if reviews %}
+                        {% set replied_count = 0 %}
+                        {% for review in reviews %}
+                            {% if review.admin_reply %}
+                                <div style="margin-bottom: 10px; padding: 10px; background: #fcf9f6; border-left: 3px solid #bc9c7e; font-size: 11px; border-radius: 0 5px 5px 0;">
+                                    <strong style="color: #333;">For {{ review.product_type }}:</strong><br>
+                                    <span style="color: #a67c52; font-style: italic;">"{{ review.admin_reply }}"</span>
+                                </div>
+                                {% set replied_count = replied_count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if replied_count == 0 %}
+                            <p style="font-size: 11px; color: #999; text-align: center;">No new replies yet.</p>
+                        {% endif %}
+                    {% else %}
+                        <p style="font-size: 11px; color: #999; text-align: center;">No feedback history.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="about-us-sidebar">
+                <h4>About Us</h4>
+                <div class="social-links">
+                    <a href="https://shopee.ph/jeanodri" target="_blank">
+                <i class="fas fa-shopping-bag"></i> <span>SHOPEE.PH/JEANODRI</span>
+            </a>
+            <a href="https://facebook.com/jeanodri" target="_blank">
+                <i class="fab fa-facebook"></i> <span>FACEBOOK.COM/JEANODRI</span>
+            </a>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="reviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: white; padding: 35px; border-radius: 15px; width: 400px; animation: modalSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <h3 style="color: #bc9c7e; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;">Submit Review</h3>
+            <form action="{{ url_for('submit_review') }}" method="POST">
+                <input type="hidden" name="order_id" id="modal_order_id">
+                <p id="modal_product_name" style="font-weight: bold; font-size: 14px; margin-bottom: 20px; color: #333;"></p>
+                <label style="font-size: 12px; font-weight: bold; color: #bc9c7e;">RATING</label><br>
+                <select name="rating" style="width: 100%; padding: 12px; margin: 8px 0 20px 0; border: 1px solid #eee; border-radius: 5px;">
+                    <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                    <option value="4">⭐⭐⭐⭐ (Good)</option>
+                    <option value="3">⭐⭐⭐ (Average)</option>
+                    <option value="2">⭐⭐ (Poor)</option>
+                    <option value="1">⭐ (Very Bad)</option>
+                </select>
+                <label style="font-size: 12px; font-weight: bold; color: #bc9c7e;">YOUR COMMENT</label><br>
+                <textarea name="comment" required style="width: 100%; height: 90px; padding: 12px; margin-top: 8px; border: 1px solid #eee; border-radius: 5px; box-sizing: border-box;" placeholder="Tell us about your experience..."></textarea>
+                <div style="margin-top: 25px; display: flex; gap: 10px;">
+                    <button type="submit" style="background: #bc9c7e; color: white; border: none; padding: 12px; cursor: pointer; flex: 1; font-weight: bold; border-radius: 5px;">SUBMIT</button>
+                    <button type="button" onclick="closeReviewModal()" style="background: #f5f5f5; color: #333; border: none; padding: 12px; cursor: pointer; flex: 1; font-weight: bold; border-radius: 5px;">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    function toggleMenu() {
+        const nav = document.getElementById('topNav');
+        nav.classList.toggle('menu-hidden');
+    }
+
+    function confirmLogout(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Logout?',
+            text: "You will need to login again.",
+            icon: 'warning',
+            iconColor: '#ff5722',
+            width: '300px',
+            padding: '1.5rem',
+            showCancelButton: true,
+            confirmButtonColor: '#ff5722',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            borderRadius: '15px',
+            customClass: {
+                title: 'small-swal-title',
+                htmlContainer: 'small-swal-text',
+                confirmButton: 'small-swal-button',
+                cancelButton: 'small-swal-button'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ url_for('logout') }}";
+            }
+        });
+    }
+
+    function openReviewModal(orderId, productName) {
+        document.getElementById('modal_order_id').value = orderId;
+        document.getElementById('modal_product_name').innerText = "Product: " + productName;
+        document.getElementById('reviewModal').style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

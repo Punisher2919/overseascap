@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overseas Cap - Contact</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* --- STAGE 1: FULL SCREEN & NO SCROLL --- */
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- STAGE 2: NAVIGATION HEADER --- */
+        header {
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo { font-size: 26px; font-weight: bold; color: #000; text-decoration: none; }
+
+        /* Functional Search Bar */
+        .search-container {
+            border: 1px solid #000;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+        .search-container input { border: none; outline: none; width: 100%; font-size: 13px; }
+        .search-container button { background: none; border: none; cursor: pointer; color: #000; }
+
+        /* Sliding Menu Logic */
+        nav { display: flex; align-items: center; transition: all 0.4s ease-in-out; }
+        nav.menu-hidden { opacity: 0; transform: translateX(20px); visibility: hidden; pointer-events: none; }
+
+        nav a {
+            color: #000;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        nav a:hover { color: #bc9c7e; }
+
+        .menu-toggle-btn { cursor: pointer; font-size: 20px; margin-left: 20px; color: #333; transition: 0.3s; }
+        .menu-toggle-btn:hover { color: #bc9c7e; }
+
+        /* --- STAGE 3: MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 50px;
+            overflow: hidden;
+            justify-content: center; 
+            align-items: center;
+            position: relative;
+        }
+
+        /* --- STAGE 4: CONTACT CONTENT --- */
+        .contact-box {
+            text-align: center;
+            max-width: 800px;
+            animation: fadeIn 0.8s ease-in-out;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-subtitle {
+            color: #bc9c7e;
+            letter-spacing: 5px;
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .main-heading {
+            font-size: 64px;
+            letter-spacing: 2px;
+            margin: 0 0 40px 0;
+            font-weight: 800;
+            color: #222;
+            line-height: 1.1;
+        }
+
+        .contact-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            margin-top: 20px;
+        }
+
+        .info-panel {
+            text-align: left;
+            border-left: 3px solid #bc9c7e;
+            padding-left: 25px;
+        }
+
+        .info-item { margin-bottom: 20px; }
+
+        .info-label {
+            font-size: 11px;
+            color: #aaa;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #444;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .info-value:hover { color: #bc9c7e; }
+
+        .qr-container {
+            background: white;
+            padding: 15px;
+            border: 1px solid #eee;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+
+        .qr-container:hover { transform: scale(1.05); }
+
+        .qr-placeholder {
+            width: 140px;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .forms-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 35px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff;
+            background-color: #bc9c7e;
+            border-radius: 50px;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(188, 156, 126, 0.3);
+        }
+
+        .forms-link:hover {
+            background-color: #a68a6d;
+            transform: translateY(-2px);
+        }
+
+        /* --- BEAUTIFUL ABOUT US SECTION (STILL) --- */
+        .about-us {
+            position: absolute;
+            bottom: 30px;
+            right: 50px;
+            text-align: right;
+        }
+
+        .about-us h4 {
+            font-size: 12px;
+            color: #bc9c7e;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .about-us h4::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #bc9c7e;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .social-links a {
+            font-size: 10px;
+            color: #444;
+            text-decoration: none;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a i {
+            font-size: 14px;
+            color: #bc9c7e;
+            width: 18px;
+            text-align: center;
+        }
+
+        .social-links a:hover {
+            color: #bc9c7e;
+        }
+
+        /* SweetAlert Compact Styles */
+        .small-swal-title { font-size: 18px !important; font-weight: bold !important; }
+        .small-swal-text { font-size: 13px !important; }
+        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <a href="/home" class="logo">Overseas Cap</a>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 35px; width: auto;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <form action="{{ url_for('home') }}" method="GET" class="search-container">
+                <input type="text" name="q" placeholder="Search products..." value="{{ request.args.get('q', '') }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+
+            <nav id="topNav">
+                <a href="/home">HOME</a>
+                <a href="{{ url_for('custom_order') }}">CUSTOM ORDER</a>
+                <a href="/contact" style="color: #bc9c7e;">CONTACT</a>
+                <a href="{{ url_for('customer_profile') }}" style="color: #ff5722;">CUSTOMER</a>
+                <a href="#" onclick="confirmLogout(event)" style="color: #ff5722; font-weight: bold;">
+                    <i class="fas fa-sign-out-alt"></i> LOGOUT
+                </a>
+            </nav>
+            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main>
+        <div class="contact-box">
+            <div class="page-subtitle">Contact Us</div>
+            <h1 class="main-heading">LET’S GET IN<br>TOUCH.</h1>
+            
+            <div class="contact-grid">
+                <div class="info-panel">
+                    <div class="info-item">
+                        <span class="info-label">Email Address</span>
+                        <a href="mailto:jeanodori@gmail.com" class="info-value">JEANODORI@GMAIL.COM</a>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone Number</span>
+                        <span class="info-value">0993 541 325</span>
+                    </div>
+                </div>
+
+                <div class="qr-container">
+                    <div class="qr-placeholder">
+                        <i class="fas fa-qrcode" style="font-size: 110px; color: #222;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://forms.google.com" target="_blank" class="forms-link">
+                OPEN GOOGLE FORMS <i class="fas fa-external-link-alt" style="margin-left: 8px;"></i>
+            </a>
+        </div>
+
+        <div class="about-us">
+            <h4>About Us</h4>
+            <div class="social-links">
+                <a href="https://shopee.ph/jeanodri" target="_blank">
+                <i class="fas fa-shopping-bag"></i> <span>SHOPEE.PH/JEANODRI</span>
+            </a>
+            <a href="https://facebook.com/jeanodri" target="_blank">
+                <i class="fab fa-facebook"></i> <span>FACEBOOK.COM/JEANODRI</span>
+            </a>
+            </div>
+        </div>
+    </main>
+
+<script>
+    function toggleMenu() {
+        const nav = document.getElementById('topNav');
+        nav.classList.toggle('menu-hidden');
+    }
+
+    function confirmLogout(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Logout?',
+            text: "You will need to login again.",
+            icon: 'warning',
+            iconColor: '#ff5722',
+            width: '300px',
+            padding: '1.5rem',
+            showCancelButton: true,
+            confirmButtonColor: '#ff5722',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            borderRadius: '15px',
+            customClass: {
+                title: 'small-swal-title',
+                htmlContainer: 'small-swal-text',
+                confirmButton: 'small-swal-button',
+                cancelButton: 'small-swal-button'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ url_for('logout') }}";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

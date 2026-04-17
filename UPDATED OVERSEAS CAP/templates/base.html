@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Overseas Cap</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Overseas Cap</h1>
+        <div class="nav-links">
+            <a href="/">HOME</a>
+            <a href="#">CUSTOMER ORDER</a>
+            <a href="#">CONTACT</a>
+            <a href="/admin">ADMIN</a>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>ABOUT US: MAYPAJO TAWILIS PARKING</p>
+        <p>SHOPEE.PH/JEANODRI | FACEBOOK.COM/JEANODRI</p>
+    </footer>
+</body>
+</html>

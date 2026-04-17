@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overseas Cap - {% if request.path == '/admin/login' %}Admin{% else %}Login{% endif %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes entranceAnim {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shieldPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); text-shadow: 0 0 10px rgba(196, 164, 132, 0.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- FIXED HEADER --- */
+        header {
+            padding: 10px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo { font-size: 26px; font-weight: bold; }
+
+        .logo-img {
+            height: 30px;
+            width: auto;
+            display: block;
+        }
+
+        .admin-badge {
+            font-size: 10px;
+            font-weight: bold;
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        .admin-access {
+            text-decoration: none;
+            color: #aaa;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .admin-access:hover {
+            color: #C4A484;
+            background: rgba(196, 164, 132, 0.05);
+        }
+
+        /* --- LOGIN SECTION --- */
+        .login-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: {% if request.path == '/admin/login' %}linear-gradient(135deg, #2c3e50 0%, #000000 100%){% else %}linear-gradient(135deg, #f8f8f8 0%, #e9e9e9 100%){% endif %};
+        }
+
+        .login-card {
+            background: white;
+            padding: 35px 30px;
+            width: 100%;
+            max-width: 340px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            /* Added Animation */
+            animation: entranceAnim 0.6s ease-out forwards;
+        }
+
+        .error-msg {
+            background: #fff5f5;
+            color: #ff5722;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border: 1px solid #ffebeb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .user-avatar {
+            font-size: 50px;
+            margin-bottom: 10px;
+            color: #C4A484;
+            display: inline-block;
+        }
+
+        /* Specific Animation for Admin Icon */
+        .admin-icon {
+            animation: shieldPulse 2s infinite ease-in-out;
+        }
+
+        h2 {
+            font-size: 11px;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #C4A484; 
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            border: 1.5px solid #eee;
+            border-radius: 10px;
+            background: #fdfdfd;
+            font-size: 13px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #C4A484;
+            box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.1);
+        }
+
+        .btn-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-login {
+            background-color: #C4A484;
+            color: white;
+        }
+
+        .btn-login:hover {
+            background-color: #b39374;
+            transform: translateY(-1.5px);
+        }
+
+        .btn-register {
+            background-color: transparent;
+            color: #C4A484;
+            border: 1.5px solid #C4A484;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 15px;
+            font-size: 11px;
+            color: #C4A484;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 20px 40px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-title {
+            font-weight: 800;
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #aaa;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .social-links a {
+            text-decoration: none;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .social-links a i {
+            font-size: 14px;
+            color: #C4A484;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <div class="logo">Overseas Cap</div>
+            {% if request.path == '/admin/login' %}
+                <span class="admin-badge">ADMIN</span>
+            {% else %}
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-img">
+            {% endif %}
+        </div>
+        
+        {% if request.path != '/admin/login' %}
+        <a href="/admin/login" class="admin-access">
+            <i class="fas fa-user-lock"></i> Admin Portal
+        </a>
+        {% endif %}
+    </header>
+
+    <div class="login-section">
+        <div class="login-card">
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="error-msg">
+                      <i class="fas fa-exclamation-circle"></i> {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="user-avatar">
+                {% if request.path == '/admin/login' %}
+                    <i class="fas fa-user-shield admin-icon"></i>
+                {% else %}
+                    <i class="fas fa-user-circle"></i>
+                {% endif %}
+            </div>
+
+            <h2>{% if request.path == '/admin/login' %}Admin Portal{% else %}Account Login{% endif %}</h2>
+
+            <form method="POST">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="{% if request.path == '/admin/login' %}Admin Username{% else %}Username{% endif %}" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="{% if request.path == '/admin/login' %}Admin Password{% else %}Password{% endif %}" required>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-login">
+                        {% if request.path == '/admin/login' %}ACCESS DASHBOARD{% else %}LOGIN <i class="fas fa-arrow-right"></i>{% endif %}
+                    </button>
+                    
+                    {% if request.path == '/admin/login' %}
+                        <a href="/" class="back-link">← BACK TO CUSTOMER LOGIN</a>
+                    {% else %}
+                        <a href="/register" class="btn btn-register">CREATE ACCOUNT</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-title">About Us: Overseas Cap</div>
+        <div class="social-links">
+            <a href="https://shopee.ph/jeanodri" target="_blank">
+                <i class="fas fa-shopping-bag"></i> <span>SHOPEE.PH/JEANODRI</span>
+            </a>
+            <a href="https://facebook.com/jeanodri" target="_blank">
+                <i class="fab fa-facebook"></i> <span>FACEBOOK.COM/JEANODRI</span>
+            </a>
+        </div>
+    </footer>
+
+</body>
+</html>

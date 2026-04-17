@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Detail - {{ order.id }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Prevents overall page scroll */
+        body { 
+            background-color: #f0f2f5; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Entrance Animation for the Card */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .detail-card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
+
+        .order-id-tag {
+            background: #a67c52;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 20px; 
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SCROLLABLE LEFT SECTION */
+        .info-section.scrollable {
+            overflow-y: auto;
+            max-height: 100%;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        /* Custom Scrollbar Styling */
+        .info-section.scrollable::-webkit-scrollbar {
+            width: 6px;
+        }
+        .info-section.scrollable::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .info-section.scrollable::-webkit-scrollbar-thumb {
+            background: #a67c5288;
+            border-radius: 10px;
+        }
+        .info-section.scrollable::-webkit-scrollbar-thumb:hover {
+            background: #a67c52;
+        }
+
+        .info-section {
+            background: #fdfdfd;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .label { 
+            font-weight: 800; 
+            color: #a67c52; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .value { 
+            font-size: 14px; 
+            margin-bottom: 12px; 
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        .img-container {
+            text-align: center;
+            height: 180px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .img-container:hover {
+            border-color: #a67c52;
+            box-shadow: 0 5px 15px rgba(166, 124, 82, 0.2);
+        }
+
+        .design-img, .proof-img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .design-img:hover, .proof-img:hover {
+            transform: scale(1.08);
+        }
+
+        .action-btns { 
+            margin-top: 20px; 
+            display: flex; 
+            gap: 12px; 
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn { 
+            border: none; 
+            padding: 10px 20px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            top: 0;
+        }
+
+        .btn:hover { 
+            opacity: 0.9; 
+            top: -3px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            top: 0;
+        }
+
+        .btn-delivery { background: #FF8C00; }
+        .btn-done { background: #2ecc71; }
+        .btn-back { background: #555; }
+
+        .status-pill {
+            font-weight: bold;
+            color: #ff5722;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="detail-card">
+        <div class="header">
+            <div>
+                <span class="order-id-tag">ORDER #{{ order.id }}</span>
+                <h2 style="margin: 5px 0 0 0; color: #333;">Customer Details</h2>
+            </div>
+            <div class="status-pill">
+                <i class="fas fa-circle-notch fa-spin"></i> {{ order.status }}
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-section scrollable">
+                <div class="label"><i class="fas fa-tag"></i>Product Name</div>
+                <div class="value">{{ order.product_type }}</div>
+
+                <div class="label"><i class="fas fa-user"></i> Name</div>
+                <div class="value">{{ order.customer_name }}</div>
+                
+                <div class="label"><i class="fas fa-phone"></i> Contact</div>
+                <div class="value">{{ order.contact_number }}</div>
+                
+                <div class="label"><i class="fas fa-map-marker-alt"></i> Address</div>
+                <div class="value" style="font-size: 12px;">{{ order.address }}</div>
+                
+                <div class="label"><i class="fas fa-box"></i> Product & Material</div>
+                <div class="value">{{ order.product_type }} <br><small>({{ order.material_type }})</small></div>
+
+                <div class="label"><i class="fas fa-palette"></i> Color Selection</div>
+                <div class="value">{{ order.color_type }}</div>
+
+                <div class="label"><i class="fas fa-ruler"></i> Size Selection</div>
+                <div class="value">{{ order.size_type }}</div>
+                
+                <div class="label"><i class="fas fa-sticky-note"></i> Remarks</div>
+                <div class="value" style="font-size: 12px; font-style: italic; background: #fff8f0; padding: 8px; border-radius: 5px; border-left: 3px solid #a67c52;">
+                    {{ order.remarks or 'No instructions' }}
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="label"><i class="fas fa-paint-brush"></i> Uploaded Design</div>
+                <div class="img-container">
+                    {% if order.design_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + order.design_filename) }}" class="design-img">
+                    {% else %}
+                        <span style="font-size: 12px; color: #999;">No Design Image</span>
+                    {% endif %}
+                </div>
+                <p style="text-align: center; margin-top: 10px;"><small>Custom Artwork</small></p>
+            </div>
+
+            <div class="info-section" style="border-left: 3px solid #a67c52;">
+                <div class="label"><i class="fas fa-credit-card"></i> Payment Method</div>
+                <div class="value" style="font-weight: bold;">{{ order.payment_method }}</div>
+
+                <div class="label"><i class="fas fa-receipt"></i> Payment Proof</div>
+                <div class="img-container">
+                    {% if order.payment_proof %}
+                        <a href="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" class="proof-img">
+                        </a>
+                    {% else %}
+                        <span style="color: #e74c3c; font-size: 12px; font-weight: bold;">NO PROOF UPLOADED</span>
+                    {% endif %}
+                </div>
+                {% if order.payment_proof %}
+                <p style="text-align: center; margin-top: 10px; color: #a67c52;">
+                    <small><i class="fas fa-search-plus"></i> Click to enlarge</small>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> BACK
+            </a>
+            <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ON DELIVERY') }}" class="btn btn-delivery">
+                <i class="fas fa-truck"></i> ON DELIVERY
+            </a>
+            <a href="{{ url_for('update_order_status', order_id=order.id, new_status='DONE') }}" class="btn btn-done">
+                <i class="fas fa-check-double"></i> MARK AS DONE
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

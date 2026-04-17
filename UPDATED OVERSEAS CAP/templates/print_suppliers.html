@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Supplier Directory Report - {{ stats.generated_at }}</title>
+    <style>
+        /* Define Portrait Print Settings */
+        @page {
+            size: Portrait;
+            margin: 15mm;
+        }
+
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        /* Professional Header Section */
+        .header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 3px solid #bc9c7e; /* Brand Color */
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: 26px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #1a1a1a;
+        }
+
+        .header-info { text-align: right; }
+        .header-info p { margin: 2px 0; font-size: 13px; color: #666; }
+
+        /* Summary Dashboard */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-box {
+            background: #fcfaf8;
+            padding: 12px;
+            border-left: 4px solid #bc9c7e;
+            border-radius: 2px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
+        }
+
+        .summary-box span { display: block; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .summary-box strong { font-size: 16px; color: #2c3e50; }
+
+        /* Table Design */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        th { 
+            background-color: #f8f9fa; 
+            color: #1a1a1a;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid #bc9c7e;
+            padding: 12px 10px;
+            text-align: left;
+        }
+
+        td { 
+            padding: 12px 10px; 
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+
+        /* Content Styling */
+        .supplier-name { font-weight: bold; color: #1a1a1a; font-size: 13px; }
+        .price-tag { 
+            font-weight: bold; 
+            color: #bc9c7e; 
+            background: #fdf8f3;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Print Logic */
+        .no-print { 
+            margin: 20px; 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center;
+        }
+        .btn { 
+            padding: 10px 25px; 
+            border-radius: 4px; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: bold; 
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+        .btn-print { background: #bc9c7e; color: white; }
+        .btn-back { background: #666; color: white; }
+
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+            .container { max-width: 100%; padding: 0; }
+            tr { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button class="btn btn-print" onclick="window.print()">Print Report</button>
+        <a href="{{ url_for('admin_inventory') }}" class="btn btn-back">Return</a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Overseas Cap</h1>
+                <p style="margin: 0; color: #bc9c7e; font-weight: bold; font-size: 14px;">Supplier Directory Report</p>
+            </div>
+            <div class="header-info">
+                <p><strong>Generated:</strong> {{ stats.generated_at }}</p>
+                <p><strong>File ID:</strong> SUP-{{ stats.generated_at.split(' ')[0].replace('-', '') }}</p>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-box">
+                <span>Active Vendors</span>
+                <strong>{{ stats.count }} Registered</strong>
+            </div>
+            <div class="summary-box">
+                <span>Data Classification</span>
+                <strong>Internal / Logistics</strong>
+            </div>
+            <div class="summary-box">
+                <span>Approval Status</span>
+                <strong>Verified</strong>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Vendor Name</th>
+                    <th style="width: 25%;">Contact / Location</th>
+                    <th style="width: 35%;">Materials & Supply</th>
+                    <th style="width: 20%;">Price Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in suppliers %}
+                <tr>
+                    <td>
+                        <div class="supplier-name">{{ s.name }}</div>
+                        <small style="color: #999;">Partner #{{ loop.index + 1000 }}</small>
+                    </td>
+                    <td>
+                        <span style="display: block; font-weight: 500;">{{ s.contact }}</span>
+                        <small style="color: #666;">{{ s.address }}</small>
+                    </td>
+                    <td>
+                        <div style="color: #2c3e50;">{{ s.supply }}</div>
+                    </td>
+                    <td>
+                        <span class="price-tag">{{ s.price_range }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 60px; border-top: 1px solid #eee; padding-top: 15px; font-size: 10px; color: #aaa; text-align: center; letter-spacing: 0.5px;">
+            CONFIDENTIAL: This document contains proprietary supplier information for Overseas Cap Shop operations. 
+            <br>&copy; {{ stats.generated_at[:4] }} Administrative Records.
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            setTimeout(() => { window.print(); }, 500);
+        }
+    </script>
+</body>
+</html>
