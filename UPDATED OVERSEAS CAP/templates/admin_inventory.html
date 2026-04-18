@@ -225,32 +225,37 @@
         }
         .delete-link:hover { color: #ff8a80; transform: scale(1.1); }
 
-        /* --- SIDEBAR --- */
-        .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; }
-        .sidebar-header { font-weight: bold; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        /* --- COMPACT SIDEBAR --- */
+        .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; overflow-y: auto; padding-right: 5px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        
+        .sidebar-header { font-weight: bold; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        
         .sidebar-box { 
             background: #fff; 
             border: 1px solid #ddd; 
-            padding: 20px; 
-            border-radius: 15px;
+            padding: 12px; 
+            border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
         
         .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { padding: 12px 0; border-bottom: 1px solid #eee; }
-        .nav-list a { text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
+        .nav-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .nav-list li:last-child { border-bottom: none; }
+        .nav-list a { text-decoration: none; color: #333; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
         .nav-list a:hover { color: #a67c52; padding-left: 5px; }
 
         .sidebar-box input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 7px;
+            margin-bottom: 7px;
             border: 1px solid #eee;
-            border-radius: 8px;
+            border-radius: 6px;
             box-sizing: border-box;
             background: #fcfcfc;
             outline: none;
+            font-size: 12px;
             transition: border-color 0.3s;
         }
         .sidebar-box input:focus { border-color: #a67c52; }
@@ -260,15 +265,16 @@
             background: #a67c52; 
             color: white; 
             border: none; 
-            padding: 12px; 
+            padding: 10px; 
             cursor: pointer; 
             font-weight: bold; 
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s;
         }
-        .add-btn:hover { background: #8e6843; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .add-btn:hover { background: #8e6843; transform: translateY(-1px); }
 
         /* --- ANIMATIONS --- */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -384,6 +390,18 @@
             </div>
 
             <div class="sidebar-header">
+                <span>STOCK REPORTS</span>
+                <i class="fas fa-print" style="color: #a67c52;"></i>
+            </div>
+            <div class="sidebar-box">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('print_low_stock') }}" target="_blank" style="color: #ff5252;">Low Stock (< 20) <i class="fas fa-exclamation-circle"></i></a></li>
+                    <li><a href="{{ url_for('print_sufficient_stock') }}" target="_blank">Sufficient Stock <i class="fas fa-check-circle"></i></a></li>
+                    <li><a href="{{ url_for('print_overall_stock') }}" target="_blank" style="color: #a67c52;">Master Valuation <i class="fas fa-file-invoice-dollar"></i></a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-header">
                 <span>QUICK LINKS</span>
                 <i class="fas fa-link" style="color: #a67c52;"></i>
             </div>
@@ -391,7 +409,6 @@
                 <ul class="nav-list">
                     <li><a href="{{ url_for('admin_suppliers') }}">Partner Directory <i class="fas fa-truck"></i></a></li>
                     <li><a href="{{ url_for('admin_dashboard') }}">Back to Home <i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('print_inventory') }}" target="_blank" style="color: #a67c52;">Export Stock Data <i class="fas fa-file-pdf"></i></a></li>
                 </ul>
             </div>
         </aside>
