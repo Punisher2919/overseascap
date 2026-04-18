@@ -136,6 +136,7 @@ class CustomOrder(db.Model):
     payment_method = db.Column(db.String(50)) 
     date_ordered = db.Column(db.DateTime, default=datetime.utcnow)
     payment_proof = db.Column(db.String(100))
+    price = db.Column(db.Float, default=0.0)
 
 with app.app_context():
     db.create_all()
@@ -415,45 +416,47 @@ def submit_custom_order():
 
 @app.route('/payment_gateway', methods=['GET', 'POST'])
 def payment_gateway():
-    method = request.args.get('method')
+    # Get details from the URL (for GET) or the Form (for POST)
+    order_id = request.args.get('order_id') or request.form.get('order_id')
+    method = request.args.get('method') or request.form.get('payment_method')
     
     if request.method == 'POST':
-        file = request.files.get('payment_screenshot')
-        order_data = session.get('temp_order') # Get the data we "remembered"
+        # Aligning input name: request.files.get('payment_proof') 
+        # (Ensure your HTML input name matches this)
+        file = request.files.get('payment_proof')
         
-        if file and order_data:
-            # 1. Save the payment proof image
-            proof_filename = f"proof_{file.filename}"
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], proof_filename))
-            
-            # 2. FINALLY create the database entry
-            user_data = User.query.filter_by(username=session.get('user')).first()
-            new_custom_order = CustomOrder(
-                user_id=user_data.id if user_data else None,
-                customer_name=order_data['customer_name'],
-                contact_number=order_data['contact_number'],
-                address=order_data['address'],
-                quantity=order_data['quantity'],
-                product_type=order_data['product_type'],
-                color_type=order_data['color_type'],
-                size_type=order_data['size_type'],
-                payment_method=order_data['payment_method'],
-                design_filename=order_data['design_filename'],
-                payment_proof=proof_filename,
-                status="PENDING"
-            )
-            
-            db.session.add(new_custom_order)
-            db.session.commit()
-            
-            # Clear the session so the data isn't resubmitted by accident
-            session.pop('temp_order', None)
-            
-            return jsonify({"status": "success", "message": "Order and Payment submitted!"})
-        
-        return jsonify({"status": "error", "message": "Missing file or session expired"})
+        if not order_id:
+            return jsonify({"status": "error", "message": "Order ID is missing."})
 
-    return render_template('payment_gateway.html', method=method)
+        if file and file.filename != '':
+            try:
+                # 1. Save the payment proof using your new naming convention
+                filename = secure_filename(file.filename)
+                # Matches the format: proof_202405201230_filename.jpg
+                proof_filename = f"proof_{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], proof_filename))
+                
+                # 2. Update the EXISTING CustomOrder in the database
+                order = CustomOrder.query.get(order_id)
+                if order:
+                    order.payment_method = method 
+                    order.payment_proof = proof_filename 
+                    # Optionally update status if needed
+                    # order.status = "PENDING" 
+                    
+                    db.session.commit()
+                    return jsonify({"status": "success", "message": "Payment details updated successfully!"})
+                else:
+                    return jsonify({"status": "error", "message": "Order not found in database."})
+            
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({"status": "error", "message": str(e)})
+        
+        return jsonify({"status": "error", "message": "Please upload a screenshot."})
+
+    # For GET request: render the page with current info
+    return render_template('payment_gateway.html', order_id=order_id, method=method)
    
 @app.route('/product_payment_gateway', methods=['GET', 'POST'])
 def product_payment_gateway():
@@ -566,6 +569,27 @@ def custom_order():
                            messages=messages, 
                            prev_data=prev_data, 
                            custom_orders=custom_orders)
+    
+@app.route('/update_payment_method/<int:order_id>', methods=['POST'])
+def update_payment_method(order_id):
+    try:
+        data = request.get_json()
+        new_method = data.get('payment_method')
+
+        # Use SQLAlchemy to find the order
+        order = CustomOrder.query.get(order_id)
+        
+        if order:
+            order.payment_method = new_method
+            db.session.commit() # Save to overseas_cap.db
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "error", "message": "Order not found"}), 404
+            
+    except Exception as e:
+        db.session.rollback() # Undo changes if there's an error
+        print(f"Error updating payment: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
     
 @app.route('/update_order/<int:order_id>', methods=['POST'])
 def update_order(order_id):
@@ -806,11 +830,14 @@ def admin_orders():
     total_revenue = 0
     
     for order in completed_orders:
-        if order.product: # Check if linked to a registered Product
+        if order.product: 
+            # For quick orders linked to a registered Product
             total_revenue += (order.product.price * order.quantity)
         else:
-            # Fallback for manual/custom orders without a linked product
-            total_revenue += (200 * order.quantity)
+            # For custom orders, use the 'price' set by the admin in order_view
+            # We use a fallback of 0 if for some reason the admin hasn't set a price yet
+            order_price = order.price if (order.price and order.price != 'Not set') else 0
+            total_revenue += (float(order_price))
 
     # 2. Add Inventory metrics to the stats dictionary
     dashboard_stats = {
@@ -869,13 +896,23 @@ def update_order_status(order_id, new_status):
     
     order = CustomOrder.query.get_or_404(order_id)
     
-    # Normalize status to uppercase to match our tracking logic
+    # 1. Capture price from query string (?price=...)
+    price_input = request.args.get('price')
+    
+    # 2. Update status (forced to upper to match ACCEPTED)
     order.status = new_status.upper() 
+    
+    # 3. Save price to database if present
+    if price_input:
+        try:
+            order.price = float(price_input)
+        except (ValueError, TypeError):
+            pass 
+
     db.session.commit()
+    flash(f"Order #{order_id} updated successfully.")
     
-    flash(f"Order #{order_id} is now {order.status}")
-    
-    # Redirect back to the specific order view or the main list
+    # After saving, we go back to the list of orders
     return redirect(url_for('admin_orders'))
 
 @app.route('/admin/sales_report')
@@ -906,19 +943,21 @@ def sales_report():
 
     completed_orders = query.all()
     
-    FALLBACK_PRICE = 200.00 
     sales_data = []
     total_revenue = 0
     
     for order in completed_orders:
-        unit_price = 0
-        if order.product:
+        if order.product: 
+            # For quick orders linked to a registered Product
             unit_price = order.product.price
+            order_total = unit_price * order.quantity
         else:
-            lookup_product = Product.query.filter_by(name=order.product_type).first()
-            unit_price = lookup_product.price if lookup_product else FALLBACK_PRICE
+            # For custom orders, use the 'price' set by the admin in order_view
+            raw_price = order.price if (order.price and order.price != 'Not set') else 0
+            # Custom orders usually have a total price set; we derive unit_price for the table
+            order_total = float(raw_price)
+            unit_price = order_total / order.quantity if order.quantity > 0 else order_total
 
-        order_total = unit_price * order.quantity
         total_revenue += order_total
         
         sales_data.append({
@@ -1047,10 +1086,14 @@ def print_low_stock():
     # Filter for items with quantity below 20
     low_stock_items = Inventory.query.filter(Inventory.qty < 20).all()
     
+    # Calculate valuation for this specific list
+    total_val = sum(item.qty * item.price for item in low_stock_items)
+    
     stats = {
         "title": "Low Stock Inventory Report",
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "count": len(low_stock_items)
+        "total_items": len(low_stock_items), # Changed from 'count' to match template
+        "total_value": total_val             # Added to prevent 'Undefined' error
     }
     return render_template('print_inventory.html', inventory=low_stock_items, stats=stats)
 
@@ -1062,10 +1105,14 @@ def print_sufficient_stock():
     # Filter for items with 20 or more
     sufficient_items = Inventory.query.filter(Inventory.qty >= 20).all()
     
+    # Calculate valuation for this specific list
+    total_val = sum(item.qty * item.price for item in sufficient_items)
+    
     stats = {
         "title": "Sufficient Stock Report",
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "count": len(sufficient_items)
+        "total_items": len(sufficient_items), # Changed from 'count' to match template
+        "total_value": total_val              # Added to prevent 'Undefined' error
     }
     return render_template('print_inventory.html', inventory=sufficient_items, stats=stats)
 
@@ -1364,6 +1411,32 @@ def submit_admin_message():
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/update_message/<int:message_id>', methods=['POST'])
+def update_message(message_id):
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    data = request.get_json()
+    new_text = data.get('message')
+    
+    # Find the message and update it
+    msg = ContactMessage.query.get_or_404(message_id)
+    msg.message = new_text
+    db.session.commit()
+    
+    return jsonify({"status": "success"})
+
+@app.route('/delete_message/<int:message_id>', methods=['POST'])
+def delete_message(message_id):
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    msg = ContactMessage.query.get_or_404(message_id)
+    db.session.delete(msg)
+    db.session.commit()
+    
+    return jsonify({"status": "success"})
 
 @app.route('/admin/reply_customer_msg/<int:msg_id>', methods=['POST'])
 def reply_customer_msg(msg_id):

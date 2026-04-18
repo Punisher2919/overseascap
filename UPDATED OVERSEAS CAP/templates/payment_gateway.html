@@ -217,12 +217,7 @@
 
         <form id="paymentForm" enctype="multipart/form-data">
             <input type="hidden" name="order_id" value="{{ order_id }}">
-            <input type="hidden" name="product_id" value="{{ request.args.get('product_id') }}">
-            <input type="hidden" name="qty" value="{{ request.args.get('qty') }}">
-            <input type="hidden" name="color_type" value="{{ request.args.get('color_type') }}">
-            <input type="hidden" name="size_type" value="{{ request.args.get('size_type') }}">
             <input type="hidden" name="payment_method" value="{{ method }}">
-            <input type="hidden" name="order_source" value="quick">
             
             <div class="upload-warning animate__animated animate__pulse animate__infinite">
                 <i class="fas fa-exclamation-circle"></i> Required: Upload screenshot first
@@ -230,7 +225,7 @@
 
             <div class="upload-section" id="dropZone" onclick="document.getElementById('screenshotInput').click()">
                 <label><i class="fas fa-cloud-upload-alt"></i> CLICK TO UPLOAD PROOF</label>
-                <input type="file" name="payment_screenshot" id="screenshotInput" accept="image/*" required hidden onchange="updateFileName()">
+                <input type="file" name="payment_proof" id="screenshotInput" accept="image/*" required hidden onchange="updateFileName()">
                 <div id="file-name-display">No file chosen</div>
             </div>
 
@@ -312,7 +307,9 @@
             const formData = new FormData(e.target);
 
             try {
-                const response = await fetch(window.location.href, {
+                // Fetch to /payment_gateway directly instead of window.location.href
+                // to avoid double-query parameters in some browsers
+                const response = await fetch('/payment_gateway', {
                     method: 'POST',
                     body: formData
                 });

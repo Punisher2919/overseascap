@@ -18,7 +18,68 @@
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+        
+       .pay-btn-small {
+    padding: 15px 5px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    line-height: 1.5;
+}
 
+.pay-btn-small i {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.pay-btn-small:hover {
+    filter: brightness(1.1);
+    transform: translateY(-3px);
+}
+
+/* Payment Selection Cards */
+.payment-card-btn {
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.payment-card-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+    background: #fdfdfd;
+}
+
+.payment-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.payment-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #444;
+    letter-spacing: 0.5px;
+}
+
+/* SweetAlert Title tweak to match image */
+.swal2-title {
+    margin-top: 10px !important;
+}
+
+        
         /* --- STAGE 2: NAVIGATION --- */
         header { padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid #ddd; z-index: 100; }
         .logo { font-size: 26px; font-weight: bold; }
@@ -368,67 +429,79 @@
             </div>
 
             <div style="margin-top: 25px;">
-                <div class="sidebar-header"><span>MY CUSTOM ORDERS</span><i class="fas fa-history"></i></div>
-                <div class="sidebar-box" style="padding: 10px; max-height: 200px; overflow-y: auto;">
-                    {% if custom_orders %}
-                    {% for order in custom_orders %}
-                                <div class="recent-order-item" 
-                                 style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;"
-                                 onclick="viewOrderStatus('{{ order.id }}', 
-             '{{ order.status }}', 
-             '{{ order.customer_name }}', 
-             '{{ order.contact_number }}', 
-             '{{ order.address }}', 
-             '{{ order.quantity }}', 
-             '{{ order.size_type }}', 
-             '{{ order.product_type }}', 
-             '{{ order.color_type }}', 
-             '{{ order.material_type }}', 
-             '{{ order.interlining_thickness }}', 
-             '{{ (order.remarks or "")|replace("\'", "\\\'")|replace("\n", " ") }}', 
-             '{{ order.design_filename }}')">
-                            <div style="font-size: 12px; font-weight: bold; color: #333;">Order #{{ order.id }}</div>
-                             <span style="font-size: 10px; font-weight: bold; color: #ff5722; text-transform: uppercase;">{{ order.status }}</span>
-                            </div>
-                     {% endfor %}
-                    {% else %}
-                    <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No recent orders.</p>
-                    {% endif %}
-                 </div>
-            </div>
+    <div class="sidebar-header"><span>MY CUSTOM ORDERS</span><i class="fas fa-history"></i></div>
+    <div class="sidebar-box" style="padding: 10px; max-height: 200px; overflow-y: auto;">
+        {% if custom_orders %}
+            {% for order in custom_orders %}
+            <div class="recent-order-item" 
+                 style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;"
+                 onclick="viewOrderStatus('{{ order.id }}', 
+                 '{{ order.status }}', 
+                 '{{ order.customer_name }}', 
+                 '{{ order.contact_number }}', 
+                 '{{ order.address }}', 
+                 '{{ order.quantity }}', 
+                 '{{ order.size_type }}', 
+                 '{{ order.product_type }}', 
+                 '{{ order.color_type }}', 
+                 '{{ order.material_type }}', 
+                 '{{ order.interlining_thickness }}', 
+                 '{{ (order.remarks or "")|replace("\'", "\\\'")|replace("\n", " ") }}', 
+                 '{{ order.design_filename }}',
+                 '{{ order.price or "Not set" }}',
+                 '{{ order.payment_method }}')"> <div style="font-size: 12px; font-weight: bold; color: #333;">Order #{{ order.id }}</div>
+    <span style="font-size: 10px; font-weight: bold; color: #ff5722; text-transform: uppercase;">{{ order.status }}</span>
+</div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No recent orders.</p>
+        {% endif %}
+    </div>
+</div>
+
+            
 
             <div style="margin-top: 25px;">
-                <div class="sidebar-header"><span>MESSAGE ADMIN</span><i class="fas fa-envelope"></i></div>
-                <div class="sidebar-box" style="padding: 15px;">
-                    <textarea id="adminMessage" class="admin-msg-box" placeholder="Describe your Custom Order, Design, budget, and preferred timeline here..."></textarea>
-                    <button type="button" class="msg-send-btn" onclick="sendMessageToAdmin()">SEND REQUEST</button>
-                    
-                    <div class="chat-history" style="margin-top: 20px; max-height: 250px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
-                        {% if messages %}
-                            {% for msg in messages %}
-                                <div style="margin-bottom: 15px; font-size: 12px; animation: fadeIn 0.3s ease;">
-                                    <div style="background: #eee; padding: 10px; border-radius: 10px 10px 0 10px; margin-bottom: 5px;">
-                                        <strong>You:</strong> {{ msg.message }}
-                                    </div>
-                                    
-                                    {% if msg.admin_reply %}
-                                        <div style="background: #e3f2fd; padding: 10px; border-radius: 10px 10px 10px 0; margin-left: 15px; border-left: 3px solid #2196f3;">
-                                            <strong>Admin Reply:</strong> {{ msg.admin_reply }}
-                                        </div>
-                                    {% else %}
-                                        <div style="margin-left: 15px; color: #888; font-style: italic; font-size: 11px;">
-                                            <i class="fas fa-clock"></i> Waiting for admin response...
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <hr style="border: 0; border-top: 1px solid #f9f9f9; margin: 10px 0;">
-                            {% endfor %}
+    <div class="sidebar-header"><span>MESSAGE ADMIN</span><i class="fas fa-envelope"></i></div>
+    <div class="sidebar-box" style="padding: 15px;">
+        <textarea id="adminMessage" class="admin-msg-box" placeholder="Describe your Custom Order, Design, budget, and preferred timeline here..."></textarea>
+        <button type="button" class="msg-send-btn" onclick="sendMessageToAdmin()">SEND REQUEST</button>
+        
+        <div class="chat-history" style="margin-top: 20px; max-height: 250px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div style="margin-bottom: 15px; font-size: 12px; animation: fadeIn 0.3s ease;">
+                        <div style="background: #eee; padding: 10px; border-radius: 10px 10px 0 10px; margin-bottom: 5px; position: relative;">
+                            <strong>You:</strong> {{ msg.message }}
+
+                            <div style="position: absolute; top: 5px; right: 10px; display: flex; gap: 8px;">
+                                <button onclick="updateMessage('{{ msg.id }}', '{{ msg.message }}')" title="Edit Message" style="border:none; background:none; color:#bc9c7e; cursor:pointer; font-size: 12px; padding: 0;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteMessage('{{ msg.id }}')" title="Delete Message" style="border:none; background:none; color:#d33; cursor:pointer; font-size: 12px; padding: 0;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if msg.admin_reply %}
+                            <div style="background: #e3f2fd; padding: 10px; border-radius: 10px 10px 10px 0; margin-left: 15px; border-left: 3px solid #2196f3;">
+                                <strong>Admin Reply:</strong> {{ msg.admin_reply }}
+                            </div>
                         {% else %}
-                            <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No messages sent yet.</p>
+                            <div style="margin-left: 15px; color: #888; font-style: italic; font-size: 11px;">
+                                <i class="fas fa-clock"></i> Waiting for admin response...
+                            </div>
                         {% endif %}
                     </div>
-                </div>
-            </div>
+                    <hr style="border: 0; border-top: 1px solid #f9f9f9; margin: 10px 0;">
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No messages sent yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
             <div class="about-us">
                 <h4>About Us</h4>
@@ -448,51 +521,174 @@
     function toggleMenu() {
         const nav = document.getElementById('topNav');
         nav.classList.toggle('menu-hidden');
-    }
+    }  
 
     // Function to view specific order details
-    function viewOrderStatus(id, status, name, contact, address, qty, size, type, color, material, thickness, remarks, design) {
+   function viewOrderStatus(id, status, name, contact, address, qty, size, type, color, material, thickness, remarks, design, price, paymentMethod) {
+    const isAccepted = status === 'ACCEPTED';
+    const isPending = status === 'PENDING';
+    const hasPaid = (paymentMethod && paymentMethod !== 'None' && paymentMethod !== '' && paymentMethod !== 'Direct Submission');
+
+    const canUpdate = isPending;
+    const canPay = isAccepted && !hasPaid;
+
     Swal.fire({
-        title: `<span style="color:#bc9c7e">Order #${id}</span>`,
+        title: `<div style="font-family: 'Georgia', serif; color: #bc9c7e; border-bottom: 2px solid #f4eee8; padding-bottom: 10px; font-size: 20px;">Order Details: #${id}</div>`,
         html: `
-            <div style="text-align: left; font-size: 13px; line-height: 1.5; max-height: 350px; overflow-y: auto; padding-right: 5px;">
-                <p style="margin: 5px 0;"><strong>Customer:</strong> ${name}</p>
-                <p style="margin: 5px 0;"><strong>Contact:</strong> ${contact}</p>
-                <p style="margin: 5px 0;"><strong>Address:</strong> ${address}</p>
-                <hr style="border:0; border-top:1px solid #eee;">
-                <p style="margin: 5px 0;"><strong>Product Type:</strong> ${type}</p>
-                <p style="margin: 5px 0;"><strong>Quantity:</strong> ${qty}</p>
-                <p style="margin: 5px 0;"><strong>Size:</strong> ${size}</p>
-                <p style="margin: 5px 0;"><strong>Color / Piping:</strong> ${color}</p>
-                <p style="margin: 5px 0;"><strong>Material:</strong> ${material}</p>
-                <p style="margin: 5px 0;"><strong>Interlining:</strong> ${thickness}</p>
-                <hr style="border:0; border-top:1px solid #eee;">
-                <p style="margin: 5px 0;"><strong>Design:</strong> ${design ? `<a href="/static/uploads/${design}" target="_blank" style="color:#bc9c7e;">View Attachment</a>` : 'No file uploaded'}</p>
-                <p style="margin: 5px 0;"><strong>Remarks:</strong> ${remarks || 'None'}</p>
-                <hr style="border:0; border-top:1px solid #eee;">
-                <p style="margin: 5px 0; text-align: center;">
-                    <strong>Status:</strong> <span style="color:#ff5722; font-weight:bold;">${status}</span>
-                </p>
+            <div style="display: flex; gap: 20px; text-align: left; padding: 10px 0; align-items: start;">
+                
+                <div style="flex: 1; border-right: 1px solid #eee; padding-right: 20px;">
+                    <div style="background: #fdfbf9; border-radius: 10px; padding: 12px; text-align: center; border: 1px dashed #bc9c7e; margin-bottom: 15px;">
+                        <span style="color: #888; text-transform: uppercase; font-size: 9px; letter-spacing: 1px;">Total Amount</span>
+                        <h2 style="margin: 2px 0; color: #28a745; font-size: 22px;">
+                            ₱${(price && price !== 'None' && price !== 'Not set') ? parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) : '---'}
+                        </h2>
+                        <span style="display: inline-block; padding: 2px 8px; border-radius: 15px; font-size: 10px; font-weight: bold; background: ${isPending ? '#fff3cd' : '#d4edda'}; color: ${isPending ? '#856404' : '#155724'};">
+                            ${status}
+                        </span>
+                    </div>
+
+                    <p style="margin: 5px 0; font-size: 13px;"><i class="fas fa-user" style="width: 18px; color: #bc9c7e;"></i> <b>${name}</b></p>
+                    <p style="margin: 5px 0; font-size: 12px;"><i class="fas fa-phone" style="width: 18px; color: #bc9c7e;"></i> ${contact}</p>
+                    <p style="margin: 5px 0; font-size: 12px; line-height: 1.4;"><i class="fas fa-map-marker-alt" style="width: 18px; color: #bc9c7e;"></i> ${address}</p>
+                    
+                    ${hasPaid ? `
+                    <div style="margin-top: 15px; padding: 8px; background: #e8f5e9; border-radius: 5px; text-align: center; font-size: 12px;">
+                        <i class="fas fa-receipt" style="color: #2e7d32;"></i> <span style="color: #2e7d32; font-weight: bold;">Paid via ${paymentMethod}</span>
+                    </div>` : ''}
+                </div>
+
+                <div style="flex: 1.2;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <div style="font-size: 12px;"><span style="color: #999;">Type:</span><br><b>${type}</b></div>
+                        <div style="font-size: 12px;"><span style="color: #999;">Qty:</span><br><b>${qty} pcs</b></div>
+                        <div style="font-size: 12px;"><span style="color: #999;">Size:</span><br><b>${size} cm</b></div>
+                        <div style="font-size: 12px;"><span style="color: #999;">Material:</span><br><b>${material}</b></div>
+                    </div>
+
+                    <div style="font-size: 12px; margin-bottom: 8px;">
+                        <span style="color: #999;">Color / Piping:</span><br><b>${color}</b>
+                    </div>
+
+                    <div style="font-size: 12px; margin-bottom: 10px;">
+                        <span style="color: #999;">Design:</span><br>
+                        ${design ? `<a href="/static/uploads/${design}" target="_blank" style="color:#bc9c7e; text-decoration: none; font-weight: bold;"><i class="fas fa-image"></i> View File</a>` : '<span style="color: #ccc;">No upload</span>'}
+                    </div>
+
+                    <div style="font-size: 12px;">
+                        <span style="color: #999;">Remarks:</span><br>
+                        <div style="font-style: italic; color: #666; border-left: 2px solid #bc9c7e; padding-left: 5px; margin-top: 3px;">
+                            ${remarks || 'No instructions.'}
+                        </div>
+                    </div>
+                </div>
             </div>
         `,
-        showDenyButton: true,
-        showCancelButton: false,
+        showDenyButton: canUpdate,
+        showCancelButton: canPay,
         confirmButtonText: 'CLOSE',
-        denyButtonText: 'UPDATE ORDER',
+        denyButtonText: '<i class="fas fa-edit"></i> UPDATE',
+        cancelButtonText: '<i class="fas fa-credit-card"></i> PAY NOW',
         confirmButtonColor: '#777',
         denyButtonColor: '#bc9c7e',
-        width: '380px',
+        cancelButtonColor: '#28a745',
+        width: '650px', // Wider width for landscape
         customClass: {
-            title: 'small-swal-title',
-            confirmButton: 'small-swal-button',
-            denyButton: 'small-swal-button'
+            confirmButton: 'swal-custom-btn',
+            denyButton: 'swal-custom-btn',
+            cancelButton: 'swal-custom-btn'
         }
     }).then((result) => {
         if (result.isDenied) {
-            // OPEN THE UPDATE MENU
             openUpdateMenu(id, name, contact, address, qty, size, type, color, material, thickness, remarks);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            selectPaymentMethod(id);
         }
     });
+}
+
+function selectPaymentMethod(orderId) {
+    Swal.fire({
+        title: `<div style="font-family: 'Georgia', serif; color: #bc9c7e; font-size: 22px; padding-bottom: 5px;">Select Payment Method</div>`,
+        html: `
+            <p style="font-size: 14px; color: #777; margin-bottom: 25px;">How would you like to pay for <b>Order #${orderId}</b>?</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; padding: 0 10px;">
+                <button id="btn-gcash" class="payment-card-btn" style="border-top: 4px solid #007bff;">
+                    <i class="fa-solid fa-mobile-screen payment-icon" style="color: #007bff;"></i>
+                    <span class="payment-label">GCash</span>
+                </button>
+
+                <button id="btn-maya" class="payment-card-btn" style="border-top: 4px solid #2ecc71;">
+                    <i class="fa-solid fa-wallet payment-icon" style="color: #2ecc71;"></i>
+                    <span class="payment-label">Maya</span>
+                </button>
+
+                <button id="btn-cod" class="payment-card-btn" style="border-top: 4px solid #555;">
+                    <i class="fa-solid fa-hand-holding-dollar payment-icon" style="color: #555;"></i>
+                    <span class="payment-label">COD</span>
+                </button>
+            </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '500px',
+        padding: '2rem',
+        background: '#fff',
+        didOpen: () => {
+            document.getElementById('btn-gcash').onclick = () => { Swal.close(); updateOrderPayment(orderId, 'GCash', true); };
+            document.getElementById('btn-maya').onclick = () => { Swal.close(); updateOrderPayment(orderId, 'Maya', true); };
+            document.getElementById('btn-cod').onclick = () => { Swal.close(); confirmCOD(orderId); };
+        }
+    });
+}
+
+function confirmCOD(orderId) {
+    Swal.fire({
+        title: 'Confirm COD?',
+        text: "You will pay the total amount upon delivery. Mark this order as Cash on Delivery?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Confirm COD',
+        confirmButtonColor: '#28a745',
+        cancelButtonText: 'Back'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            updateOrderPayment(orderId, 'COD', false);
+        } else {
+            selectPaymentMethod(orderId);
+        }
+    });
+}
+
+// Inside your <script> tag in custom_order.html
+
+async function updateOrderPayment(orderId, method, shouldRedirect) {
+    try {
+        const response = await fetch(`/update_payment_method/${orderId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_method: method })
+        });
+        
+        const res = await response.json();
+        
+        if (res.status === 'success') {
+            if (shouldRedirect) {
+                // This is where it leads you to the payment gateway
+                window.location.href = `/payment_gateway?order_id=${orderId}&method=${method}`;
+            } else {
+                Swal.fire('Confirmed!', `Order #${orderId} updated to ${method}.`, 'success')
+                    .then(() => window.location.reload());
+            }
+        } else {
+            // This is the error you were seeing
+            Swal.fire('Error', res.message || 'Server failed to update.', 'error');
+        }
+    } catch (err) {
+        console.error("Fetch error:", err);
+        Swal.fire('Error', 'Connection failed. Check if server is running.', 'error');
+    }
 }
 
 function openUpdateMenu(id, name, contact, address, qty, size, type, color, material, thickness, remarks) {
@@ -667,6 +863,60 @@ async function updateOrderInDatabase(orderId, updatedData) {
             });
         });
     }
+
+function updateMessage(messageId, currentText) {
+    Swal.fire({
+        title: 'Update Message',
+        input: 'textarea',
+        inputValue: currentText,
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        confirmButtonColor: '#bc9c7e',
+        inputValidator: (value) => {
+            if (!value.trim()) {
+                return 'Message cannot be empty!'
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/update_message/${messageId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: result.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Updated!', 'Your message has been modified.', 'success');
+                    setTimeout(() => { window.location.reload(); }, 1500);
+                }
+            });
+        }
+    });
+}
+
+function deleteMessage(messageId) {
+    Swal.fire({
+        title: 'Delete Message?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#777',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/delete_message/${messageId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', 'Message removed.', 'success');
+                    setTimeout(() => { window.location.reload(); }, 1500);
+                }
+            });
+        }
+    });
+}
 
     function confirmLogout(event) {
         event.preventDefault();

@@ -349,11 +349,12 @@
             <div class="search-container">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="orderSearch" class="search-bar" placeholder="Search by Order ID, Client Name, or Product..." onkeyup="filterOrders()">
+                    <input type="text" id="orderSearch" class="search-bar" placeholder="Search ID, Name, Product, Payment, or Date..." onkeyup="filterOrders()">
                 </div>
                 <select id="statusFilter" class="filter-select" onchange="filterOrders()">
                     <option value="">ALL STATUS</option>
                     <option value="PENDING">PENDING</option>
+                    <option value="ACCEPTED">ACCEPTED</option>
                     <option value="ON DELIVERY">ON DELIVERY</option>
                     <option value="DONE">DONE</option>
                 </select>
@@ -449,71 +450,103 @@
                 <i class="fas fa-tasks"></i>
             </div>
             <div class="sidebar-box">
-                <ul class="nav-list">
-                    <li><a href="#" onclick="createManualOrder()" style="color: #a67c52;">Create Manual Order <i class="fas fa-plus-circle"></i></a></li>
-                    <li><a href="{{ url_for('export_orders_csv') }}">Export CSV <i class="fas fa-file-export"></i></a></li>
-                    <li><a href="#" onclick="deleteOrderPrompt()">Delete Order <i class="fas fa-trash"></i></a></li>
-                    <li><a href="{{ url_for('admin_dashboard') }}">Back to Main <i class="fas fa-arrow-left"></i></a></li>
-                    <li><a href="{{ url_for('print_orders') }}" target="_blank" style="color: #a67c52;">Print Orders Report <i class="fas fa-print"></i></a></li>
-                </ul>
-            </div>
+    <ul class="nav-list">
+        <li><a href="#" onclick="createManualOrder()" style="color: #a67c52;">Create Manual Order <i class="fas fa-plus-circle"></i></a></li>
+        
+        <li>
+            <a href="#" onclick="printFilteredOrders()" style="color: #a67c52;">
+                Print Current View <i class="fas fa-filter"></i>
+            </a>
+        </li>
+
+        <li><a href="{{ url_for('export_orders_csv') }}">Export CSV <i class="fas fa-file-export"></i></a></li>
+        <li><a href="#" onclick="deleteOrderPrompt()">Delete Order <i class="fas fa-trash"></i></a></li>
+        <li><a href="{{ url_for('admin_dashboard') }}">Back to Main <i class="fas fa-arrow-left"></i></a></li>
+        <li><a href="{{ url_for('print_orders') }}" target="_blank" style="color: #a67c52;">Print All Orders <i class="fas fa-print"></i></a></li>
+    </ul>
+</div>
         </aside>
     </main>
 
     <script>
         // Sales Revenue Detail Function
-        function showSalesDetails() {
-            const rows = document.querySelectorAll('#orderTableBody tr');
-            let productSales = {};
-            let totalRevenue = 0;
+      function showSalesDetails() {
+    const rows = document.querySelectorAll('#orderTableBody tr');
+    let productSales = {};
+    let grandTotalRevenue = 0;
 
-            rows.forEach(row => {
-                const status = row.cells[7].innerText.trim();
-                if (status === "DONE") {
-                    const product = row.cells[3].innerText.trim();
-                    const qty = parseInt(row.cells[5].innerText.trim()) || 0;
-                    
-                    if (!productSales[product]) {
-                        productSales[product] = { qty: 0 };
-                    }
-                    productSales[product].qty += qty;
-                }
-            });
+    rows.forEach(row => {
+        // Status is in cell index 7
+        const status = row.cells[7].innerText.trim();
+        
+        // We only count DONE or COMPLETED orders for sales
+        if (status === "DONE" || status === "COMPLETED") {
+            const product = row.cells[3].innerText.trim();
+            const qty = parseInt(row.cells[5].innerText.trim()) || 0;
+            
+            // Get the price from the 'Total' column (assuming it's cell index 8 or hidden in your data)
+            // If the price isn't in a visible cell, we can pull it from the 'viewOrderStatus' arguments if needed,
+            // but usually it's best to have a hidden span or data-attribute in the row.
+            // For this example, we'll try to find the price text.
+            const priceText = row.cells[8] ? row.cells[8].innerText.replace(/[^0-9.-]+/g,"") : "0";
+            const orderTotal = parseFloat(priceText) || 0;
 
-            let tableContent = `
-                <table class="sales-detail-table">
-                    <thead>
-                        <tr>
-                            <th>PRODUCT NAME</th>
-                            <th>UNITS SOLD</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            for (const [name, data] of Object.entries(productSales)) {
-                tableContent += `
-                    <tr>
-                        <td style="text-align:left; font-weight:bold;">${name}</td>
-                        <td>${data.qty} pcs</td>
-                    </tr>
-                `;
+            if (!productSales[product]) {
+                productSales[product] = { qty: 0, revenue: 0 };
             }
-
-            if (Object.keys(productSales).length === 0) {
-                tableContent += `<tr><td colspan="2">No completed sales recorded yet.</td></tr>`;
-            }
-
-            tableContent += `</tbody></table>`;
-
-            Swal.fire({
-                title: 'SALES BREAKDOWN',
-                html: tableContent,
-                confirmButtonColor: '#a67c52',
-                confirmButtonText: 'CLOSE',
-                width: '400px'
-            });
+            productSales[product].qty += qty;
+            productSales[product].revenue += orderTotal;
+            grandTotalRevenue += orderTotal;
         }
+    });
+
+    let tableContent = `
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #bc9c7e; color: #a67c52;">
+                        <th style="padding: 10px 5px;">PRODUCT</th>
+                        <th style="padding: 10px 5px; text-align: center;">UNITS</th>
+                        <th style="padding: 10px 5px; text-align: right;">REVENUE</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    for (const [name, data] of Object.entries(productSales)) {
+        tableContent += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 5px; font-weight: bold;">${name}</td>
+                <td style="padding: 10px 5px; text-align: center;">${data.qty}</td>
+                <td style="padding: 10px 5px; text-align: right; color: #28a745; font-weight: bold;">
+                    ₱${data.revenue.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                </td>
+            </tr>
+        `;
+    }
+
+    if (Object.keys(productSales).length === 0) {
+        tableContent += `<tr><td colspan="3" style="text-align:center; padding: 20px; color: #999;">No completed sales found.</td></tr>`;
+    }
+
+    tableContent += `
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #eee; text-align: right;">
+            <span style="font-size: 12px; color: #777;">GRAND TOTAL</span><br>
+            <span style="font-size: 20px; font-weight: bold; color: #bc9c7e;">₱${grandTotalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+        </div>
+    `;
+
+    Swal.fire({
+        title: '<div style="font-family: Georgia, serif; font-size: 22px; color: #bc9c7e;">Sales Performance</div>',
+        html: tableContent,
+        confirmButtonColor: '#bc9c7e',
+        confirmButtonText: 'CLOSE',
+        width: '500px' // Wider for landscape-style table
+    });
+}
 
         // Create Manual Order Function
         function createManualOrder() {
@@ -604,37 +637,93 @@
             });
         }
 
-        function filterOrders() {
-            const input = document.getElementById('orderSearch').value.toUpperCase();
-            const statusFilter = document.getElementById('statusFilter').value.toUpperCase();
+      function filterOrders() {
+    // 1. Get the search terms
+    const input = document.getElementById('orderSearch').value.toUpperCase().trim();
+    const statusFilter = document.getElementById('statusFilter').value.toUpperCase().trim();
+    
+    // 2. Get the table rows
+    const table = document.getElementById('orderTableBody');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < tr.length; i++) {
+        const cells = tr[i].getElementsByTagName('td');
+        if (cells.length > 0) {
+            // Combine ALL text from EVERY cell into one big string to search through
+            let rowText = tr[i].textContent.toUpperCase();
+            
+            // Specifically grab the status for the dropdown filter (Index 6)
+            const statusText = cells[6] ? cells[6].textContent.toUpperCase().trim() : "";
+
+            // Check if the search input matches anything in the row
+            const matchesSearch = rowText.includes(input);
+            
+            // Check if the dropdown status filter matches
+            const matchesStatus = (statusFilter === "" || statusText === statusFilter);
+
+            // Final Decision: Show or Hide
+            if (matchesSearch && matchesStatus) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+        function printFilteredOrders() {
+            const statusFilter = document.getElementById('statusFilter').value || "All";
             const table = document.getElementById('orderTableBody');
             const tr = table.getElementsByTagName('tr');
+            
+            let printContents = `
+                <div style="text-align:center; font-family: Arial, sans-serif;">
+                    <h2>Overseas Cap Shop - Order Report</h2>
+                    <p>Status Category: <b>${statusFilter}</b> | Date: ${new Date().toLocaleDateString()}</p>
+                    <table border="1" style="width:100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background: #f2f2f2;">
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Date</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
+            let hasData = false;
             for (let i = 0; i < tr.length; i++) {
-                const idCell = tr[i].getElementsByTagName('td')[1];
-                const nameCell = tr[i].getElementsByTagName('td')[2];
-                const productCell = tr[i].getElementsByTagName('td')[3];
-                const statusCell = tr[i].getElementsByTagName('td')[7];
-
-                if (idCell && nameCell && productCell && statusCell) {
-                    const idText = idCell.textContent || idCell.innerText;
-                    const nameText = nameCell.textContent || nameCell.innerText;
-                    const productText = productCell.textContent || productCell.innerText;
-                    const statusText = statusCell.textContent || statusCell.innerText;
-
-                    const matchesSearch = (idText.toUpperCase().indexOf(input) > -1 || 
-                                           nameText.toUpperCase().indexOf(input) > -1 || 
-                                           productText.toUpperCase().indexOf(input) > -1);
-                    
-                    const matchesStatus = (statusFilter === "" || statusText.toUpperCase().trim() === statusFilter);
-
-                    if (matchesSearch && matchesStatus) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+                // Only pick rows that are NOT hidden by your search/filter
+                if (tr[i].style.display !== "none") {
+                    hasData = true;
+                    const cells = tr[i].getElementsByTagName('td');
+                    printContents += `
+                        <tr>
+                            <td style="padding: 8px; text-align: center;">${cells[1].innerText}</td>
+                            <td style="padding: 8px;">${cells[2].innerText}</td>
+                            <td style="padding: 8px;">${cells[3].innerText}</td>
+                            <td style="padding: 8px;">${cells[4].innerText}</td>
+                            <td style="padding: 8px;">${cells[6].innerText}</td>
+                            <td style="padding: 8px; text-align: center;">${cells[7].innerText}</td>
+                        </tr>`;
                 }
             }
+
+            printContents += `</tbody></table></div>`;
+
+            if (!hasData) {
+                Swal.fire('No Data', 'There are no orders in the current view to print.', 'warning');
+                return;
+            }
+
+            // Open a new window and print
+            const printWindow = window.open('', '_blank', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Print Orders</title></head><body>');
+            printWindow.document.write(printContents);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
         }
 
         function confirmLogout(event) {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Order Detail - {{ order.id }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Prevents overall page scroll */
         body { 
@@ -179,10 +180,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        .btn:active {
-            top: 0;
-        }
-
         .btn-accept { background: #3498db; }
         .btn-delivery { background: #FF8C00; }
         .btn-done { background: #2ecc71; }
@@ -243,6 +240,17 @@
             </div>
             
             <div class="info-section">
+                <div class="label"><i class="fas fa-money-bill-wave"></i> Total Price</div>
+                <div class="value" style="font-size: 18px; color: #2ecc71; font-weight: 800; margin-bottom: 20px;">
+                    {% if order.price %}
+                        ₱{{ "{:,.2f}".format(order.price) }}
+                    {% elif order.product %}
+                        ₱{{ "{:,.2f}".format(order.product.price) }}
+                    {% else %}
+                        <span style="color: #e74c3c;">NOT SET</span>
+                    {% endif %}
+                </div>
+
                 {% if not order.product_id %}
                     <div class="label"><i class="fas fa-paint-brush"></i> Uploaded Design</div>
                     <div class="img-container">
@@ -270,7 +278,13 @@
 
             <div class="info-section" style="border-left: 3px solid #a67c52;">
                 <div class="label"><i class="fas fa-credit-card"></i> Payment Method</div>
-                <div class="value" style="font-weight: bold;">{{ order.payment_method }}</div>
+                <div class="value" style="font-weight: bold; color: #28a745;">
+                    {% if order.payment_method and order.payment_method != 'Direct Submission' %}
+                        {{ order.payment_method }}
+                    {% else %}
+                        <span style="color: #666; font-style: italic;">No Payment Choice Yet</span>
+                    {% endif %}
+                </div>
 
                 <div class="label"><i class="fas fa-receipt"></i> Payment Proof</div>
                 <div class="img-container">
@@ -279,7 +293,10 @@
                             <img src="{{ url_for('static', filename='uploads/' + order.payment_proof) }}" class="proof-img">
                         </a>
                     {% else %}
-                        <span style="color: #e74c3c; font-size: 12px; font-weight: bold;">NO PROOF UPLOADED</span>
+                        <div style="text-align: center;">
+                            <i class="fas fa-file-invoice-dollar" style="font-size: 30px; color: #ccc; margin-bottom: 10px;"></i><br>
+                            <span style="color: #e74c3c; font-size: 12px; font-weight: bold;">NO PROOF UPLOADED</span>
+                        </div>
                     {% endif %}
                 </div>
                 {% if order.payment_proof %}
@@ -294,9 +311,17 @@
             <a href="{{ url_for('admin_orders') }}" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> BACK
             </a>
-            <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
-                <i class="fas fa-check"></i> ACCEPT ORDER
-            </a>
+            
+            {% if not order.product_id %}
+                <button onclick="acceptWithPrice('{{ order.id }}')" class="btn btn-accept">
+                    <i class="fas fa-check"></i> ACCEPT ORDER
+                </button>
+            {% else %}
+                <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
+                    <i class="fas fa-check"></i> ACCEPT ORDER
+                </a>
+            {% endif %}
+
             <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ON DELIVERY') }}" class="btn btn-delivery">
                 <i class="fas fa-truck"></i> ON DELIVERY
             </a>
@@ -306,5 +331,29 @@
         </div>
     </div>
 
+<script>
+function acceptWithPrice(orderId) {
+    Swal.fire({
+        title: 'Set Price for Custom Order',
+        input: 'number',
+        inputLabel: 'Total Price (PHP)',
+        inputPlaceholder: 'Enter amount...',
+        showCancelButton: true,
+        confirmButtonText: 'Confirm & Accept',
+        confirmButtonColor: '#3498db',
+        inputValidator: (value) => {
+            if (!value || value <= 0) {
+                return 'Please enter a valid price!'
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const price = result.value;
+            const baseUrl = `/admin/order/update/${orderId}/ACCEPTED`;
+            window.location.href = `${baseUrl}?price=${price}`;
+        }
+    });
+}
+</script>
 </body>
 </html>
