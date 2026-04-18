@@ -369,7 +369,7 @@
                     </div>
                 </div>
 
-                <div class="card" onclick="showSalesDetails()" style="cursor: pointer;">
+                 <div class="card" onclick="window.location.href='{{ url_for('sales_report') }}'" style="cursor: pointer;">
                     <div class="card-title">SALES REVENUE <i class="fas fa-chevron-right" style="float: right; font-size: 10px; opacity: 0.5;"></i></div>
                     <div class="stat-flex">
                         <div><span class="big-num" style="color: #00FF00;">₱{{ "{:,.0f}".format(stats.revenue or 0) }}</span><br><small>TOTAL SALES</small></div>

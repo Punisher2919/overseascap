@@ -127,7 +127,8 @@ class CustomOrder(db.Model):
     size_type = db.Column(db.String(50))
     color_variants = db.Column(db.String(50))
     size_variants = db.Column(db.String(50))
-    material_type = db.Column(db.String(50))
+    material_type = db.Column(db.String(100))
+    interlining_thickness = db.Column(db.String(100))
     order_type = db.Column(db.String(50)) 
     design_filename = db.Column(db.String(100))
     remarks = db.Column(db.Text)
@@ -340,7 +341,8 @@ def submit_quick_order():
         'product_type': f"{product_name}", # Mapping to product_type field
         'color_type': selected_color if selected_color else "Default",
         'size_type': selected_size if selected_size else "Standard",
-        'payment_method': method
+        'payment_method': method,
+        'order_type': "Quick Order" # Label for source identification
     }
 
     # --- WITHIN submit_quick_order ---
@@ -354,10 +356,10 @@ def submit_quick_order():
             address=order_info['address'],
             quantity=order_info['quantity'],
             product_type=order_info['product_type'],
-            # FIX: Change 'color' to 'color_type' and 'size' to 'size_type'
             color_type=order_info['color_type'], 
             size_type=order_info['size_type'],
             payment_method=method,
+            order_type="Quick Order", # Tagging as Quick Order
             status="PENDING"
         )
         db.session.add(new_order)
@@ -365,12 +367,10 @@ def submit_quick_order():
         return jsonify({"status": "success", "type": "direct"})
 
     # FOR GCASH/MAYA: Save to the specific "Quick Order" session key
-    # Also include product_id for the gateway to reference if needed
     order_info['product_id'] = product_id 
     session['temp_quick_order'] = order_info
     session.modified = True 
     
-    # Returning method in the response helps the JS redirect to the correct gateway URL
     return jsonify({
         "status": "success", 
         "type": "redirect", 
@@ -379,55 +379,39 @@ def submit_quick_order():
 
 @app.route('/submit_custom_order', methods=['POST'])
 def submit_custom_order():
-    # Save the design image immediately so we don't lose it
+    # Save the design image if provided
     file = request.files.get('design_image')
     filename = file.filename if file else None
     
-    # Check if a new file was uploaded, otherwise try to keep the old one from session
     if file: 
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    elif 'temp_order' in session:
-        filename = session['temp_order'].get('design_filename')
 
-    method = request.form.get('payment_method')
-
-    # STORE IN SESSION FIRST (This enables the "Return" functionality)
-    session['temp_order'] = {
-        'customer_name': request.form.get('customer_name'),
-        'contact_number': request.form.get('contact_number'),
-        'address': request.form.get('address'),
-        'quantity': request.form.get('quantity'),
-        'product_type': request.form.get('product_type'),
-        'color_type': request.form.get('color'),
-        'size_type': request.form.get('size'),
-        'payment_method': method,
-        'design_filename': filename
-    }
-
-    # If COD, save to DB immediately
-    if method == 'Cash on Delivery':
-        user_data = User.query.filter_by(username=session.get('user')).first()
-        new_order = CustomOrder(
-            user_id=user_data.id if user_data else None,
-            customer_name=request.form.get('customer_name'),
-            contact_number=request.form.get('contact_number'),
-            address=request.form.get('address'),
-            quantity=request.form.get('quantity'),
-            product_type=request.form.get('product_type'),
-            color_type=request.form.get('color'),
-            size_type=request.form.get('size'),
-            payment_method=method,
-            design_filename=filename,
-            status="PENDING"
-        )
-        db.session.add(new_order)
-        db.session.commit()
-        # Clear session since order is finalized
-        session.pop('temp_order', None)
-        return jsonify({"status": "success", "type": "direct"})
-
-    # IF GCASH/MAYA: Redirect to gateway (data is already in session from code above)
-    return jsonify({"status": "success", "type": "redirect", "method": method})
+    # Retrieve current user info
+    user_data = User.query.filter_by(username=session.get('user')).first()
+    
+    # Create and save the order directly to the database
+    new_order = CustomOrder(
+        user_id=user_data.id if user_data else None,
+        customer_name=request.form.get('customer_name'),
+        contact_number=request.form.get('contact_number'),
+        address=request.form.get('address'),
+        quantity=request.form.get('quantity'),
+        product_type=request.form.get('product_type'),
+        color_type=request.form.get('color'),
+        material_type=request.form.get('material_type'),
+        interlining_thickness=request.form.get('interlining_thickness'),
+        size_type=request.form.get('size'),
+        remarks=request.form.get('remarks'),
+        payment_method="Direct Submission", 
+        design_filename=filename,
+        order_type="Custom Order", # Tagging as Custom Order
+        status="PENDING"
+    )
+    
+    db.session.add(new_order)
+    db.session.commit()
+    
+    return jsonify({"status": "success", "message": "Order successfully submitted!"})
 
 @app.route('/payment_gateway', methods=['GET', 'POST'])
 def payment_gateway():
@@ -568,12 +552,52 @@ def custom_order():
     
     user = User.query.filter_by(username=session['user']).first()
     
+    # Fetch only orders tagged as "Custom Order" for this specific user
+    custom_orders = CustomOrder.query.filter_by(
+        user_id=user.id, 
+        order_type="Custom Order"
+    ).order_by(CustomOrder.id.desc()).all()
+    
     prev_data = session.get('temp_order', {})
     
     messages = ContactMessage.query.filter_by(user_id=user.id).order_by(ContactMessage.date_sent.desc()).all()
     
-    return render_template('custom_order.html', messages=messages, prev_data=prev_data)
+    return render_template('custom_order.html', 
+                           messages=messages, 
+                           prev_data=prev_data, 
+                           custom_orders=custom_orders)
+    
+@app.route('/update_order/<int:order_id>', methods=['POST'])
+def update_order(order_id):
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    order = CustomOrder.query.get_or_404(order_id)
+    
+    user = User.query.filter_by(username=session['user']).first()
+    if not user or order.user_id != user.id:
+        return jsonify({"status": "error", "message": "Permission denied"}), 403
 
+    try:
+        # Updating all fields based on the new form data
+        order.customer_name = data.get('name')
+        order.contact_number = data.get('contact')
+        order.address = data.get('address')
+        order.quantity = data.get('qty')
+        order.size_type = data.get('size')
+        order.product_type = data.get('type')
+        order.color_type = data.get('color')
+        order.material_type = data.get('material')
+        order.interlining_thickness = data.get('thickness')
+        order.remarks = data.get('remarks')
+        
+        db.session.commit()
+        return jsonify({"status": "success", "message": "Order updated successfully"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
@@ -591,7 +615,7 @@ def admin_dashboard():
     # 2. Materials/Inventory Stats
     total_materials = Inventory.query.count()
     overall_stock_qty = db.session.query(db.func.sum(Inventory.qty)).scalar() or 0
-    low_stock_count = Inventory.query.filter(Inventory.qty < 10).count()
+    low_stock_count = Inventory.query.filter(Inventory.qty < 20).count()
 
     # 3. Message Count (Replacing Custom Requests)
     # This counts all messages sent by customers from the contact form
@@ -772,7 +796,7 @@ def admin_orders():
     # 1. Fetch Inventory Data
     total_materials = Inventory.query.count()
     overall_stock_qty = db.session.query(db.func.sum(Inventory.qty)).scalar() or 0
-    low_stock_count = Inventory.query.filter(Inventory.qty < 10).count()
+    low_stock_count = Inventory.query.filter(Inventory.qty < 20).count()
 
     # Fetch all orders ordered by ID ascending
     db_orders = CustomOrder.query.order_by(CustomOrder.id.asc()).all()
@@ -853,6 +877,66 @@ def update_order_status(order_id, new_status):
     
     # Redirect back to the specific order view or the main list
     return redirect(url_for('admin_orders'))
+
+@app.route('/admin/sales_report')
+def sales_report():
+    if session.get('user') != 'admin':
+        return redirect(url_for('login'))
+    
+    filter_type = request.args.get('filter', 'all')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    
+    query = CustomOrder.query.filter(CustomOrder.status.in_(['DONE', 'COMPLETED']))
+    now = datetime.now()
+    
+    # --- DATE RANGE & FILTER LOGIC ---
+    if start_date and end_date:
+        # Filter between two dates inclusive
+        query = query.filter(db.func.date(CustomOrder.date_ordered) >= start_date)
+        query = query.filter(db.func.date(CustomOrder.date_ordered) <= end_date)
+        filter_type = 'custom'
+    elif filter_type == 'day':
+        query = query.filter(db.func.date(CustomOrder.date_ordered) == now.date())
+    elif filter_type == 'week':
+        one_week_ago = now - timedelta(days=7)
+        query = query.filter(CustomOrder.date_ordered >= one_week_ago)
+    elif filter_type == 'month':
+        query = query.filter(db.func.strftime('%Y-%m', CustomOrder.date_ordered) == now.strftime('%Y-%m'))
+
+    completed_orders = query.all()
+    
+    FALLBACK_PRICE = 200.00 
+    sales_data = []
+    total_revenue = 0
+    
+    for order in completed_orders:
+        unit_price = 0
+        if order.product:
+            unit_price = order.product.price
+        else:
+            lookup_product = Product.query.filter_by(name=order.product_type).first()
+            unit_price = lookup_product.price if lookup_product else FALLBACK_PRICE
+
+        order_total = unit_price * order.quantity
+        total_revenue += order_total
+        
+        sales_data.append({
+            'id': order.id,
+            'date': order.date_ordered.strftime('%Y-%m-%d %H:%M') if order.date_ordered else "N/A",
+            'customer': order.customer_name,
+            'product': order.product_type,
+            'quantity': order.quantity,
+            'unit_price': unit_price,
+            'total': order_total
+        })
+    
+    return render_template('sales_report.html', 
+                           sales=sales_data, 
+                           total_revenue=total_revenue, 
+                           current_filter=filter_type,
+                           start_date=start_date,
+                           end_date=end_date)
 
 @app.route('/admin/export_orders_csv')
 def export_orders_csv():
@@ -955,24 +1039,53 @@ def admin_inventory():
     inventory_items = Inventory.query.all()
     return render_template('admin_inventory.html', inventory=inventory_items)
 
-@app.route('/admin/print_inventory')
-def print_inventory():
+@app.route('/admin/print_low_stock')
+def print_low_stock():
     if session.get('user') != 'admin':
         return redirect(url_for('login'))
     
-    # Fetch all items from the database
-    inventory_items = Inventory.query.all()
+    # Filter for items with quantity below 20
+    low_stock_items = Inventory.query.filter(Inventory.qty < 20).all()
+    
+    stats = {
+        "title": "Low Stock Inventory Report",
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "count": len(low_stock_items)
+    }
+    return render_template('print_inventory.html', inventory=low_stock_items, stats=stats)
+
+@app.route('/admin/print_sufficient_stock')
+def print_sufficient_stock():
+    if session.get('user') != 'admin':
+        return redirect(url_for('login'))
+    
+    # Filter for items with 20 or more
+    sufficient_items = Inventory.query.filter(Inventory.qty >= 20).all()
+    
+    stats = {
+        "title": "Sufficient Stock Report",
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "count": len(sufficient_items)
+    }
+    return render_template('print_inventory.html', inventory=sufficient_items, stats=stats)
+
+@app.route('/admin/print_overall_stock')
+def print_overall_stock():
+    if session.get('user') != 'admin':
+        return redirect(url_for('login'))
+    
+    all_items = Inventory.query.all()
     
     # Calculate total valuation
-    total_val = sum(item.qty * item.price for item in inventory_items if item.qty and item.price)
+    total_val = sum(item.qty * item.price for item in all_items)
     
-    report_data = {
-        "generated_at": datetime.now().strftime("%B %d, %Y - %I:%M %p"),
-        "total_items": len(inventory_items),
+    stats = {
+        "title": "Master Inventory Valuation",
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "total_items": len(all_items),
         "total_value": total_val
     }
-
-    return render_template('print_inventory.html', inventory=inventory_items, stats=report_data)
+    return render_template('print_inventory.html', inventory=all_items, stats=stats)
 
 @app.route('/admin/inventory/delete/<int:item_id>')
 def delete_material(item_id):
