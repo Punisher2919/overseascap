@@ -377,24 +377,24 @@
                                  onclick="viewOrderStatus('{{ order.id }}', 
              '{{ order.status }}', 
              '{{ order.customer_name }}', 
-        '{{ order.contact_number }}', 
-        '{{ order.address }}', 
-        '{{ order.quantity }}', 
-        '{{ order.size_type }}', 
-        '{{ order.product_type }}', 
-        '{{ order.color_type }}', 
-        '{{ order.material_type }}', 
-        '{{ order.interlining_thickness }}', 
-        '{{ (order.remarks or "")|replace("\'", "\\\'")|replace("\n", " ") }}', 
-        '{{ order.design_filename }}')">
+             '{{ order.contact_number }}', 
+             '{{ order.address }}', 
+             '{{ order.quantity }}', 
+             '{{ order.size_type }}', 
+             '{{ order.product_type }}', 
+             '{{ order.color_type }}', 
+             '{{ order.material_type }}', 
+             '{{ order.interlining_thickness }}', 
+             '{{ (order.remarks or "")|replace("\'", "\\\'")|replace("\n", " ") }}', 
+             '{{ order.design_filename }}')">
                             <div style="font-size: 12px; font-weight: bold; color: #333;">Order #{{ order.id }}</div>
                              <span style="font-size: 10px; font-weight: bold; color: #ff5722; text-transform: uppercase;">{{ order.status }}</span>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No recent orders.</p>
-                    {% endif %}
-                </div>
+                            </div>
+                     {% endfor %}
+                    {% else %}
+                    <p style="text-align: center; color: #bbb; font-size: 11px; margin-top: 10px;">No recent orders.</p>
+                    {% endif %}
+                 </div>
             </div>
 
             <div style="margin-top: 25px;">
