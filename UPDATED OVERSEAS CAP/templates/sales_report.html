@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8">
+    <title>Sales Report - Overseas Cap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- CORE LAYOUT --- */
+        html, body {
+            height: 100vh; width: 100vw; margin: 0; padding: 0;
+            overflow: hidden; background-color: #f8f8f8;
+            font-family: Arial, sans-serif; display: flex; flex-direction: column;
+        }
+
+        header {
+            padding: 10px 50px; display: flex; justify-content: space-between;
+            align-items: center; background: white; border-bottom: 1px solid #ddd; z-index: 1000;
+        }
+        .logo-wrapper { display: flex; align-items: center; gap: 15px; }
+        .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .logo-main { font-size: 26px; font-weight: bold; }
+        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+
+        nav { display: flex; align-items: center; transition: all 0.4s ease-in-out; }
+        nav.menu-hidden { opacity: 0; transform: translateX(20px); visibility: hidden; pointer-events: none; }
+        nav a { color: #000; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
+        nav a:hover { color: #a67c52; }
+        .menu-toggle-btn { cursor: pointer; font-size: 22px; margin-left: 25px; color: #333; }
+
+        /* --- ADVANCED ANIMATIONS --- */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shine {
+            100% { left: 125%; }
+        }
+
+        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        
+        /* Apply entry animation to main content areas */
+        .content-left, .sidebar {
+            opacity: 0;
+            animation: slideUpFade 0.7s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+        .sidebar { animation-delay: 0.2s; }
+
+        .content-left { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px; }
+        .content-left::-webkit-scrollbar { width: 5px; }
+        .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+
+        .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .report-card, .filter-nav, .sidebar-box {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Shine Effect for the Report Card */
+        .report-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 100%);
+            transform: skewX(-25deg);
+            pointer-events: none;
+        }
+        .report-card:hover::after { animation: shine 0.8s; }
+
+        /* --- DATE RANGE BAR --- */
+        .filter-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .filter-btn {
+            padding: 6px 15px; border-radius: 20px; border: 1px solid #bc9c7e;
+            background: white; color: #bc9c7e; text-decoration: none;
+            font-size: 11px; font-weight: bold; transition: all 0.3s;
+        }
+        .filter-btn.active, .filter-btn:hover { background: #bc9c7e; color: white; transform: translateY(-2px); }
+
+        .calendar-wrapper { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .calendar-input {
+            border: 1px solid #ddd; border-radius: 5px; padding: 5px 8px;
+            font-size: 11px; color: #333; outline: none; font-family: inherit;
+        }
+        .apply-filter-btn {
+            background: #a67c52; color: white; border: none; padding: 6px 15px;
+            border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .apply-filter-btn:active { transform: scale(0.95); }
+
+        /* --- TABLE STYLING --- */
+        .report-card { background: white; border-radius: 15px; border: 1px solid #ddd; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #888; text-transform: uppercase; font-size: 11px; border-bottom: 2px solid #f4f4f4; }
+        td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #444; font-size: 13px; }
+        tr:hover { background-color: #fdfaf7; }
+        .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 16px; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { flex: 1; max-width: 250px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
+        .sidebar-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-list { list-style: none; padding: 0; margin: 0; }
+        .nav-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .nav-list a {
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            transition: all 0.3s;
+        }
+        .nav-list a:hover { color: #a67c52; padding-left: 8px; }
+        
+        /* Click Animation for Sidebar Items */
+        .nav-list a:active { transform: scale(0.95); filter: brightness(0.8); }
+
+        /* Hide print header during web browsing */
+        .print-header { display: none; }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            header, nav, .filter-nav, aside, .menu-toggle-btn, .sidebar, .sidebar-header { display: none !important; }
+            body, html { background: white; overflow: visible !important; height: auto !important; }
+            main { padding: 0; margin: 0; display: block; overflow: visible !important; animation: none !important; }
+            .content-left { width: 100%; overflow: visible !important; padding-right: 0; opacity: 1 !important; transform: none !important; }
+            
+            /* Show the specific report information when printing */
+            .print-header { 
+                display: block !important; 
+                margin-bottom: 20px; 
+                border-bottom: 2px solid #333;
+                padding-bottom: 10px;
+            }
+            .print-header h1 { margin: 0; font-size: 24px; color: #000; }
+            .print-header p { margin: 5px 0; font-size: 14px; font-weight: bold; }
+
+            .report-card { border: none; box-shadow: none; padding: 0; }
+            .admin-sub-label { border-bottom: 1px solid #333; margin-top: 10px; }
+            table { border: 1px solid #eee; }
+            th { color: #000; }
+            .revenue-highlight { color: #000 !important; }
+            @page { margin: 1cm; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-wrapper">
+            <div class="logo-text">
+                <span class="logo-main">Overseas Cap</span>
+                <span class="logo-admin">ADMIN</span>
+            </div>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; width: auto;">
+        </div>
+
+        <div style="display: flex; align-items: center;">
+            <nav id="topNav">
+                <a href="{{ url_for('admin_dashboard') }}">DASHBOARD</a>
+                <a href="{{ url_for('admin_products') }}">PRODUCTS</a>
+                <a href="{{ url_for('admin_orders') }}" style="color: #bc9c7e;">ORDERS</a>
+                <a href="{{ url_for('admin_inventory') }}">INVENTORY</a>
+                <a href="{{ url_for('admin_customers') }}">CUSTOMERS</a>
+                <a href="{{ url_for('admin_reviews') }}">REVIEWS</a>
+                <a href="/logout" onclick="return confirmLogout(event)" style="color: #ff5722;">LOGOUT</a>
+            </nav>
+            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-left">
+            <div class="print-header">
+                <h1>Overseas Cap - Sales Revenue Report</h1>
+                <p>Report Period: 
+                    {% if current_filter == 'custom' %}{{ start_date }} to {{ end_date }}
+                    {% elif current_filter == 'week' %}Last 7 Days
+                    {% elif current_filter == 'month' %}This Month
+                    {% else %}All Time Overview{% endif %}
+                </p>
+                <p>Printed on: {{ now.strftime('%Y-%m-%d %H:%M') if now else '' }}</p>
+            </div>
+
+            <div class="page-title">Sales Revenue Report</div>
+
+            <div class="filter-nav">
+                <a href="{{ url_for('sales_report', filter='all') }}" class="filter-btn {{ 'active' if current_filter == 'all' }}">ALL TIME</a>
+                <a href="{{ url_for('sales_report', filter='week') }}" class="filter-btn {{ 'active' if current_filter == 'week' }}">LAST 7 DAYS</a>
+                <a href="{{ url_for('sales_report', filter='month') }}" class="filter-btn {{ 'active' if current_filter == 'month' }}">THIS MONTH</a>
+                
+                <div class="calendar-wrapper">
+                    <span style="font-size: 11px; font-weight: bold; color: #a67c52;">RANGE:</span>
+                    <input type="date" class="calendar-input" id="startDate" value="{{ start_date }}">
+                    <span style="font-size: 11px; font-weight: bold;">TO</span>
+                    <input type="date" class="calendar-input" id="endDate" value="{{ end_date }}">
+                    <button class="apply-filter-btn" onclick="applyRangeFilter()">FILTER</button>
+                </div>
+            </div>
+
+            <div class="admin-sub-label">
+                <span>
+                    {% if current_filter == 'custom' %}RANGE: {{ start_date }} — {{ end_date }}
+                    {% elif current_filter == 'week' %}WEEKLY OVERVIEW
+                    {% elif current_filter == 'month' %}MONTHLY OVERVIEW
+                    {% else %}DETAILED ORDER BREAKDOWN{% endif %}
+                </span>
+                <span class="revenue-highlight">TOTAL: ₱{{ "{:,.2f}".format(total_revenue) }}</span>
+            </div>
+            
+            <div class="report-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in sales %}
+                        <tr>
+                            <td>{{ item.date }}</td>
+                            <td>#{{ item.id }}</td>
+                            <td>{{ item.customer }}</td>
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₱{{ "{:,.2f}".format(item.unit_price) }}</td>
+                            <td><strong>₱{{ "{:,.2f}".format(item.total) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                        {% if not sales %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 50px; color: #bbb;">No completed sales found for this selection.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span>ACTIONS</span>
+                <i class="fas fa-chart-line" style="color: #a67c52;"></i>
+            </div>
+            <div class="sidebar-box">
+                <ul class="nav-list">
+                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_dashboard') }}')">Back to Dashboard <i class="fas fa-chevron-left"></i></a></li>
+                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_orders') }}')">Manage Orders <i class="fas fa-box"></i></a></li>
+                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_inventory') }}')">Check Inventory <i class="fas fa-warehouse"></i></a></li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="printReport()" style="color: #a67c52;">
+                            Print Sales Report <i class="fas fa-print"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // Smoother Navigation Function
+        function rippleNavigate(url) {
+            setTimeout(() => {
+                window.location.href = url;
+            }, 150);
+        }
+
+        function applyRangeFilter() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            if (!start || !end) {
+                Swal.fire({ icon: 'error', title: 'Missing Dates', text: 'Select both dates first!', confirmButtonColor: '#a67c52' });
+                return;
+            }
+            window.location.href = `{{ url_for('sales_report') }}?start_date=${start}&end_date=${end}`;
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Logout?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#a67c52',
+                confirmButtonText: 'Yes'
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = "/logout";
+            });
+        }
+    
+        function toggleMenu() {
+            document.getElementById('topNav').classList.toggle('menu-hidden');
+        }
+    </script>
+</body>
+</html>
