@@ -226,7 +226,7 @@
                                 {% endfor %}
 
                                 {% if ns.found_msg %}
-                                    {% if not ns.found_msg.is_read %}
+                                    {% if not ns.found_msg.reply %}
                                         <span class="msg-badge">NEW MESSAGE</span>
                                     {% else %}
                                         <span style="font-size: 11px; opacity: 0.8; font-weight: bold;">Replied</span>
@@ -267,6 +267,10 @@
                 <div class="stats-item">
                     <span>NEW MESSAGES</span>
                     <div style="color: #d33;">{{ stats.unread_msgs }} Pending</div>
+                </div>
+                <div class="stats-item">
+                    <span>BULK ORDER CLIENTS</span>
+                    <div>{{ stats.bulk_clients }} Clients</div>
                 </div>
                 <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
                 <button class="export-btn" onclick="exportToPDF()">
@@ -481,9 +485,6 @@
                         chatHtml += `<p style="text-align:center; color:#888; font-size:12px;">No messages yet.</p>`;
                     } else {
                         data.history.forEach(m => {
-                            // Escape single quotes for the JS function call
-                            let escapedReply = m.reply ? m.reply.replace(/'/g, "\\'") : "";
-                            
                             chatHtml += `
                                 <div style="margin-bottom:15px;">
                                     <div style="background:#eee; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;">
@@ -493,6 +494,10 @@
                                     <div style="text-align:right; margin-top:5px;">
                                         <div style="background:#a67c52; color:white; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px; position: relative;">
                                             ${m.reply}
+                                            <div style="font-size: 9px; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 3px;">
+                                                <span onclick="editAdminReply('${m.id}', '${userId}', '${userName}', '${m.reply.replace(/'/g, "\\'")}')" style="cursor:pointer; margin-right: 10px;"><i class="fas fa-edit"></i> Edit</span>
+                                                <span onclick="deleteAdminReply('${m.id}', '${userId}', '${userName}')" style="cursor:pointer;"><i class="fas fa-trash"></i> Delete</span>
+                                            </div>
                                         </div>
                                     </div>` : ''}
                                 </div>`;
@@ -506,8 +511,7 @@
                         showCancelButton: true,
                         confirmButtonText: 'Send Reply',
                         confirmButtonColor: '#a67c52',
-                        showCloseButton: true,
-                        didOpen: () => { const cb = document.getElementById('chatBox'); if(cb) cb.scrollTop = cb.scrollHeight; }
+                        didOpen: () => { const cb = document.getElementById('chatBox'); cb.scrollTop = cb.scrollHeight; }
                     }).then(result => {
                         if (result.isConfirmed) {
                             const replyText = document.getElementById('newReply').value;
@@ -517,43 +521,36 @@
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reply: replyText })
                             }).then(() => {
+                                // Reload page to clear "NEW MESSAGE" badge and update UI
                                 location.reload();
                             });
-                        } else if (result.isDismissed && result.dismiss !== Swal.DismissReason.cancel) {
-                             // Only reload if they closed the modal via 'X' or click outside, 
-                             // because get_convo_history marked them as read
-                            location.reload();
                         }
                     });
                 });
         }
 
-        function confirmDeleteReply(id) {
-    if (confirm("Are you sure you want to delete this reply?")) {
-        fetch(`/admin/delete_reply/${id}`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === 'success') location.reload();
-            else alert(data.message);
-        });
-    }
-}
+        function editAdminReply(msgId, userId, userName, currentText) {
+            Swal.fire({
+                title: 'Edit Reply',
+                input: 'textarea',
+                inputValue: currentText,
+                showCancelButton: true,
+                confirmButtonColor: '#a67c52'
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    fetch(`/admin/edit_reply/${msgId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reply: result.value })
+                    }).then(() => viewConversationMessenger(userId, userName));
+                }
+            });
+        }
 
-function openEditModal(id, currentReply) {
-    const newReply = prompt("Edit your reply:", currentReply);
-    if (newReply !== null) {
-        fetch(`/admin/edit_reply/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reply: newReply })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === 'success') location.reload();
-            else alert(data.message);
-        });
-    }
-}
+        function deleteAdminReply(msgId, userId, userName) {
+            fetch(`/admin/delete_reply/${msgId}`, { method: 'POST' })
+                .then(() => viewConversationMessenger(userId, userName));
+        }
     </script>
 </body>
 </html>

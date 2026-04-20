@@ -1524,36 +1524,31 @@ def delete_customer(id):
     flash('Customer and all related data deleted.')
     return redirect(url_for('admin_customers'))
 
-@app.route('/admin/edit_reply/<int:review_id>', methods=['POST'])
-def edit_admin_reply(review_id):
+@app.route('/admin/edit_reply/<int:msg_id>', methods=['POST'])
+def edit_admin_reply(msg_id):
     if session.get('user') != 'admin':
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
-    
-    review = Review.query.get_or_404(review_id)
+        
     data = request.get_json()
-    new_reply = data.get('reply')
+    msg = ContactMessage.query.get_or_404(msg_id)
     
-    try:
-        review.admin_reply = new_reply
+    if data.get('reply'):
+        msg.admin_reply = data.get('reply')
         db.session.commit()
-        return jsonify({"status": "success", "message": "Reply updated!"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "success"})
+    
+    return jsonify({"status": "error", "message": "Reply cannot be empty"})
 
-@app.route('/admin/delete_reply/<int:review_id>', methods=['POST'])
-def delete_admin_reply(review_id):
+@app.route('/admin/delete_reply/<int:msg_id>', methods=['POST'])
+def delete_admin_reply(msg_id):
     if session.get('user') != 'admin':
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
+        
+    msg = ContactMessage.query.get_or_404(msg_id)
+    msg.admin_reply = None  # Remove only the reply, keep the customer's message
+    db.session.commit()
     
-    review = Review.query.get_or_404(review_id)
-    try:
-        review.admin_reply = None  # Clear the reply
-        db.session.commit()
-        return jsonify({"status": "success", "message": "Reply deleted!"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "success"})
 
 @app.route('/logout')
 def logout():
