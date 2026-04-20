@@ -1486,11 +1486,15 @@ def get_customer_details(user_id):
 @app.route('/admin/get_convo_history/<int:user_id>')
 def get_convo_history(user_id):
     if session.get('user') != 'admin':
-        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+        return jsonify({"status": "error"}), 403
     
-    # Fetch all messages for this user, ordered by ID (chronological)
-    messages = ContactMessage.query.filter_by(user_id=user_id).order_by(ContactMessage.id.asc()).all()
+    # 1. Mark all messages from this user as read
+    messages = ContactMessage.query.filter_by(user_id=user_id).all()
+    for m in messages:
+        m.is_read = True
+    db.session.commit() # Save the "Read" status
     
+    # 2. Prepare history for display
     history = []
     for m in messages:
         history.append({
@@ -1499,8 +1503,57 @@ def get_convo_history(user_id):
             "text": m.message,
             "reply": m.admin_reply
         })
-        
     return jsonify({"history": history})
+
+# --- MISSING ADMIN CUSTOMER MANAGEMENT ROUTES ---
+
+@app.route('/admin/delete_customer/<int:id>')
+def delete_customer(id):
+    customer = User.query.get_or_404(id)
+    
+    # 1. Manually delete related reviews first
+    Review.query.filter_by(user_id=id).delete()
+    
+    # 2. Manually delete related messages (if applicable)
+    ContactMessage.query.filter_by(user_id=id).delete()
+    
+    # 3. Finally delete the customer
+    db.session.delete(customer)
+    db.session.commit()
+    
+    flash('Customer and all related data deleted.')
+    return redirect(url_for('admin_customers'))
+
+@app.route('/admin/edit_reply/<int:review_id>', methods=['POST'])
+def edit_admin_reply(review_id):
+    if session.get('user') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    review = Review.query.get_or_404(review_id)
+    data = request.get_json()
+    new_reply = data.get('reply')
+    
+    try:
+        review.admin_reply = new_reply
+        db.session.commit()
+        return jsonify({"status": "success", "message": "Reply updated!"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/admin/delete_reply/<int:review_id>', methods=['POST'])
+def delete_admin_reply(review_id):
+    if session.get('user') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+    
+    review = Review.query.get_or_404(review_id)
+    try:
+        review.admin_reply = None  # Clear the reply
+        db.session.commit()
+        return jsonify({"status": "success", "message": "Reply deleted!"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/logout')
 def logout():

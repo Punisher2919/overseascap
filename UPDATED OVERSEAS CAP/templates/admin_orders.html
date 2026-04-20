@@ -637,31 +637,24 @@
             });
         }
 
-      function filterOrders() {
-    // 1. Get the search terms
+ function filterOrders() {
     const input = document.getElementById('orderSearch').value.toUpperCase().trim();
     const statusFilter = document.getElementById('statusFilter').value.toUpperCase().trim();
     
-    // 2. Get the table rows
     const table = document.getElementById('orderTableBody');
     const tr = table.getElementsByTagName('tr');
 
     for (let i = 0; i < tr.length; i++) {
         const cells = tr[i].getElementsByTagName('td');
         if (cells.length > 0) {
-            // Combine ALL text from EVERY cell into one big string to search through
             let rowText = tr[i].textContent.toUpperCase();
             
-            // Specifically grab the status for the dropdown filter (Index 6)
-            const statusText = cells[6] ? cells[6].textContent.toUpperCase().trim() : "";
+            // CHANGED: Index updated from 6 to 7 to target the correct Status column
+            const statusText = cells[7] ? cells[7].textContent.toUpperCase().trim() : "";
 
-            // Check if the search input matches anything in the row
             const matchesSearch = rowText.includes(input);
-            
-            // Check if the dropdown status filter matches
             const matchesStatus = (statusFilter === "" || statusText === statusFilter);
 
-            // Final Decision: Show or Hide
             if (matchesSearch && matchesStatus) {
                 tr[i].style.display = "";
             } else {
@@ -774,27 +767,72 @@
             btn.style.display = checkboxes.length > 0 ? 'block' : 'none';
         }
 
-        function bulkDelete() {
+       function bulkDelete() {
             const selected = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
-            if (confirm(`Are you sure you want to delete ${selected.length} orders?`)) {
-                fetch('/admin/orders/bulk-delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: selected })
-                }).then(response => {
-                    if (response.ok) { window.location.reload(); } 
-                    else { alert("Error deleting orders."); }
-                });
-            }
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete ${selected.length} selected orders. This action cannot be undone!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5722', // Red-orange for delete
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/orders/bulk-delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: selected })
+                    }).then(response => {
+                        if (response.ok) { 
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'The orders have been removed.',
+                                icon: 'success',
+                                confirmButtonColor: '#a67c52'
+                            }).then(() => window.location.reload());
+                        } else { 
+                            Swal.fire('Error', 'Failed to delete orders.', 'error'); 
+                        }
+                    });
+                }
+            });
         }
 
         function deleteOrderPrompt() {
-            let orderId = prompt("Enter the Numeric Order ID to delete:");
-            if (orderId) {
-                if (confirm("Are you sure you want to delete Order #" + orderId + "?")) {
-                    window.location.href = "/admin/order/delete/" + orderId;
+            Swal.fire({
+                title: 'Delete Specific Order',
+                text: 'Enter the Numeric Order ID to delete:',
+                input: 'text',
+                inputPlaceholder: 'e.g. 1025',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5722',
+                confirmButtonText: 'Delete Order',
+                preConfirm: (orderId) => {
+                    if (!orderId) {
+                        Swal.showValidationMessage('Please enter an Order ID');
+                    }
+                    return orderId;
                 }
-            }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const orderId = result.value;
+                    Swal.fire({
+                        title: 'Confirm Deletion',
+                        text: `Are you sure you want to delete Order #${orderId}?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ff5722',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((finalConfirm) => {
+                        if (finalConfirm.isConfirmed) {
+                            window.location.href = "/admin/order/delete/" + orderId;
+                        }
+                    });
+                }
+            });
         }
     </script>
 </body>

@@ -226,7 +226,7 @@
                                 {% endfor %}
 
                                 {% if ns.found_msg %}
-                                    {% if not ns.found_msg.reply %}
+                                    {% if not ns.found_msg.is_read %}
                                         <span class="msg-badge">NEW MESSAGE</span>
                                     {% else %}
                                         <span style="font-size: 11px; opacity: 0.8; font-weight: bold;">Replied</span>
@@ -267,10 +267,6 @@
                 <div class="stats-item">
                     <span>NEW MESSAGES</span>
                     <div style="color: #d33;">{{ stats.unread_msgs }} Pending</div>
-                </div>
-                <div class="stats-item">
-                    <span>BULK ORDER CLIENTS</span>
-                    <div>{{ stats.bulk_clients }} Clients</div>
                 </div>
                 <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
                 <button class="export-btn" onclick="exportToPDF()">
@@ -320,6 +316,22 @@
                 cancelButtonText: 'No'
             }).then((result) => {
                 if (result.isConfirmed) window.location.href = "/logout";
+            });
+        }
+
+        function deleteCustomer(userId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will permanently delete this customer and all their associated data!",
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5722',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Yes, delete customer'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/delete_customer/${userId}`;
+                }
             });
         }
 
@@ -448,9 +460,14 @@
                                         <tbody>${orderRows || '<tr><td colspan="6">No orders yet.</td></tr>'}</tbody>
                                     </table>
                                 </div>
+                                <hr style="margin: 20px 0;">
+                                <button onclick="deleteCustomer('${userId}')" style="width: 100%; background: #ff5722; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                                    <i class="fas fa-trash-alt"></i> Delete Customer Account
+                                </button>
                             </div>
                         `,
-                        confirmButtonColor: '#a67c52'
+                        showConfirmButton: false,
+                        showCloseButton: true
                     });
                 });
         }
@@ -464,7 +481,21 @@
                         chatHtml += `<p style="text-align:center; color:#888; font-size:12px;">No messages yet.</p>`;
                     } else {
                         data.history.forEach(m => {
-                            chatHtml += `<div style="margin-bottom:15px;"><div style="background:#eee; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;"><strong>${m.sender}:</strong> ${m.text}</div>${m.reply ? `<div style="text-align:right; margin-top:5px;"><div style="background:#a67c52; color:white; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;">${m.reply}</div></div>` : ''}</div>`;
+                            // Escape single quotes for the JS function call
+                            let escapedReply = m.reply ? m.reply.replace(/'/g, "\\'") : "";
+                            
+                            chatHtml += `
+                                <div style="margin-bottom:15px;">
+                                    <div style="background:#eee; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px;">
+                                        <strong>${m.sender}:</strong> ${m.text}
+                                    </div>
+                                    ${m.reply ? `
+                                    <div style="text-align:right; margin-top:5px;">
+                                        <div style="background:#a67c52; color:white; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; font-size:13px; position: relative;">
+                                            ${m.reply}
+                                        </div>
+                                    </div>` : ''}
+                                </div>`;
                         });
                     }
                     chatHtml += `</div><textarea id="newReply" style="width:100%; height: 60px; margin-top:10px; padding:10px; border-radius:5px; border:1px solid #ddd; resize:none;" placeholder="Type your reply here..."></textarea>`;
@@ -475,7 +506,8 @@
                         showCancelButton: true,
                         confirmButtonText: 'Send Reply',
                         confirmButtonColor: '#a67c52',
-                        didOpen: () => { const cb = document.getElementById('chatBox'); cb.scrollTop = cb.scrollHeight; }
+                        showCloseButton: true,
+                        didOpen: () => { const cb = document.getElementById('chatBox'); if(cb) cb.scrollTop = cb.scrollHeight; }
                     }).then(result => {
                         if (result.isConfirmed) {
                             const replyText = document.getElementById('newReply').value;
@@ -485,13 +517,43 @@
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ reply: replyText })
                             }).then(() => {
-                                viewConversationMessenger(userId, userName);
                                 location.reload();
                             });
+                        } else if (result.isDismissed && result.dismiss !== Swal.DismissReason.cancel) {
+                             // Only reload if they closed the modal via 'X' or click outside, 
+                             // because get_convo_history marked them as read
+                            location.reload();
                         }
                     });
                 });
         }
+
+        function confirmDeleteReply(id) {
+    if (confirm("Are you sure you want to delete this reply?")) {
+        fetch(`/admin/delete_reply/${id}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') location.reload();
+            else alert(data.message);
+        });
+    }
+}
+
+function openEditModal(id, currentReply) {
+    const newReply = prompt("Edit your reply:", currentReply);
+    if (newReply !== null) {
+        fetch(`/admin/edit_reply/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reply: newReply })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') location.reload();
+            else alert(data.message);
+        });
+    }
+}
     </script>
 </body>
 </html>

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <title>Sales Report - Overseas Cap</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -55,7 +56,7 @@
         .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 
         /* --- INTERACTIVE ELEMENTS --- */
-        .report-card, .filter-nav, .sidebar-box {
+        .report-card, .filter-nav, .sidebar-box, .graph-box {
             position: relative;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -104,9 +105,17 @@
         .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 16px; }
 
         /* --- SIDEBAR --- */
-        .sidebar { flex: 1; max-width: 250px; }
+        .sidebar { flex: 1; max-width: 250px; display: flex; flex-direction: column; gap: 20px; }
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .sidebar-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        /* Graph Styling */
+        .graph-box { 
+            background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); animation: slideUpFade 0.7s ease forwards; animation-delay: 0.4s; opacity: 0;
+        }
+        .graph-box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(166, 124, 82, 0.15); }
+
         .nav-list { list-style: none; padding: 0; margin: 0; }
         .nav-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
         .nav-list a {
@@ -128,7 +137,7 @@
 
         /* --- PRINT STYLES --- */
         @media print {
-            header, nav, .filter-nav, aside, .menu-toggle-btn, .sidebar, .sidebar-header { display: none !important; }
+            header, nav, .filter-nav, aside, .menu-toggle-btn, .sidebar, .sidebar-header, .graph-box { display: none !important; }
             body, html { background: white; overflow: visible !important; height: auto !important; }
             main { padding: 0; margin: 0; display: block; overflow: visible !important; animation: none !important; }
             .content-left { width: 100%; overflow: visible !important; padding-right: 0; opacity: 1 !important; transform: none !important; }
@@ -252,26 +261,89 @@
         </div>
 
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <span>ACTIONS</span>
-                <i class="fas fa-chart-line" style="color: #a67c52;"></i>
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>ACTIONS</span>
+                    <i class="fas fa-chart-line" style="color: #a67c52;"></i>
+                </div>
+                <div class="sidebar-box">
+                    <ul class="nav-list">
+                        <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_dashboard') }}')">Back to Dashboard <i class="fas fa-chevron-left"></i></a></li>
+                        <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_orders') }}')">Manage Orders <i class="fas fa-box"></i></a></li>
+                        <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_inventory') }}')">Check Inventory <i class="fas fa-warehouse"></i></a></li>
+                        <li>
+                            <a href="javascript:void(0)" onclick="printReport()" style="color: #a67c52;">
+                                Print Sales Report <i class="fas fa-print"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="sidebar-box">
-                <ul class="nav-list">
-                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_dashboard') }}')">Back to Dashboard <i class="fas fa-chevron-left"></i></a></li>
-                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_orders') }}')">Manage Orders <i class="fas fa-box"></i></a></li>
-                    <li><a href="javascript:void(0)" onclick="rippleNavigate('{{ url_for('admin_inventory') }}')">Check Inventory <i class="fas fa-warehouse"></i></a></li>
-                    <li>
-                        <a href="javascript:void(0)" onclick="printReport()" style="color: #a67c52;">
-                            Print Sales Report <i class="fas fa-print"></i>
-                        </a>
-                    </li>
-                </ul>
+
+            <div class="graph-box">
+                <div style="font-size: 10px; font-weight: bold; color: #a67c52; margin-bottom: 1px; text-transform: uppercase; letter-spacing: 1px;">
+                    Revenue Trend
+                </div>
+                <canvas id="salesChart" height="200"></canvas>
             </div>
         </aside>
     </main>
 
     <script>
+        // --- Sales Graph Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            // Extracting data from the table for the graph
+            // Note: In a real app, you might pass a separate JSON variable from Flask
+            const labels = [];
+            const dataPoints = [];
+            
+            // Limit to last 7 entries for better sidebar visibility
+            const rows = Array.from(document.querySelectorAll('tbody tr')).reverse().slice(-7);
+            
+            rows.forEach(row => {
+                const date = row.cells[0]?.innerText;
+                const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
+                if(date && amountStr) {
+                    labels.push(date.split('-').slice(1).join('/')); // Format M/D
+                    dataPoints.push(parseFloat(amountStr));
+                }
+            });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['No Data'],
+                    datasets: [{
+                        label: 'Sales (₱)',
+                        data: dataPoints.length ? dataPoints : [0],
+                        borderColor: '#a67c52',
+                        backgroundColor: 'rgba(166, 124, 82, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#a67c52',
+                        pointHoverRadius: 5,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false },
+                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        });
+
         // Smoother Navigation Function
         function rippleNavigate(url) {
             setTimeout(() => {
