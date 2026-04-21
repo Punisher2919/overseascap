@@ -6,17 +6,27 @@
     <title>Admin Dashboard - Overseas Cap</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- CORE LAYOUT --- */
+  /* --- BACKGROUND INTEGRATION --- */
         html, body {
             height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
-            background-color: #f8f8f8;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
+            overflow-x: hidden; /* Allow vertical scroll if dashboard content is long */
+            /* Using a slightly darker overlay (0.9) to keep the admin data legible */
+            background: linear-gradient(rgba(248, 248, 248, 0.9), rgba(248, 248, 248, 0.9)),
+                        url("{{ url_for('static', filename='bg2.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Keeps bg still while scrolling through stats */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* --- OPTIONAL: GLASS EFFECT FOR CARDS --- */
+        .dashboard-card, .stats-container {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* --- HEADER --- */

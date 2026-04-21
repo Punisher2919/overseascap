@@ -6,14 +6,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* --- STAGE 1: FULL SCREEN & NO SCROLL --- */
+
+/* --- STAGE 1: FULL SCREEN & BACKGROUND --- */
         html, body {
             height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
-            background-color: #f8f8f8;
+            overflow: hidden;
+            /* Use Flask's url_for to point to your static folder */
+            background: linear-gradient(rgba(248, 248, 248, 0.85), rgba(248, 248, 248, 0.85)),
+                        url("{{ url_for('static', filename='bg2.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -76,7 +82,7 @@
             flex-direction: column;
             padding: 20px 50px;
             overflow: hidden;
-            justify-content: center; 
+            justify-content: center;
             align-items: center;
             position: relative;
         }
@@ -284,7 +290,7 @@
         <div class="contact-box">
             <div class="page-subtitle">Contact Us</div>
             <h1 class="main-heading">LET’S GET IN<br>TOUCH.</h1>
-            
+
             <div class="contact-grid">
                 <div class="info-panel">
                     <div class="info-item">
