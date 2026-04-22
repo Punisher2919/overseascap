@@ -378,6 +378,95 @@ def submit_quick_order():
         "method": method
     })
 
+# --- ADD THESE NEW ROUTES TO app.py ---
+
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    product_id = request.form.get('product_id')
+    product_name = request.form.get('product_name')
+    quantity = int(request.form.get('quantity', 1))
+    
+    # FIX: Get price from the form, or look it up from the DB if missing
+    price_val = request.form.get('price')
+    if not price_val:
+        product = Product.query.get(product_id)
+        price = product.price if product else 0.0
+    else:
+        price = float(price_val)
+
+    selected_color = request.form.get('color_type', "Default")
+    selected_size = request.form.get('size_type', "Standard")
+
+    if 'cart' not in session:
+        session['cart'] = []
+
+    cart_item = {
+        'product_id': product_id,
+        'name': product_name,
+        'quantity': quantity,
+        'price': price,
+        'color': selected_color,
+        'size': selected_size,
+        'total': price * quantity
+    }
+    
+    session['cart'].append(cart_item)
+    session.modified = True
+    return jsonify({"status": "success", "message": f"{product_name} added to cart!"})
+
+@app.route('/clear_cart')
+def clear_cart():
+    session.pop('cart', None)
+    return redirect(url_for('home'))
+
+@app.route('/checkout_all', methods=['POST'])
+def checkout_all():
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Please login first"})
+
+    user_data = User.query.filter_by(username=session.get('user')).first()
+    cart = session.get('cart', [])
+    # Get method from the fetch body
+    method = request.form.get('payment_method')
+
+    if not cart:
+        return jsonify({"status": "error", "message": "Your cart is empty."})
+
+    if method == 'Cash on Delivery':
+        try:
+            for item in cart:
+                new_order = CustomOrder(
+                    user_id=user_data.id,
+                    product_id=item.get('product_id'),
+                    customer_name=user_data.full_name,
+                    contact_number=user_data.contact,
+                    address=user_data.address,
+                    quantity=item.get('quantity'),
+                    product_type=item.get('name'),
+                    color_type=item.get('color'),
+                    size_type=item.get('size'),
+                    payment_method=method,
+                    status="PENDING"
+                )
+                db.session.add(new_order)
+            
+            db.session.commit()
+            session.pop('cart', None) # Clear cart after success
+            return jsonify({"status": "success", "type": "direct", "message": "Orders placed via COD!"})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"status": "error", "message": str(e)})
+    
+    else:
+        # Digital Payment: Store cart temporarily for the gateway to process later
+        session['temp_cart_checkout'] = {'items': cart}
+        # Provide the redirect URL the frontend is looking for
+        return jsonify({
+            "status": "success", 
+            "type": "redirect", 
+            "redirect_url": url_for('product_payment_gateway', method=method)
+        })
+
 @app.route('/submit_custom_order', methods=['POST'])
 def submit_custom_order():
     # Save the design image if provided
@@ -464,47 +553,74 @@ def product_payment_gateway():
     
     if request.method == 'POST':
         file = request.files.get('payment_screenshot')
-        order_data = session.get('temp_quick_order') 
         
-        if not order_data:
+        # Check both possible session keys
+        cart_data = session.get('temp_cart_checkout')
+        quick_order_data = session.get('temp_quick_order') 
+
+        if not cart_data and not quick_order_data:
             return jsonify({"status": "error", "message": "Session expired. Please re-order."})
 
-        if file:
-            try:
-                # 1. Save the payment proof
-                filename = secure_filename(file.filename)
-                proof_filename = f"proof_{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], proof_filename))
+        if not file:
+            return jsonify({"status": "error", "message": "Please upload a receipt."})
+
+        try:
+            # 1. Save the payment proof
+            filename = secure_filename(file.filename)
+            proof_filename = f"proof_{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], proof_filename))
+            
+            user_data = User.query.filter_by(username=session.get('user')).first()
+            user_id = user_data.id if user_data else None
+
+            # 2. Process Cart Checkout (Multiple Items)
+            if cart_data:
+                for item in cart_data['items']:
+                    new_order = CustomOrder(
+                        user_id=user_id,
+                        product_id=item.get('product_id'),
+                        customer_name=user_data.full_name,
+                        contact_number=user_data.contact,
+                        address=user_data.address,
+                        quantity=item.get('quantity'),
+                        product_type=item.get('name'),
+                        color_type=item.get('color'),
+                        size_type=item.get('size'),
+                        payment_method=method,
+                        payment_proof=proof_filename,
+                        status="PENDING"
+                    )
+                    db.session.add(new_order)
                 
-                # 2. Get User ID correctly
-                user_data = User.query.filter_by(username=session.get('user')).first()
-                
-                # 3. Create the order (With product_id fix)
+                db.session.commit()
+                session.pop('temp_cart_checkout', None)
+                session.pop('cart', None) # Clear the actual cart
+                return jsonify({"status": "success", "message": "All cart items submitted!"})
+
+            # 3. Process Quick Order (Single Item)
+            elif quick_order_data:
                 new_order = CustomOrder(
-                    user_id=user_data.id if user_data else None,
-                    product_id=order_data.get('product_id'), 
-                    customer_name=order_data.get('customer_name'),
-                    contact_number=order_data.get('contact_number'),
-                    address=order_data.get('address'),
-                    quantity=order_data.get('quantity'),
-                    product_type=order_data.get('product_type'), 
-                    color_type=order_data.get('color_type'), 
-                    size_type=order_data.get('size_type'),
-                    payment_method=order_data.get('payment_method'),
+                    user_id=user_id,
+                    product_id=quick_order_data.get('product_id'), 
+                    customer_name=quick_order_data.get('customer_name'),
+                    contact_number=quick_order_data.get('contact_number'),
+                    address=quick_order_data.get('address'),
+                    quantity=quick_order_data.get('quantity'),
+                    product_type=quick_order_data.get('product_type'), 
+                    color_type=quick_order_data.get('color_type'), 
+                    size_type=quick_order_data.get('size_type'),
+                    payment_method=quick_order_data.get('payment_method'),
                     payment_proof=proof_filename,
                     status="PENDING"
                 )
-                
                 db.session.add(new_order)
                 db.session.commit()
-                
                 session.pop('temp_quick_order', None)
                 return jsonify({"status": "success", "message": "Order submitted successfully!"})
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({"status": "error", "message": str(e)})
-        
-        return jsonify({"status": "error", "message": "Please upload a receipt."})
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"status": "error", "message": str(e)})
 
     return render_template('product_payment_gateway.html', method=method)
     

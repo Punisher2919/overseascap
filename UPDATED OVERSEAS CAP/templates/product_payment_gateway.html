@@ -128,7 +128,6 @@
             transform: scale(1.02);
         }
 
-        /* When file is added */
         .upload-section.active {
             border-color: #2ecc71;
             background: #f0fff4;
@@ -186,7 +185,6 @@
             transform: translateX(-5px);
         }
 
-        /* Shake animation for errors */
         .shake {
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
@@ -302,9 +300,13 @@
             btn.disabled = true;
 
             const formData = new FormData(e.target);
+            
+            // Check if we are coming from checkout_all or single order
+            const isCartCheckout = new URLSearchParams(window.location.search).get('checkout_type') === 'cart';
+            const targetUrl = isCartCheckout ? "/checkout_all?method={{ method }}" : "/product_payment_gateway?method={{ method }}";
 
             try {
-                const response = await fetch('/product_payment_gateway?method={{ method }}', {
+                const response = await fetch(targetUrl, {
                     method: 'POST',
                     body: formData
                 });
@@ -315,7 +317,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Success!',
-                        text: 'Order placed! We will verify your payment shortly.',
+                        text: result.message || 'Order placed! We will verify your payment shortly.',
                         confirmButtonColor: '#bc9c7e'
                     }).then(() => {
                         window.location.href = "{{ url_for('home') }}";
