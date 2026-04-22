@@ -168,7 +168,6 @@
         .product-info { margin-top: 10px; font-size: 14px; }
         .price { color: #ff5722; font-weight: bold; float: right; }
 
-        /* Rating styles */
         .rating-row { margin-top: 5px; display: flex; align-items: center; gap: 5px; font-size: 12px; }
         .star-filled { color: #f1c40f; }
         .star-empty { color: #ccc; }
@@ -226,7 +225,6 @@
             text-decoration: none;
         }
 
-        /* --- BEAUTIFUL ABOUT US SECTION --- */
         .about-us {
             margin-top: auto;
             padding: 20px 0;
@@ -284,10 +282,48 @@
             color: #bc9c7e;
         }
 
-        /* --- SWEETALERT CUSTOM STYLES --- */
         .small-swal-title { font-size: 18px !important; font-weight: bold !important; }
         .small-swal-text { font-size: 13px !important; }
         .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; }
+
+        /* Custom Payment Selection Design */
+.payment-selection-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+    border-color: #bc9c7e;
+    background-color: #fcf9f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.payment-option i {
+    font-size: 24px;
+    color: #bc9c7e;
+    width: 50px;
+    text-align: center;
+}
+
+.payment-option span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-left: 10px;
+}
     </style>
 </head>
 <body>
@@ -373,6 +409,27 @@
                 {% if request.args.get('q') or request.args.get('min_price') or request.args.get('max_price') %}
                     <a href="{{ url_for('home') }}" class="clear-link">Clear all filters</a>
                 {% endif %}
+
+                <div class="filter-header" style="margin-top: 30px;">
+                    <span>YOUR CART</span>
+                    <a href="{{ url_for('clear_cart') }}" style="font-size: 10px; color: #d33; text-decoration: none;">CLEAR</a>
+                </div>
+                <div class="cart-container" style="background: white; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; max-height: 300px; overflow-y: auto;">
+                    {% if session.get('cart') %}
+                        {% for item in session['cart'] %}
+                            <div style="font-size: 12px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                                <strong>{{ item.name }}</strong> (x{{ item.quantity }})<br>
+                                <span style="color: #888;">{{ item.color }} / {{ item.size }}</span>
+                                <span style="float: right; color: #bc9c7e;">₱{{ "{:,.2f}".format(item.total) }}</span>
+                            </div>
+                        {% endfor %}
+                        <button type="button" onclick="checkoutAll()" style="width: 100%; background: #bc9c7e; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                            CHECKOUT ALL
+                        </button>
+                    {% else %}
+                        <p style="font-size: 12px; color: #999; text-align: center;">Cart is empty</p>
+                    {% endif %}
+                </div>
             </form>
 
             <div class="about-us">
@@ -394,6 +451,97 @@
             const nav = document.getElementById('topNav');
             nav.classList.toggle('menu-hidden');
         }
+
+     async function checkoutAll() {
+    // Step 1: Initial Prompt
+    const initialCheck = await Swal.fire({
+        title: 'Proceed to Checkout?',
+        text: "Pay for all items in your cart?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#bc9c7e',
+        confirmButtonText: 'Yes, Proceed'
+    });
+
+    if (!initialCheck.isConfirmed) return;
+
+    // Step 2: Custom Selection Design
+    const { value: paymentMethod } = await Swal.fire({
+        title: 'Select Payment Method',
+        html: `
+            <div class="payment-selection-container">
+                <div class="payment-option" onclick="selectPayment('Cash on Delivery')">
+                    <i class="fas fa-truck"></i>
+                    <span>Cash on Delivery</span>
+                </div>
+                <div class="payment-option" onclick="selectPayment('GCash')">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>GCash</span>
+                </div>
+                <div class="payment-option" onclick="selectPayment('Maya')">
+                    <i class="fas fa-wallet"></i>
+                    <span>Maya</span>
+                </div>
+            </div>
+        `,
+        showConfirmButton: false, // User clicks a card to choose
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        didOpen: () => {
+            // Internal function to handle the card click inside Swal
+            window.selectPayment = (method) => {
+                Swal.clickConfirm();
+                window.selectedMethod = method;
+            };
+        },
+        preConfirm: () => {
+            return window.selectedMethod;
+        }
+    });
+
+    if (paymentMethod) {
+        // Step 3: COD Confirmation
+        if (paymentMethod === 'Cash on Delivery') {
+            const confirmCOD = await Swal.fire({
+                title: 'Confirm COD?',
+                text: "Pay upon delivery. Ensure someone is available to receive the order.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#bc9c7e',
+                confirmButtonText: 'Confirm Order'
+            });
+            if (!confirmCOD.isConfirmed) return;
+        }
+
+        // Step 4: Submit to Backend
+        try {
+            const response = await fetch("{{ url_for('checkout_all') }}", { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `payment_method=${encodeURIComponent(paymentMethod)}`
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                if (data.type === 'redirect') {
+                    window.location.href = data.redirect_url;
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        confirmButtonColor: '#bc9c7e'
+                    }).then(() => location.reload());
+                }
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Connection failed.', 'error');
+        }
+    }
+}
 
         function confirmLogout(event) {
             event.preventDefault();

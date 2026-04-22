@@ -274,7 +274,9 @@
                 <form id="quickOrderForm">
                     <input type="hidden" name="product_name" value="{{ product.name }}">
                     <input type="hidden" name="product_id" value="{{ product.id }}">
-                    
+                    <input type="hidden" name="price" value="{{ product.price }}">
+
+
                     {% if product.color_variants %}
                     <div class="variant-group">
                         <label class="variant-label">Select Color</label>
@@ -314,7 +316,12 @@
                             <button type="submit" class="buy-btn">
                                 <i class="fas fa-shopping-cart" style="margin-right: 8px;"></i> ADD TO ORDER
                             </button>
+                            <button type="button" class="buy-btn" style="background: #444;" onclick="addToCart()">
+    <i class="fas fa-cart-plus"></i> ADD TO CART
+</button>
                         </div>
+
+                        
 
                         <div style="display: flex; align-items: center; margin: 10px 0;">
                             <hr style="flex: 1; border: 0; border-top: 1px solid #eee;">
@@ -426,6 +433,49 @@
             document.getElementById('paymentModal').style.display = 'flex';
         };
 
+        async function addToCart() {
+    // 1. Ask for confirmation first
+    const confirm = await Swal.fire({
+        title: 'Add to cart?',
+        text: "Do you want to add this item to your cart?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#bc9c7e',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, add it!'
+    });
+
+    // 2. Only proceed if user clicked "Yes"
+    if (confirm.isConfirmed) {
+        const qForm = document.getElementById('quickOrderForm');
+        const formData = new FormData(qForm);
+
+        try {
+            const response = await fetch("{{ url_for('add_to_cart') }}", {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added!',
+                    text: result.message,
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Cart',
+                    cancelButtonText: 'Keep Shopping',
+                    confirmButtonColor: '#bc9c7e'
+                }).then((res) => {
+                    if (res.isConfirmed) window.location.href = "{{ url_for('home') }}";
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire('Error', 'Could not add to cart', 'error');
+        }
+    }
+}
         async function finalizeOrder(method) {
             document.getElementById('paymentModal').style.display = 'none';
             
