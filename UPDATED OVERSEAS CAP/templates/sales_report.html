@@ -290,59 +290,82 @@
     </main>
 
     <script>
-        // --- Sales Graph Initialization ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            
-            // Extracting data from the table for the graph
-            // Note: In a real app, you might pass a separate JSON variable from Flask
-            const labels = [];
-            const dataPoints = [];
-            
-            // Limit to last 7 entries for better sidebar visibility
-            const rows = Array.from(document.querySelectorAll('tbody tr')).reverse().slice(-7);
-            
-            rows.forEach(row => {
-                const date = row.cells[0]?.innerText;
-                const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
-                if(date && amountStr) {
-                    labels.push(date.split('-').slice(1).join('/')); // Format M/D
-                    dataPoints.push(parseFloat(amountStr));
-                }
-            });
+           // --- Sales Graph Initialization ---
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('salesChart').getContext('2d');
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels.length ? labels : ['No Data'],
-                    datasets: [{
-                        label: 'Sales (₱)',
-                        data: dataPoints.length ? dataPoints : [0],
-                        borderColor: '#a67c52',
-                        backgroundColor: 'rgba(166, 124, 82, 0.1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#a67c52',
-                        pointHoverRadius: 5,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { display: false },
-                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
-                    },
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeOutQuart'
+    const labels = [];
+    const dataPoints = [];
+
+    // 1. Grab the rows.
+    // We take the first 7 (usually the most recent sales).
+    const rows = Array.from(document.querySelectorAll('tbody tr')).slice(0, 7);
+
+    rows.forEach((row, index) => {
+        // --- COLUMN CHECK ---
+        // If your Date is NOT in the 1st column, change [0] below.
+        // If your Price is NOT in the 7th column, change [6] below.
+        const rawTimestamp = row.cells[0]?.innerText.trim();
+        const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
+
+        if(rawTimestamp && amountStr) {
+            // This regex looks for dates like 2026-04-22 and times like 18:30
+            // It captures the Month, Day, and the Time.
+            const dateMatch = rawTimestamp.match(/(\d{2})-(\d{2})\s+(\d{2}:\d{2})/);
+
+            let formattedLabel = "";
+            if (dateMatch) {
+                // Result looks like: "04/22 18:30"
+                formattedLabel = `${dateMatch[1]}/${dateMatch[2]} ${dateMatch[3]}`;
+            } else {
+                // Fallback: If format is different, just take the last 11 characters
+                formattedLabel = rawTimestamp.slice(-11);
+            }
+
+            labels.push(formattedLabel);
+            dataPoints.push(parseFloat(amountStr));
+        }
+    });
+
+    // Reverse so the chart flows from Left (Past) to Right (Current/Newest)
+    labels.reverse();
+    dataPoints.reverse();
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels.length ? labels : ['No Data'],
+            datasets: [{
+                label: 'Sales (₱)',
+                data: dataPoints.length ? dataPoints : [0],
+                borderColor: '#a67c52',
+                backgroundColor: 'rgba(166, 124, 82, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#a67c52',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { display: false, beginAtZero: true },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 8 }, // Slightly smaller font to fit Date + Time
+                        maxRotation: 45,   // Tilts the text if it's too long
+                        minRotation: 45
                     }
                 }
-            });
-        });
+            }
+        }
+    });
+});
 
         // Smoother Navigation Function
         function rippleNavigate(url) {
