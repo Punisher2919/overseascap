@@ -7,7 +7,7 @@ from io import StringIO
 from flask import make_response
 
 app = Flask(__name__)
-app.secret_key = 'overse    as_cap_secret'
+app.secret_key = 'overseas_cap_secret'
 
 # Database Setup
 basedir = os.path.abspath(os.path.dirname(__file__))
