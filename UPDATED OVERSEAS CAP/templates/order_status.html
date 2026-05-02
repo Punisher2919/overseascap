@@ -16,6 +16,8 @@
             --bg: #f8f8f8;
             --white: #fff;
             --ease-out: cubic-bezier(0.165, 0.84, 0.44, 1);
+            --danger: #e74c3c;
+            --danger-light: #fce4e4;
         }
 
         body { 
@@ -92,6 +94,7 @@
         .status-label.pending { background: #fdf6ec; color: #e67e22; }
         .status-label.delivered { background: #e8f5e9; color: #27ae60; }
         .status-label.delivery { background: var(--primary-light); color: var(--primary); }
+        .status-label.cancelled { background: var(--danger-light); color: var(--danger); }
 
         .details-panel h1 { 
             margin: 0; 
@@ -146,10 +149,13 @@
             border-radius: 50%;
         }
         .step.active::before { background: var(--primary); border-color: var(--primary); }
+        .step.cancelled-step::before { background: var(--danger); border-color: var(--danger); }
+        
         .step-content { display: flex; align-items: center; gap: 8px; }
         .step-content i { font-size: 11px; color: #ccc; }
         .step-content span { font-size: 11px; color: #ccc; }
         .step.active .step-content i, .step.active .step-content span { color: var(--text-dark); font-weight: 600; }
+        .step.cancelled-step .step-content i, .step.cancelled-step .step-content span { color: var(--danger); font-weight: 800; }
 
         /* --- RIGHT PANEL --- */
         .action-panel { 
@@ -174,6 +180,7 @@
             line-height: 1.6;
         }
         .info-msg-box i { font-size: 18px; color: var(--primary); margin-bottom: 10px; display: block; }
+        .info-msg-box.danger-box i { color: var(--danger); }
 
         .feedback-section { width: 100%; }
         .feedback-section h3 { font-size: 14px; margin: 0 0 15px 0; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -243,7 +250,7 @@
                 <i class="fas fa-chevron-left"></i> BACK TO PROFILE
             </a>
             
-            <div class="status-label {{ 'pending' if order.status == 'PENDING' else 'delivery' if order.status == 'ON DELIVERY' else 'delivered' }}">
+            <div class="status-label {% if order.status == 'PENDING' %}pending{% elif order.status == 'ON DELIVERY' %}delivery{% elif order.status == 'CANCELLED' %}cancelled{% else %}delivered{% endif %}">
                 {{ order.status }}
             </div>
             
@@ -283,25 +290,34 @@
             </div>
 
             <div class="premium-tracker">
-                <div class="tracker-line {{ 'active' if order.status == 'DONE' or order.status == 'COMPLETED' }}"></div>
-                <div class="step {{ 'active' if order.status in ['PENDING', 'ON DELIVERY', 'DONE', 'COMPLETED'] }}">
-                    <div class="step-content">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span>Order Received</span>
+                {% if order.status == 'CANCELLED' %}
+                    <div class="step active cancelled-step">
+                        <div class="step-content">
+                            <i class="fas fa-ban"></i>
+                            <span>Order Cancelled</span>
+                        </div>
                     </div>
-                </div>
-                <div class="step {{ 'active' if order.status in ['ON DELIVERY', 'DONE', 'COMPLETED'] }}" style="animation-delay: 0.6s;">
-                    <div class="step-content">
-                        <i class="fas fa-truck-pickup"></i>
-                        <span>In Transit</span>
+                {% else %}
+                    <div class="tracker-line {{ 'active' if order.status in ['DONE', 'COMPLETED'] }}"></div>
+                    <div class="step {{ 'active' if order.status in ['PENDING', 'ON DELIVERY', 'DONE', 'COMPLETED'] }}">
+                        <div class="step-content">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Order Received</span>
+                        </div>
                     </div>
-                </div>
-                <div class="step {{ 'active' if order.status in ['DONE', 'COMPLETED'] }}" style="animation-delay: 1.0s;">
-                    <div class="step-content">
-                        <i class="fas fa-check-double"></i>
-                        <span>Delivered</span>
+                    <div class="step {{ 'active' if order.status in ['ON DELIVERY', 'DONE', 'COMPLETED'] }}" style="animation-delay: 0.6s;">
+                        <div class="step-content">
+                            <i class="fas fa-truck-pickup"></i>
+                            <span>In Transit</span>
+                        </div>
                     </div>
-                </div>
+                    <div class="step {{ 'active' if order.status in ['DONE', 'COMPLETED'] }}" style="animation-delay: 1.0s;">
+                        <div class="step-content">
+                            <i class="fas fa-check-double"></i>
+                            <span>Delivered</span>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -344,6 +360,12 @@
                             <button type="submit" class="btn-submit">SUBMIT REVIEW</button>
                         </form>
                     {% endif %}
+                </div>
+            {% elif order.status == 'CANCELLED' %}
+                <div class="info-msg-box danger-box">
+                    <i class="fas fa-times-circle"></i>
+                    <strong>This order has been cancelled.</strong><br><br>
+                    If you have already made a payment or believe this is an error, please contact our support team immediately.
                 </div>
             {% else %}
                 <div class="info-msg-box">

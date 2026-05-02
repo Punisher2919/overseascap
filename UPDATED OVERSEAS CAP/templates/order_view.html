@@ -184,7 +184,9 @@
         .btn-delivery { background: #FF8C00; }
         .btn-done { background: #2ecc71; }
         .btn-back { background: #555; }
+        .btn-cancel { background: #e74c3c; } /* Red for cancellation */
 
+        
         .status-pill {
             font-weight: bold;
             color: #ff5722;
@@ -308,30 +310,55 @@
         </div>
 
         <div class="action-btns">
-            <a href="{{ url_for('admin_orders') }}" class="btn btn-back">
-                <i class="fas fa-arrow-left"></i> BACK
-            </a>
-            
-            {% if not order.product_id %}
-                <button onclick="acceptWithPrice('{{ order.id }}')" class="btn btn-accept">
-                    <i class="fas fa-check"></i> ACCEPT ORDER
-                </button>
-            {% else %}
-                <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
-                    <i class="fas fa-check"></i> ACCEPT ORDER
-                </a>
-            {% endif %}
+    <a href="{{ url_for('admin_orders') }}" class="btn btn-back">
+        <i class="fas fa-arrow-left"></i> BACK
+    </a>
+    
+    <!-- Only show Cancel button if NOT on delivery -->
+    {% if order.status != 'ON DELIVERY' %}
+        <button onclick="confirmCancel('{{ order.id }}')" class="btn btn-cancel">
+            <i class="fas fa-times"></i> CANCEL ORDER
+        </button>
+    {% endif %}
 
-            <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ON DELIVERY') }}" class="btn btn-delivery">
-                <i class="fas fa-truck"></i> ON DELIVERY
-            </a>
-            <a href="{{ url_for('update_order_status', order_id=order.id, new_status='DONE') }}" class="btn btn-done">
-                <i class="fas fa-check-double"></i> MARK AS DONE
-            </a>
-        </div>
+    {% if not order.product_id %}
+        <button onclick="acceptWithPrice('{{ order.id }}')" class="btn btn-accept">
+            <i class="fas fa-check"></i> ACCEPT ORDER
+        </button>
+    {% else %}
+        <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
+            <i class="fas fa-check"></i> ACCEPT ORDER
+        </a>
+    {% endif %}
+
+    <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ON DELIVERY') }}" class="btn btn-delivery">
+        <i class="fas fa-truck"></i> ON DELIVERY
+    </a>
+    <a href="{{ url_for('update_order_status', order_id=order.id, new_status='DONE') }}" class="btn btn-done">
+        <i class="fas fa-check-double"></i> MARK AS DONE
+    </a>
+</div>
     </div>
 
 <script>
+
+function confirmCancel(orderId) {
+    Swal.fire({
+        title: 'Cancel Order #' + orderId + '?',
+        text: "This will set the order status to CANCELLED. This action is permanent.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#555',
+        confirmButtonText: 'Yes, Cancel it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirects to your existing update status route
+            window.location.href = `/admin/order/update/${orderId}/CANCELLED`;
+        }
+    });
+}
+
 function acceptWithPrice(orderId) {
     Swal.fire({
         title: 'Set Price for Custom Order',

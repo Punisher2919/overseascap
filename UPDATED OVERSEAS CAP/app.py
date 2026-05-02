@@ -93,6 +93,8 @@ class Inventory(db.Model):
     supplier = db.Column(db.String(100), nullable=False)
     qty = db.Column(db.Integer, default=0)
     price = db.Column(db.Float, default=0.0)
+    # Add this line to the existing class
+    low_stock_threshold = db.Column(db.Integer, default=20) 
     status = db.Column(db.String(50), default="Available")
     
 class Supplier(db.Model):
@@ -664,6 +666,46 @@ def customer_profile():
     user_reviews = Review.query.filter_by(user_id=user.id).all()
     return render_template('customer_profile.html', user=user, user_orders=user_orders, reviews=user_reviews)
 
+@app.route('/request_cancellation/<int:order_id>', methods=['POST'])
+def request_cancellation(order_id):
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    reason = data.get('reason')
+    
+    order = CustomOrder.query.get_or_404(order_id)
+    user = User.query.filter_by(username=session['user']).first()
+    
+    if order.user_id != user.id:
+        return jsonify({"status": "error", "message": "Permission denied"}), 403
+
+    # Logic: Prevent cancellation if the order is already with the courier
+    if order.status == "ON DELIVERY":
+        return jsonify({"status": "error", "message": "Order is already on delivery and cannot be cancelled."}), 400
+    
+    try:
+        # Determine the type of request based on current status
+        request_type = "REFUND" if order.status == "DONE" else "CANCELLATION"
+        
+        # Update Order Status to a request state
+        order.status = "CANCEL REQUESTED"
+        
+        # Create the message for the admin_customers view
+        msg_content = f"[{request_type} REQUEST] Order #{order_id} ({order.product_type}). Reason: {reason}"
+        new_message = ContactMessage(
+            user_id=user.id,
+            sender_name=user.full_name if user.full_name != "NOT SET" else user.username,
+            message=msg_content
+        )
+        
+        db.session.add(new_message)
+        db.session.commit()
+        return jsonify({"status": "success", "message": f"Your {request_type.lower()} request has been submitted."})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/custom_order')
 def custom_order():
     if 'user' not in session:
@@ -755,7 +797,7 @@ def admin_dashboard():
     # 2. Materials/Inventory Stats
     total_materials = Inventory.query.count()
     overall_stock_qty = db.session.query(db.func.sum(Inventory.qty)).scalar() or 0
-    low_stock_count = Inventory.query.filter(Inventory.qty < 20).count()
+    low_stock_count = Inventory.query.filter(Inventory.qty < Inventory.low_stock_threshold).count()
 
     # 3. Message Count (Replacing Custom Requests)
     # This counts all messages sent by customers from the contact form
@@ -936,7 +978,7 @@ def admin_orders():
     # 1. Fetch Inventory Data
     total_materials = Inventory.query.count()
     overall_stock_qty = db.session.query(db.func.sum(Inventory.qty)).scalar() or 0
-    low_stock_count = Inventory.query.filter(Inventory.qty < 20).count()
+    low_stock_count = Inventory.query.filter(Inventory.qty < Inventory.low_stock_threshold).count()
 
     # Fetch all orders ordered by ID ascending
     db_orders = CustomOrder.query.order_by(CustomOrder.id.asc()).all()
@@ -1030,6 +1072,38 @@ def update_order_status(order_id, new_status):
     
     # After saving, we go back to the list of orders
     return redirect(url_for('admin_orders'))
+
+@app.route('/admin/orders/create-manual', methods=['POST'])
+def create_manual_order_route():
+    if session.get('user') != 'admin':
+        return jsonify({"status": "unauthorized"}), 403
+    
+    data = request.get_json()
+    
+    try:
+        # Map the frontend fields to your CustomOrder model
+        new_order = CustomOrder(
+            customer_name=data.get('name'),
+            product_type=data.get('product'),
+            quantity=int(data.get('qty', 1)),
+            price=float(data.get('price', 0)),
+            color_type=data.get('color'),
+            size_type=data.get('size'),
+            payment_method=data.get('payment'),
+            # Since this is a manual admin entry, we label the source
+            order_type="Manual Order", 
+            status="PENDING",
+            contact_number="N/A", # Placeholder for required fields
+            address="N/A"         # Placeholder for required fields
+        )
+        
+        db.session.add(new_order)
+        db.session.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/admin/sales_report')
 def sales_report():
@@ -1176,13 +1250,16 @@ def admin_inventory():
     if session.get('user') != 'admin':
         return redirect(url_for('login'))
 
-    # Logic to handle adding new materials from the sidebar
     if request.method == 'POST' and 'add_material' in request.form:
+        # ADD THIS LINE to capture the limit from your modal/sidebar form
+        custom_threshold = request.form.get('low_stock_threshold', 20) 
+
         new_item = Inventory(
             material=request.form.get('material'),
             supplier=request.form.get('supplier'),
             qty=request.form.get('qty'),
             price=request.form.get('price'),
+            low_stock_threshold=custom_threshold, # <--- ASSIGN IT HERE
             status="In Stock"
         )
         db.session.add(new_item)
@@ -1190,7 +1267,6 @@ def admin_inventory():
         flash("New material added!")
         return redirect(url_for('admin_inventory'))
 
-    # Query the database instead of using a hardcoded list
     inventory_items = Inventory.query.all()
     return render_template('admin_inventory.html', inventory=inventory_items)
 
@@ -1199,8 +1275,9 @@ def print_low_stock():
     if session.get('user') != 'admin':
         return redirect(url_for('login'))
     
-    # Filter for items with quantity below 20
-    low_stock_items = Inventory.query.filter(Inventory.qty < 20).all()
+    # FIX: Compare the 'qty' column directly to the 'low_stock_threshold' column
+    # This pulls items based on the custom limit set by the admin for each material
+    low_stock_items = Inventory.query.filter(Inventory.qty < Inventory.low_stock_threshold).all()
     
     # Calculate valuation for this specific list
     total_val = sum(item.qty * item.price for item in low_stock_items)
@@ -1208,8 +1285,8 @@ def print_low_stock():
     stats = {
         "title": "Low Stock Inventory Report",
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "total_items": len(low_stock_items), # Changed from 'count' to match template
-        "total_value": total_val             # Added to prevent 'Undefined' error
+        "total_items": len(low_stock_items),
+        "total_value": total_val
     }
     return render_template('print_inventory.html', inventory=low_stock_items, stats=stats)
 
@@ -1219,7 +1296,7 @@ def print_sufficient_stock():
         return redirect(url_for('login'))
     
     # Filter for items with 20 or more
-    sufficient_items = Inventory.query.filter(Inventory.qty >= 20).all()
+    sufficient_items = Inventory.query.filter(Inventory.qty >= Inventory.low_stock_threshold).all()
     
     # Calculate valuation for this specific list
     total_val = sum(item.qty * item.price for item in sufficient_items)
@@ -1270,12 +1347,15 @@ def update_stock():
     
     mat_id = request.form.get('id')
     new_qty = request.form.get('qty')
+    # Capture the custom threshold from the form
+    new_threshold = request.form.get('low_stock_threshold')
     
     item = Inventory.query.get(mat_id)
     if item:
         item.qty = new_qty
+        item.low_stock_threshold = new_threshold # Save the new custom limit
         db.session.commit()
-        flash(f"Updated {item.material} stock successfully.")
+        flash(f"Updated {item.material} stock and alert limit successfully.")
     
     return redirect(url_for('admin_inventory'))
 

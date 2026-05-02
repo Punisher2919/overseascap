@@ -159,27 +159,27 @@
 <body>
 
     <header>
-        <div class="logo-wrapper">
-            <div class="logo-text">
-                <span class="logo-main">Overseas Cap</span>
-                <span class="logo-admin">ADMIN</span>
-            </div>
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; width: auto;">
+    <div class="logo-wrapper">
+        <div class="logo-text">
+            <span class="logo-main">Overseas Cap</span>
+            <span class="logo-admin">ADMIN</span>
         </div>
-        
-        <div style="display: flex; align-items: center;">
-            <nav id="topNav">
-                <a href="{{ url_for('admin_dashboard') }}">DASHBOARD</a>
-                <a href="{{ url_for('admin_products') }}">PRODUCTS</a>
-                <a href="{{ url_for('admin_orders') }}">ORDERS</a>
-                <a href="{{ url_for('admin_inventory') }}">INVENTORY</a>
-                <a href="{{ url_for('admin_customers') }}" style="color: #bc9c7e;">CUSTOMERS</a>
-                <a href="{{ url_for('admin_reviews') }}">REVIEWS</a>
-                <a href="/logout" onclick="confirmLogout(event)" style="color: #ff5722;">LOGOUT</a>
-            </nav>
-            <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
-        </div>
-    </header>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; width: auto;">
+    </div>
+    
+    <div style="display: flex; align-items: center;">
+        <nav id="topNav">
+            <a href="{{ url_for('admin_dashboard') }}" style="color: #bc9c7e;">DASHBOARD</a>
+            <a href="{{ url_for('admin_products') }}">PRODUCTS</a>
+            <a href="{{ url_for('admin_orders') }}">ORDERS</a>
+            <a href="{{ url_for('admin_inventory') }}">INVENTORY</a>
+            <a href="{{ url_for('admin_customers') }}">CUSTOMERS</a>
+            <a href="{{ url_for('admin_reviews') }}">REVIEWS</a>
+            <a href="/logout" onclick="confirmLogout(event)" style="color: #ff5722;">LOGOUT</a>
+        </nav>
+        <i class="fas fa-bars menu-toggle-btn" onclick="toggleMenu()"></i>
+    </div>
+</header>
 
     <main>
         <div class="content-left">

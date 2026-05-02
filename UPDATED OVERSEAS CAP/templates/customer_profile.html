@@ -213,6 +213,7 @@
         .status-pending { background: #e67e22; }
         .status-delivery { background: #bc9c7e; }
         .status-done { background: #27ae60; }
+        .status-cancelled { background: #e74c3c; } /* Red for Cancelled */
 
         .rate-btn {
             display:block; font-size: 10px; margin-top: 5px; 
@@ -346,13 +347,33 @@
                                 <td style="text-align: center;">
                                     {% if order.status == 'DONE' %}
                                         <span class="status-pill-user status-done">DELIVERED</span>
-                                        <button class="rate-btn" onclick="event.stopPropagation(); openReviewModal('{{ order.id }}', '{{ order.product_type }}')">
-                                            <i class="fas fa-pen"></i> RATE & REVIEW
-                                        </button>
-                                    {% else %}
-                                        <span class="status-pill-user {% if order.status == 'PENDING' %}status-pending{% else %}status-delivery{% endif %}">
+                                        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
+                                            <button class="rate-btn" style="background: #e67e22; color: white;" onclick="event.stopPropagation(); requestCancel('{{ order.id }}', 'Refund')">
+                                                <i class="fas fa-undo"></i> REQUEST REFUND
+                                            </button>
+                                        </div>
+
+                                    {% elif order.status in ['PENDING', 'ACCEPTED'] %}
+                                        <span class="status-pill-user {% if order.status == 'ACCEPTED' %}status-delivery{% else %}status-pending{% endif %}">
                                             {{ order.status }}
                                         </span>
+                                        <button class="rate-btn" style="background: #e74c3c; color: white; margin-top: 5px;" 
+                                                onclick="event.stopPropagation(); requestCancel('{{ order.id }}', 'Cancellation/Refund')">
+                                            <i class="fas fa-times"></i> CANCEL/REFUND
+                                        </button>
+
+                                    {% elif order.status == 'ON DELIVERY' %}
+                                        <span class="status-pill-user status-delivery">ON DELIVERY</span>
+                                        <p style="font-size: 0.7rem; color: #7f8c8d; margin-top: 4px;">Cannot cancel while in transit</p>
+
+                                    {% elif order.status == 'CANCEL REQUESTED' %}
+                                        <span class="status-pill-user" style="background: #95a5a6;">REQUEST PENDING</span>
+                                        
+                                    {% elif order.status == 'CANCELLED' %}
+                                        <span class="status-pill-user status-cancelled">CANCELLED</span>
+
+                                    {% else %}
+                                        <span class="status-pill-user">{{ order.status }}</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -473,6 +494,43 @@
             }
         });
     }
+
+    function requestCancel(orderId, type) {
+    Swal.fire({
+        title: 'Request ' + type,
+        text: `Please provide a reason for your ${type.toLowerCase()} request for Order #${orderId}:`,
+        input: 'textarea',
+        inputPlaceholder: 'Reason for request...',
+        showCancelButton: true,
+        confirmButtonColor: '#bc9c7e',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Submit Request',
+        preConfirm: (reason) => {
+            if (!reason) {
+                Swal.showValidationMessage('You must provide a reason');
+            }
+            return reason;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/request_cancellation/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: result.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Success', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            });
+        }
+    });
+}
 
     function openReviewModal(orderId, productName) {
         document.getElementById('modal_order_id').value = orderId;

@@ -14,7 +14,6 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            /* Use Flask's url_for to point to your static folder */
             background: linear-gradient(rgba(248, 248, 248, 0.85), rgba(248, 248, 248, 0.85)),
                         url("{{ url_for('static', filename='bg2.png') }}");
             background-size: cover;
@@ -160,6 +159,9 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.05);
             border-radius: 12px;
             transition: transform 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
         }
 
         .qr-container:hover { transform: scale(1.05); }
@@ -172,6 +174,13 @@
             align-items: center;
             background: #fafafa;
             border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .forms-link {
@@ -194,7 +203,7 @@
             transform: translateY(-2px);
         }
 
-        /* --- BEAUTIFUL ABOUT US SECTION (STILL) --- */
+        /* --- BEAUTIFUL ABOUT US SECTION --- */
         .about-us {
             position: absolute;
             bottom: 30px;
@@ -303,15 +312,18 @@
                     </div>
                 </div>
 
-                <div class="qr-container">
+                <!-- Changed to Clickable Shopee Link -->
+                <a href="https://shopee.ph/jeanodri" target="_blank" class="qr-container">
                     <div class="qr-placeholder">
-                        <i class="fas fa-qrcode" style="font-size: 110px; color: #222;"></i>
+                        <!-- Points to your static logo or Shopee icon -->
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Shopee Link">
                     </div>
-                </div>
+                </a>
             </div>
 
-            <a href="https://forms.google.com" target="_blank" class="forms-link">
-                OPEN GOOGLE FORMS <i class="fas fa-external-link-alt" style="margin-left: 8px;"></i>
+            <!-- Changed to Contact Us Email Link -->
+            <a href="mailto:jeanodori@gmail.com" class="forms-link">
+                CONTACT US <i class="fas fa-envelope" style="margin-left: 8px;"></i>
             </a>
         </div>
 

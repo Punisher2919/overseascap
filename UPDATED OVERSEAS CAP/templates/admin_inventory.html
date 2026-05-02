@@ -234,10 +234,10 @@
         .sidebar-box { 
             background: #fff; 
             border: 1px solid #ddd; 
-            padding: 12px; 
+            padding: 7px; 
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            margin-bottom: 12px;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.03);
+            margin-bottom: 5px;
         }
         
         .nav-list { list-style: none; padding: 0; margin: 0; }
@@ -334,26 +334,40 @@
                         {% for item in inventory %}
                         <tr>
                             <td>
-                                <a href="javascript:void(0)" 
-                                   class="stock-detail-link"
-                                   onclick="showStockDetails('{{ item.material }}', '{{ item.supplier }}', '{{ item.qty }}', '{{ item.price }}')">
-                                   <i class="fas fa-info-circle"></i> {{ item.material }}
+                                <a href="javascript:void(0)" class="stock-detail-link"
+                                onclick="showStockDetails('{{ item.material }}', '{{ item.supplier }}', '{{ item.qty }}', '{{ item.price }}')">
+                                <i class="fas fa-info-circle"></i> {{ item.material }}
                                 </a>
                             </td>
                             <td style="opacity: 0.8; font-size: 12px;">{{ item.supplier }}</td>
                             <td>
                                 <form action="{{ url_for('update_stock') }}" method="POST" style="display:flex; flex-direction: column; align-items:center;">
-                                    <div style="display:flex; gap:10px; justify-content:center; align-items:center;">
+                                    <div style="display:flex; gap:5px; justify-content:center; align-items:center;">
                                         <input type="hidden" name="id" value="{{ item.id }}">
-                                        <input type="number" name="qty" value="{{ item.qty }}" 
-                                               class="qty-input {% if item.qty <= 20 %}stock-low{% endif %}">
-                                        <button type="submit" class="save-btn" title="Update Quantity">
+                                        
+                                        <!-- Current Quantity Input -->
+                                        <div style="display: flex; flex-direction: column; align-items: center;">
+                                            <span style="font-size: 9px; margin-bottom: 2px;">QTY</span>
+                                            <input type="number" name="qty" value="{{ item.qty }}" 
+                                                class="qty-input {% if item.qty <= item.low_stock_threshold %}stock-low{% endif %}">
+                                        </div>
+
+                                        <!-- NEW: Threshold Input -->
+                                        <div style="display: flex; flex-direction: column; align-items: center;">
+                                            <span style="font-size: 9px; margin-bottom: 2px;">ALERT AT</span>
+                                            <input type="number" name="low_stock_threshold" value="{{ item.low_stock_threshold }}" 
+                                                class="qty-input" style="border-color: #ffd700; width: 50px;">
+                                        </div>
+
+                                        <button type="submit" class="save-btn" title="Update Values" style="margin-top: 12px;">
                                             <i class="fas fa-check-circle"></i>
                                         </button>
                                     </div>
-                                    {% if item.qty <= 20 %}
+                                    
+                                    <!-- Dynamic Warning Logic -->
+                                    {% if item.qty <= item.low_stock_threshold %}
                                         <a href="{{ url_for('admin_suppliers') }}" class="restock-action-btn">
-                                            <i class="fas fa-truck-loading"></i> Order Now
+                                            <i class="fas fa-exclamation-triangle"></i> Low Stock Alert
                                         </a>
                                     {% endif %}
                                 </form>
@@ -361,8 +375,8 @@
                             <td style="color: #FFD700;">₱ {{ "{:,.2f}".format(item.price) }}</td>
                             <td>
                                 <a href="{{ url_for('delete_material', item_id=item.id) }}" 
-                                   class="delete-link"
-                                   onclick="return confirm('Remove {{ item.material }} from inventory?')">
+                                class="delete-link"
+                                onclick="return confirm('Remove {{ item.material }} from inventory?')">
                                     <i class="fas fa-trash-alt"></i>
                                 </a>
                             </td>
@@ -384,6 +398,7 @@
                     <input type="text" name="material" placeholder="Material Name" required>
                     <input type="text" name="supplier" placeholder="Select Supplier" required>
                     <input type="number" name="qty" placeholder="Initial Qty" required>
+                    <input type="number" name="low_stock_threshold" placeholder="Alert Limit" required>
                     <input type="number" step="0.01" name="price" placeholder="Cost per Unit (₱)" required>
                     <button type="submit" class="add-btn">+ Register Stock</button>
                 </form>
@@ -395,7 +410,7 @@
             </div>
             <div class="sidebar-box">
                 <ul class="nav-list">
-                    <li><a href="{{ url_for('print_low_stock') }}" target="_blank" style="color: #ff5252;">Low Stock (< 20) <i class="fas fa-exclamation-circle"></i></a></li>
+                    <li><a href="{{ url_for('print_low_stock') }}" target="_blank" style="color: #ff5252;">Low Stock<i class="fas fa-exclamation-circle"></i></a></li>
                     <li><a href="{{ url_for('print_sufficient_stock') }}" target="_blank">Sufficient Stock <i class="fas fa-check-circle"></i></a></li>
                     <li><a href="{{ url_for('print_overall_stock') }}" target="_blank" style="color: #a67c52;">Master Valuation <i class="fas fa-file-invoice-dollar"></i></a></li>
                 </ul>
