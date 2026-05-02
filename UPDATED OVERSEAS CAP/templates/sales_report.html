@@ -102,7 +102,10 @@
         th { text-align: left; padding: 15px; color: #888; text-transform: uppercase; font-size: 11px; border-bottom: 2px solid #f4f4f4; }
         td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #444; font-size: 13px; }
         tr:hover { background-color: #fdfaf7; }
-        .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 16px; }
+        
+        /* Total row styling */
+        .total-row td { border-top: 2px solid #bc9c7e; border-bottom: none; padding-top: 20px; }
+        .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 18px; }
 
         /* --- SIDEBAR --- */
         .sidebar { flex: 1; max-width: 250px; display: flex; flex-direction: column; gap: 20px; }
@@ -157,6 +160,7 @@
             table { border: 1px solid #eee; }
             th { color: #000; }
             .revenue-highlight { color: #000 !important; }
+            .total-row td { border-top: 2px solid #000; }
             @page { margin: 1cm; }
         }
     </style>
@@ -222,7 +226,6 @@
                     {% elif current_filter == 'month' %}MONTHLY OVERVIEW
                     {% else %}DETAILED ORDER BREAKDOWN{% endif %}
                 </span>
-                <span class="revenue-highlight">TOTAL: ₱{{ "{:,.2f}".format(total_revenue) }}</span>
             </div>
             
             <div class="report-card">
@@ -256,6 +259,15 @@
                         </tr>
                         {% endif %}
                     </tbody>
+                    {% if sales %}
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5"></td>
+                            <td style="text-align: right; font-weight: bold; font-size: 14px;">TOTAL REVENUE:</td>
+                            <td class="revenue-highlight">₱{{ "{:,.2f}".format(total_revenue) }}</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
                 </table>
             </div>
         </div>
@@ -298,27 +310,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const dataPoints = [];
 
     // 1. Grab the rows.
-    // We take the first 7 (usually the most recent sales).
     const rows = Array.from(document.querySelectorAll('tbody tr')).slice(0, 7);
 
     rows.forEach((row, index) => {
-        // --- COLUMN CHECK ---
-        // If your Date is NOT in the 1st column, change [0] below.
-        // If your Price is NOT in the 7th column, change [6] below.
         const rawTimestamp = row.cells[0]?.innerText.trim();
         const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
 
         if(rawTimestamp && amountStr) {
-            // This regex looks for dates like 2026-04-22 and times like 18:30
-            // It captures the Month, Day, and the Time.
             const dateMatch = rawTimestamp.match(/(\d{2})-(\d{2})\s+(\d{2}:\d{2})/);
 
             let formattedLabel = "";
             if (dateMatch) {
-                // Result looks like: "04/22 18:30"
                 formattedLabel = `${dateMatch[1]}/${dateMatch[2]} ${dateMatch[3]}`;
             } else {
-                // Fallback: If format is different, just take the last 11 characters
                 formattedLabel = rawTimestamp.slice(-11);
             }
 
@@ -327,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Reverse so the chart flows from Left (Past) to Right (Current/Newest)
     labels.reverse();
     dataPoints.reverse();
 
@@ -357,8 +360,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 x: {
                     grid: { display: false },
                     ticks: {
-                        font: { size: 8 }, // Slightly smaller font to fit Date + Time
-                        maxRotation: 45,   // Tilts the text if it's too long
+                        font: { size: 8 }, 
+                        maxRotation: 45,   
                         minRotation: 45
                     }
                 }
@@ -367,7 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-        // Smoother Navigation Function
         function rippleNavigate(url) {
             setTimeout(() => {
                 window.location.href = url;
