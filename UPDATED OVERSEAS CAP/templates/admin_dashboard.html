@@ -8,11 +8,11 @@
     <style>
   /* --- BACKGROUND INTEGRATION --- */
         html, body {
-            height: 100vh;
+            min-height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* Allow vertical scroll if dashboard content is long */
+            overflow-x: hidden;
             /* Using a slightly darker overlay (0.9) to keep the admin data legible */
             background: linear-gradient(rgba(248, 248, 248, 0.9), rgba(248, 248, 248, 0.9)),
                         url("{{ url_for('static', filename='bg2.png') }}");
@@ -20,6 +20,8 @@
             background-position: center;
             background-attachment: fixed; /* Keeps bg still while scrolling through stats */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
         }
 
         /* --- OPTIONAL: GLASS EFFECT FOR CARDS --- */
@@ -86,6 +88,7 @@ nav a:hover { color: #a67c52; }
     margin-left: 25px;
     color: #333;
     transition: transform 0.2s, color 0.2s;
+    position: relative;
 }
 .menu-toggle-btn:hover { color: #a67c52; }
 .menu-toggle-btn:active { transform: scale(0.9); }
@@ -105,29 +108,18 @@ nav a:hover { color: #a67c52; }
             line-height: 1;
         }
 
-        .menu-toggle-btn {
-            cursor: pointer;
-            font-size: 22px;
-            margin-left: 25px;
-            color: #333;
-            transition: transform 0.2s;
-        }
-        .menu-toggle-btn:hover { color: #a67c52; }
-
         /* --- MAIN LAYOUT --- */
         main {
             flex: 1;
             display: flex;
             padding: 20px 50px;
             gap: 30px;
-            overflow: hidden; 
         }
 
         .content-left {
             flex: 3;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; 
             padding-right: 10px;
         }
 
@@ -304,6 +296,54 @@ nav a:hover { color: #a67c52; }
             padding: 1px 5px;
             border-radius: 8px;
             margin-left: 5px;
+        }
+
+        /* --- MOBILE & TABLET UI UPDATES --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; }
+            .sidebar { max-width: 100%; order: 2; }
+            .content-left { padding-right: 0; order: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .logo-main { font-size: 20px; }
+            .logo-admin { font-size: 12px; }
+            
+            nav { width: 100%; justify-content: center; margin-top: 10px; }
+            nav a { margin: 0 10px; font-size: 11px; }
+
+            header { flex-direction: column; height: auto; }
+
+            /* Zoomed Overview for Phones */
+            .top-stats-grid {
+                grid-template-columns: 1fr; /* Stacked stats */
+                gap: 15px;
+            }
+
+            .overview-grid {
+                grid-template-columns: 1fr; /* Single column list style */
+            }
+
+            .card-main { padding: 30px; }
+            .stat-value { font-size: 32px; }
+            .stat-label { font-size: 12px; }
+
+            .overview-box {
+                padding: 25px;
+                justify-content: center;
+            }
+            .overview-box div { font-size: 24px; }
+            .overview-box span { font-size: 12px; }
+            
+            .page-title { font-size: 20px; text-align: center; }
+            .admin-sub-label { text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            main { padding: 10px; }
+            .card-main { border-radius: 15px; }
+            .overview-box { border-radius: 15px; }
         }
     </style>
 </head>

@@ -8,11 +8,11 @@
     <style>
         /* --- MATCHING DASHBOARD STAGING --- */
         html, body {
-            height: 100vh;
+            min-height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
+            overflow-x: hidden; 
             background-color: #f8f8f8;
             font-family: Arial, sans-serif;
             display: flex;
@@ -102,7 +102,6 @@
             display: flex;
             padding: 20px 50px;
             gap: 25px; 
-            overflow: hidden; 
             align-items: flex-start;
         }
 
@@ -110,10 +109,15 @@
             flex: 3; 
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            height: 100%;
             padding-right: 15px;
+            min-width: 0;
         }
+        
+        @media (min-width: 1025px) {
+            main { overflow: hidden; height: calc(100vh - 70px); }
+            .content-left { overflow-y: auto; height: 100%; }
+        }
+
         .content-left::-webkit-scrollbar { width: 5px; }
         .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
 
@@ -157,6 +161,7 @@
             animation: slideFadeUp 0.5s ease-out forwards;
             opacity: 0;
             position: relative;
+            cursor: pointer;
         }
         
         .review-card:hover {
@@ -172,6 +177,7 @@
             cursor: pointer;
             transition: color 0.2s;
             font-size: 14px;
+            z-index: 10;
         }
         .delete-review-btn:hover { color: #ff4444; }
 
@@ -213,6 +219,7 @@
             border-radius: 8px;
             border: 2px solid rgba(255,255,255,0.2);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .review-body { 
@@ -241,6 +248,10 @@
             opacity: 0.7; 
             text-align: right;
             margin-top: auto;
+        }
+
+        .reply-form, .delete-review-btn {
+            pointer-events: auto;
         }
 
         @keyframes slideFadeUp {
@@ -304,6 +315,8 @@
             display: flex;
             gap: 5px;
             margin-top: 10px;
+            position: relative;
+            z-index: 5;
         }
 
         .reply-input {
@@ -329,7 +342,6 @@
             border-radius: 8px;
         }
 
-        /* --- NEW FILTER STYLE --- */
         .rating-select {
             width: 100%;
             padding: 10px;
@@ -342,7 +354,21 @@
             font-weight: bold;
             cursor: pointer;
         }
-    </style>
+
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main {
+                flex-direction: column;
+                padding: 20px;
+                gap: 30px;
+                overflow-y: auto;
+            }
+            .content-left { width: 100%; padding-right: 0; order: 1; }
+            .sidebar { max-width: 100%; width: 100%; order: 2; }
+            .reviews-container { grid-template-columns: 1fr; }
+            nav { display: none; }
+        }
+</style>
 </head>
 <body>
 
@@ -376,8 +402,12 @@
             
             <div class="reviews-container" id="reviewsList">
                 {% for r in reviews %}
-                <div class="review-card" data-rating="{{ r.rating }}" id="review-{{ r.id }}">
-                    <i class="fas fa-trash delete-review-btn" onclick="deleteReview({{ r.id }})"></i>
+                <div class="review-card" 
+                     data-rating="{{ r.rating }}" 
+                     id="review-{{ r.id }}"
+                     onclick="enlargeReview('{{ r.user.username }}', '{{ r.rating }}', '{{ r.product_type }}', '{{ r.comment|replace('\'', '\\\'')|replace('\n', ' ') }}', '{{ url_for('static', filename='uploads/' + r.review_image) if r.review_image else '' }}', '{{ r.date_posted.strftime('%m/%d/%y') if r.date_posted else 'N/A' }}')">
+                    
+                    <i class="fas fa-trash delete-review-btn" onclick="event.stopPropagation(); deleteReview({{ r.id }})"></i>
                     
                     <div class="review-header">
                         <span class="user-info">
@@ -395,19 +425,18 @@
                     <div class="review-content-wrapper">
                         {% if r.review_image %}
                         <img src="{{ url_for('static', filename='uploads/' + r.review_image) }}"
-                             class="review-image-thumb" 
-                             onclick="Swal.fire({imageUrl: this.src, showConfirmButton: false, background: 'transparent'})">
+                             class="review-image-thumb" onerror="this.style.display='none'">
                         {% endif %}
                         <div class="review-body">"{{ r.comment }}"</div>
                     </div>
 
                     {% if r.admin_reply %}
-                        <div class="admin-reply-box">
+                        <div class="admin-reply-box" onclick="event.stopPropagation()">
                             <strong style="color: #FFD700; letter-spacing: 1px;">OFFICIAL REPLY:</strong><br>
                             <span style="display: inline-block; margin-top: 4px;">{{ r.admin_reply }}</span>
                         </div>
                     {% else %}
-                        <form class="reply-form" action="{{ url_for('reply_review', review_id=r.id) }}" method="POST">
+                        <form class="reply-form" action="{{ url_for('reply_review', review_id=r.id) }}" method="POST" onclick="event.stopPropagation()">
                             <input type="text" name="reply_text" class="reply-input" placeholder="Write an official response..." required>
                             <button type="submit" class="reply-btn">SEND</button>
                         </form>
@@ -457,6 +486,37 @@
     </main>
 
     <script>
+        function enlargeReview(user, rating, product, comment, imgSrc, date) {
+            let starHtml = '';
+            for(let i=0; i<rating; i++) { starHtml += '<i class="fas fa-star" style="color:#FFD700;"></i>'; }
+            
+            let imageHtml = imgSrc ? `<img src="${imgSrc}" style="width:100%; max-height:350px; object-fit:contain; border-radius:12px; margin-bottom:15px; border: 1px solid #eee; background: #fdfdfd;">` : '';
+
+            Swal.fire({
+                title: `<span style="color:#a67c52; font-size:24px;">Review Details</span>`,
+                html: `
+                    <div style="text-align:left; font-family: Arial, sans-serif;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                            <strong>Customer: ${user}</strong>
+                            <span>${starHtml}</span>
+                        </div>
+                        <p style="margin-bottom: 15px;"><strong>Item Purchased:</strong> ${product}</p>
+                        ${imageHtml}
+                        <div style="background:#f9f9f9; padding:15px; border-radius:8px; font-style:italic; border-left:4px solid #a67c52; margin-bottom:10px; line-height:1.5;">
+                            "${comment}"
+                        </div>
+                        <p style="font-size:11px; color:#999; text-align:right;">Posted on: ${date}</p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'CLOSE',
+                confirmButtonColor: '#a67c52',
+                width: '550px',
+                background: '#fff',
+                borderRadius: '20px'
+            });
+        }
+
         function deleteReview(reviewId) {
             Swal.fire({
                 title: 'Delete Review?',

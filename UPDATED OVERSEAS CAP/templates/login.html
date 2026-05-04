@@ -6,278 +6,341 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        /* --- RESET & BASE --- */
-        * { box-sizing: border-box; }
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; }
 
-        html, body {
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-        }
+    html, body {
+        height: 100%;
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+    }
 
-        /* --- ANIMATIONS --- */
-        @keyframes entranceAnim {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    /* --- ANIMATIONS --- */
+    @keyframes entranceAnim {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        @keyframes shieldPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); text-shadow: 0 0 10px rgba(196, 164, 132, 0.3); }
-            100% { transform: scale(1); }
-        }
+    @keyframes shieldPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); text-shadow: 0 0 10px rgba(196, 164, 132, 0.3); }
+        100% { transform: scale(1); }
+    }
 
-        /* --- FIXED HEADER --- */
-        header {
-            padding: 10px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            z-index: 10;
-        }
+    /* --- FIXED HEADER --- */
+    header {
+        padding: 10px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        z-index: 10;
+    }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .logo { font-size: 26px; font-weight: bold; }
+    .logo { font-size: 26px; font-weight: bold; }
 
-        .logo-img {
-            height: 30px;
-            width: auto;
-            display: block;
-        }
+    .logo-img {
+        height: 30px;
+        width: auto;
+        display: block;
+    }
 
-        .admin-badge {
-            font-size: 10px;
-            font-weight: bold;
-            background: #000;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 3px;
-            margin-left: 5px;
-        }
+    .admin-badge {
+        font-size: 10px;
+        font-weight: bold;
+        background: #000;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
 
-        .admin-access {
-            text-decoration: none;
-            color: #aaa;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
+    .admin-access {
+        text-decoration: none;
+        color: #aaa;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        padding: 8px 12px;
+        border-radius: 6px;
+    }
 
-        .admin-access:hover {
-            color: #C4A484;
-            background: rgba(196, 164, 132, 0.05);
-        }
+    .admin-access:hover {
+        color: #C4A484;
+        background: rgba(196, 164, 132, 0.05);
+    }
 
-        /* --- LOGIN SECTION --- */
-        .login-section {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Added background image support */
-            background: {% if request.path == '/admin/login' %}
-                linear-gradient(135deg, rgba(44, 62, 80, 0.9) 0%, rgba(0, 0, 0, 0.9) 100%),
-                url("{{ url_for('static', filename='bg2.png') }}");
-            {% else %}
-                linear-gradient(135deg, rgba(248, 248, 248, 0.8) 0%, rgba(233, 233, 233, 0.8) 100%),
-                url("{{ url_for('static', filename='bg2.png') }}");
-            {% endif %};
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
+    /* --- LOGIN SECTION --- */
+    .login-section {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: {% if request.path == '/admin/login' %}
+            linear-gradient(135deg, rgba(44, 62, 80, 0.9) 0%, rgba(0, 0, 0, 0.9) 100%),
+            url("{{ url_for('static', filename='bg2.png') }}");
+        {% else %}
+            linear-gradient(135deg, rgba(248, 248, 248, 0.8) 0%, rgba(233, 233, 233, 0.8) 100%),
+            url("{{ url_for('static', filename='bg2.png') }}");
+        {% endif %};
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
 
-        /* Slightly adjust card for better visibility over background */
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        padding: 35px 30px;
+        width: 100%;
+        max-width: 340px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.3);
+        animation: entranceAnim 0.6s ease-out forwards;
+    }
+
+    .error-msg {
+        background: #fff5f5;
+        color: #ff5722;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        border: 1px solid #ffebeb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .user-avatar {
+        font-size: 50px;
+        margin-bottom: 10px;
+        color: #C4A484;
+        display: inline-block;
+    }
+
+    .admin-icon {
+        animation: shieldPulse 2s infinite ease-in-out;
+    }
+
+    h2 {
+        font-size: 11px;
+        letter-spacing: 3px;
+        margin-bottom: 25px;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .input-group i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #C4A484;
+        font-size: 14px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 12px 12px 45px;
+        border: 1.5px solid #eee;
+        border-radius: 10px;
+        background: #fdfdfd;
+        font-size: 13px;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #C4A484;
+        box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.1);
+    }
+
+    .btn-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-login {
+        background-color: #C4A484;
+        color: white;
+    }
+
+    .btn-login:hover {
+        background-color: #b39374;
+        transform: translateY(-1.5px);
+    }
+
+    .btn-register {
+        background-color: transparent;
+        color: #C4A484;
+        border: 1.5px solid #C4A484;
+    }
+
+    .back-link {
+        display: block;
+        margin-top: 15px;
+        font-size: 11px;
+        color: #C4A484;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    /* --- FOOTER --- */
+    footer {
+        padding: 20px 40px;
+        background: white;
+        border-top: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-title {
+        font-weight: 800;
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: #aaa;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 25px;
+    }
+
+    .social-links a {
+        text-decoration: none;
+        color: #444;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .social-links a i {
+        font-size: 14px;
+        color: #C4A484;
+    }
+
+    /* --- RESPONSIVE UPDATES FOR MOBILE & TABLET --- */
+    @media (max-width: 1024px) {
+        /* Tablet/Mobile optimization */
         .login-card {
-            background: rgba(255, 255, 255, 0.95); /* Made slightly transparent */
-            backdrop-filter: blur(5px); /* Adds a modern frosted glass effect */
-            padding: 35px 30px;
-            width: 100%;
-            max-width: 340px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.3);
-            animation: entranceAnim 0.6s ease-out forwards;
-        }
-        .error-msg {
-            background: #fff5f5;
-            color: #ff5722;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            border: 1px solid #ffebeb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .user-avatar {
-            font-size: 50px;
-            margin-bottom: 10px;
-            color: #C4A484;
-            display: inline-block;
-        }
-
-        /* Specific Animation for Admin Icon */
-        .admin-icon {
-            animation: shieldPulse 2s infinite ease-in-out;
+            max-width: 420px; /* Comfortably wider for tablets */
+            padding: 50px 40px;
         }
 
         h2 {
-            font-size: 11px;
-            letter-spacing: 3px;
-            margin-bottom: 25px;
-            font-weight: 700;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #C4A484;
-            font-size: 14px;
+            font-size: 13px; /* More readable on high-res small screens */
         }
 
         input {
-            width: 100%;
-            padding: 12px 12px 12px 45px;
-            border: 1.5px solid #eee;
-            border-radius: 10px;
-            background: #fdfdfd;
-            font-size: 13px;
-            transition: all 0.3s;
-            outline: none;
+            padding: 16px 16px 16px 52px; /* Much larger tap area for fingers */
+            font-size: 16px !important; /* Prevents auto-zoom issues on iOS */
         }
 
-        input:focus {
-            border-color: #C4A484;
-            box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.1);
-        }
-
-        .btn-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+        .input-group i {
+            font-size: 18px; /* Scales icon with larger input */
         }
 
         .btn {
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-            text-decoration: none;
-            border: none;
+            padding: 18px;
+            font-size: 16px; /* High visibility buttons */
         }
 
-        .btn-login {
-            background-color: #C4A484;
-            color: white;
-        }
-
-        .btn-login:hover {
-            background-color: #b39374;
-            transform: translateY(-1.5px);
-        }
-
-        .btn-register {
-            background-color: transparent;
-            color: #C4A484;
-            border: 1.5px solid #C4A484;
+        .admin-access {
+            font-size: 14px;
+            padding: 12px 18px;
         }
 
         .back-link {
-            display: block;
-            margin-top: 15px;
-            font-size: 11px;
-            color: #C4A484;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 20px 40px;
-            background: white;
-            border-top: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .footer-title {
-            font-weight: 800;
-            font-size: 10px;
-            letter-spacing: 1px;
-            color: #aaa;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 25px;
+            font-size: 14px;
+            padding: 12px;
         }
 
         .social-links a {
-            text-decoration: none;
-            color: #444;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        /* Phone-specific stack */
+        header {
+            padding: 15px 20px;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .social-links a i {
-            font-size: 14px;
-            color: #C4A484;
+        .header-left {
+            justify-content: center;
+            width: 100%;
         }
-    </style>
+
+        .login-card {
+            max-width: 100%;
+            border-radius: 20px;
+            padding: 40px 25px;
+        }
+
+        .social-links {
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            align-items: center;
+        }
+    }
+</style>
 </head>
 <body>
 

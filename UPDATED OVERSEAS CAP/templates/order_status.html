@@ -28,7 +28,10 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            /* Changed overflow to allow scrolling on mobile */
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 20px 0;
         }
 
         @keyframes containerEntry {
@@ -44,12 +47,14 @@
         .status-card { 
             background: var(--white); 
             border-radius: 20px; 
-            width: 800px; 
+            width: 90%;
+            max-width: 800px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.06);
             animation: containerEntry 0.8s var(--ease-out) forwards;
             opacity: 0;
             display: flex;
             overflow: hidden;
+            flex-direction: row; /* Default for laptop */
         }
 
         /* --- LEFT PANEL --- */
@@ -118,7 +123,7 @@
         .meta-item span { font-size: 11px; color: #555; font-weight: 600; }
 
         /* --- TRACKER --- */
-        .premium-tracker { margin-top: auto; position: relative; padding-left: 5px; }
+        .premium-tracker { margin-top: auto; position: relative; padding-left: 5px; min-height: 150px; }
         .tracker-line {
             position: absolute;
             left: 12px;
@@ -178,6 +183,8 @@
             color: #999;
             text-align: center;
             line-height: 1.6;
+            width: 100%;
+            box-sizing: border-box;
         }
         .info-msg-box i { font-size: 18px; color: var(--primary); margin-bottom: 10px; display: block; }
         .info-msg-box.danger-box i { color: var(--danger); }
@@ -217,30 +224,68 @@
         select, textarea { 
             width: 100%; 
             border: 1px solid #eee; 
-            padding: 10px; 
+            padding: 12px; /* Increased for mobile touch */
             border-radius: 8px; 
-            font-size: 12px; 
+            font-size: 14px; /* Increased for mobile readability */
             margin-bottom: 10px;
             box-sizing: border-box;
             outline: none;
         }
-        textarea { height: 80px; resize: none; }
+        textarea { height: 100px; resize: none; }
         
         .btn-submit { 
             background: var(--primary); 
             color: var(--white); 
             border: none; 
-            padding: 12px; 
+            padding: 15px; /* Increased for mobile touch */
             width: 100%; 
             cursor: pointer; 
             font-weight: bold; 
             border-radius: 8px; 
-            font-size: 11px;
+            font-size: 14px; /* Increased for mobile readability */
             transition: 0.3s;
             text-transform: uppercase;
         }
         .btn-submit:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
+        /* --- RESPONSIVE UPDATES --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; align-items: flex-start; }
+            
+            .status-card { 
+                flex-direction: column; 
+                width: 100%; 
+                border-radius: 15px;
+            }
+
+            .details-panel { 
+                width: 100%; 
+                border-right: none; 
+                border-bottom: 1px solid #f0f0f0;
+                padding: 25px;
+                box-sizing: border-box;
+            }
+
+            .action-panel { 
+                width: 100%; 
+                padding: 25px; 
+                box-sizing: border-box;
+            }
+
+            .details-panel h1 { font-size: 20px; }
+            
+            .order-meta {
+                grid-template-columns: 1fr; /* Stack meta on small screens */
+                gap: 15px;
+            }
+
+            .premium-tracker { margin-top: 20px; }
+            
+            /* Make text slightly larger for better "App" feel */
+            .meta-item label { font-size: 10px; }
+            .meta-item span { font-size: 13px; }
+            .step-content span { font-size: 13px; }
+        }
     </style>
 </head>
 <body>

@@ -8,9 +8,17 @@
     <style>
         /* --- UNIFORM STAGING --- */
         html, body {
-            height: 100vh; width: 100vw; margin: 0; padding: 0;
-            overflow: hidden; background-color: #f8f8f8;
-            font-family: Arial, sans-serif; display: flex; flex-direction: column;
+            /* Changed to min-height and auto overflow for mobile scrolling */
+            min-height: 100vh; 
+            width: 100vw; 
+            margin: 0; 
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto; 
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column;
         }
 
         /* --- HEADER --- */
@@ -47,7 +55,6 @@
             visibility: visible;
         }
 
-        /* State when menu is hidden */
         nav.menu-hidden {
             opacity: 0;
             transform: translateX(20px);
@@ -68,27 +75,16 @@
         .menu-toggle-btn:hover { color: #a67c52; }
         .menu-toggle-btn:active { transform: scale(0.9); }
 
-        /* Custom sizing for the compact Logout alert */
-        .small-swal-title {
-            font-size: 18px !important;
-            font-weight: bold !important;
-            padding-top: 10px !important;
-        }
-        .small-swal-text {
-            font-size: 13px !important;
-            margin: 10px 0 !important;
-        }
-        .small-swal-button {
-            font-size: 12px !important;
-            padding: 8px 20px !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         /* --- MAIN LAYOUT --- */
-        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        main { 
+            flex: 1; 
+            display: flex; 
+            padding: 20px 50px; 
+            gap: 30px; 
+            /* Main keeps flex-direction: row for PC, will change for CP */
+        }
         
-        .content-left { flex: 3; display: flex; flex-direction: column; overflow: hidden; }
+        .content-left { flex: 3; display: flex; flex-direction: column; min-width: 0; }
         .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
         .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; }
 
@@ -106,6 +102,7 @@
             text-transform: uppercase;
             box-shadow: 0 4px 10px rgba(166, 124, 82, 0.3);
             animation: fadeInDown 0.5s ease-out;
+            text-align: center;
         }
 
         .table-container {
@@ -114,15 +111,15 @@
             border-radius: 30px; 
             padding: 30px; 
             flex: 1; 
-            overflow-y: auto;
+            overflow-x: auto; /* CRITICAL for CP: Allows horizontal scroll on table */
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             animation: slideUpFade 0.6s ease-out;
         }
 
-        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar { height: 6px; width: 6px; }
         .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        table { width: 100%; border-collapse: collapse; text-align: center; }
+        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 800px; /* Prevents column squishing */}
 
         th { 
             border-right: 2px solid rgba(0,0,0,0.1); 
@@ -143,7 +140,7 @@
             font-size: 14px;
         }
 
-        /* --- ENHANCED CLICKABLE STYLING --- */
+        /* --- CLICKABLE STYLING --- */
         .stock-detail-link {
             color: #fff;
             text-decoration: none;
@@ -154,16 +151,12 @@
             display: inline-block;
             transition: all 0.3s ease;
             cursor: pointer;
+            white-space: nowrap;
         }
         .stock-detail-link:hover {
             background: #fff;
             color: #a67c52;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .stock-detail-link i {
-            margin-right: 5px;
-            font-size: 12px;
         }
 
         .restock-action-btn {
@@ -178,19 +171,7 @@
             text-decoration: none !important;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 2px 5px rgba(255, 82, 82, 0.3);
             transition: 0.3s;
-        }
-        .restock-action-btn:hover {
-            background: #ff1744;
-            transform: scale(1.05);
-        }
-
-        /* --- RED WARNING STYLING --- */
-        .stock-low { 
-            color: #ff5252 !important; 
-            border: 2px solid #ff5252 !important;
-            background: rgba(255, 82, 82, 0.1) !important;
         }
 
         .qty-input {
@@ -203,78 +184,52 @@
             color: white;
             font-weight: bold;
             outline: none;
-            transition: 0.3s;
         }
-        .qty-input:focus { background: white; color: #a67c52; }
-
-        .save-btn {
-            background: none; 
-            border: none; 
-            color: white; 
-            cursor: pointer; 
-            font-size: 18px;
-            transition: transform 0.2s, color 0.2s;
-        }
-        .save-btn:hover { transform: scale(1.2); color: #81c784; }
-
-        .delete-link {
-            color: rgba(255,255,255,0.6); 
-            text-decoration: none; 
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .delete-link:hover { color: #ff8a80; transform: scale(1.1); }
 
         /* --- COMPACT SIDEBAR --- */
-        .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; overflow-y: auto; padding-right: 5px; }
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        
+        .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; }
         .sidebar-header { font-weight: bold; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
         
         .sidebar-box { 
             background: #fff; 
             border: 1px solid #ddd; 
-            padding: 7px; 
+            padding: 15px; 
             border-radius: 12px;
             box-shadow: 0 4px 5px rgba(0,0,0,0.03);
-            margin-bottom: 5px;
+            margin-bottom: 15px;
         }
         
         .nav-list { list-style: none; padding: 0; margin: 0; }
         .nav-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
-        .nav-list li:last-child { border-bottom: none; }
-        .nav-list a { text-decoration: none; color: #333; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
-        .nav-list a:hover { color: #a67c52; padding-left: 5px; }
+        .nav-list a { text-decoration: none; color: #333; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
 
         .sidebar-box input {
-            width: 100%;
-            padding: 7px;
-            margin-bottom: 7px;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            box-sizing: border-box;
-            background: #fcfcfc;
-            outline: none;
-            font-size: 12px;
-            transition: border-color 0.3s;
+            width: 100%; padding: 10px; margin-bottom: 10px;
+            border: 1px solid #eee; border-radius: 6px; box-sizing: border-box;
+            background: #fcfcfc; font-size: 12px;
         }
-        .sidebar-box input:focus { border-color: #a67c52; }
 
         .add-btn {
-            width: 100%;
-            background: #a67c52; 
-            color: white; 
-            border: none; 
-            padding: 10px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            border-radius: 6px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
+            width: 100%; background: #a67c52; color: white; border: none; 
+            padding: 12px; cursor: pointer; font-weight: bold; border-radius: 6px;
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
         }
-        .add-btn:hover { background: #8e6843; transform: translateY(-1px); }
+
+        /* --- RESPONSIVE MEDIA QUERIES (CP FRIENDLY) --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; } /* Stacks sidebar below content */
+            .sidebar { max-width: 100%; }
+            .content-left { flex: none; width: 100%; }
+            .inventory-header-pill { padding: 12px 30px; font-size: 14px; }
+        }
+
+        @media (max-width: 768px) {
+            .logo-main { font-size: 20px; }
+            .logo-admin { font-size: 12px; }
+            nav { display: none; } /* Hide desktop nav on small mobile */
+            .table-container { padding: 15px; border-radius: 20px; }
+        }
 
         /* --- ANIMATIONS --- */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }

@@ -9,8 +9,11 @@
     <style>
         /* --- CORE LAYOUT --- */
         html, body {
-            height: 100vh; width: 100vw; margin: 0; padding: 0;
-            overflow: hidden; background-color: #f8f8f8;
+            min-height: 100vh; /* Changed for mobile scrolling */
+            width: 100vw; margin: 0; padding: 0;
+            overflow-x: hidden; 
+            overflow-y: auto; 
+            background-color: #f8f8f8;
             font-family: Arial, sans-serif; display: flex; flex-direction: column;
         }
 
@@ -39,16 +42,15 @@
             100% { left: 125%; }
         }
 
-        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; }
         
-        /* Apply entry animation to main content areas */
         .content-left, .sidebar {
             opacity: 0;
             animation: slideUpFade 0.7s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
         }
         .sidebar { animation-delay: 0.2s; }
 
-        .content-left { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px; }
+        .content-left { flex: 3; display: flex; flex-direction: column; padding-right: 10px; }
         .content-left::-webkit-scrollbar { width: 5px; }
         .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
 
@@ -62,7 +64,6 @@
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Shine Effect for the Report Card */
         .report-card::after {
             content: "";
             position: absolute;
@@ -97,13 +98,29 @@
         .apply-filter-btn:active { transform: scale(0.95); }
 
         /* --- TABLE STYLING --- */
-        .report-card { background: white; border-radius: 15px; border: 1px solid #ddd; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; }
+        .report-card { 
+            background: white; border-radius: 15px; border: 1px solid #ddd; padding: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            overflow-x: auto; /* Required for mobile table scrolling */
+        }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; }
         th { text-align: left; padding: 15px; color: #888; text-transform: uppercase; font-size: 11px; border-bottom: 2px solid #f4f4f4; }
         td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #444; font-size: 13px; }
         tr:hover { background-color: #fdfaf7; }
         
-        /* Total row styling */
+        /* Interactive Date Cell */
+        .clickable-date {
+            cursor: pointer;
+            color: #a67c52;
+            text-decoration: underline dotted;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .clickable-date:hover {
+            color: #bc9c7e;
+            background: #fff5eb;
+        }
+
         .total-row td { border-top: 2px solid #bc9c7e; border-bottom: none; padding-top: 20px; }
         .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 18px; }
 
@@ -112,10 +129,12 @@
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .sidebar-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
-        /* Graph Styling */
+        /* FIXED GRAPH BOX TO PREVENT EXPANSION */
         .graph-box { 
             background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 10px; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05); animation: slideUpFade 0.7s ease forwards; animation-delay: 0.4s; opacity: 0;
+            height: 200px; /* Fixed height */
+            max-width: 100%; /* Prevents horizontal growth */
         }
         .graph-box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(166, 124, 82, 0.15); }
 
@@ -131,12 +150,33 @@
             transition: all 0.3s;
         }
         .nav-list a:hover { color: #a67c52; padding-left: 8px; }
-        
-        /* Click Animation for Sidebar Items */
         .nav-list a:active { transform: scale(0.95); filter: brightness(0.8); }
 
-        /* Hide print header during web browsing */
         .print-header { display: none; }
+
+        /* --- MOBILE & TABLET RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; }
+            .sidebar { max-width: 100%; order: 2; }
+            .content-left { padding-right: 0; order: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .filter-nav { flex-direction: column; align-items: stretch; gap: 15px; }
+            .calendar-wrapper { margin-left: 0; flex-direction: column; align-items: stretch; }
+            .calendar-input { padding: 12px; font-size: 14px; }
+            .apply-filter-btn { padding: 12px; font-size: 14px; }
+            
+            .page-title { font-size: 18px; text-align: center; }
+            .admin-sub-label { font-size: 12px; }
+            
+            nav { width: 100%; justify-content: space-around; margin-top: 10px; }
+            nav a { margin: 0; font-size: 12px; }
+
+            .report-card { padding: 10px; }
+            .revenue-highlight { font-size: 16px; }
+        }
 
         /* --- PRINT STYLES --- */
         @media print {
@@ -144,8 +184,6 @@
             body, html { background: white; overflow: visible !important; height: auto !important; }
             main { padding: 0; margin: 0; display: block; overflow: visible !important; animation: none !important; }
             .content-left { width: 100%; overflow: visible !important; padding-right: 0; opacity: 1 !important; transform: none !important; }
-            
-            /* Show the specific report information when printing */
             .print-header { 
                 display: block !important; 
                 margin-bottom: 20px; 
@@ -154,7 +192,6 @@
             }
             .print-header h1 { margin: 0; font-size: 24px; color: #000; }
             .print-header p { margin: 5px 0; font-size: 14px; font-weight: bold; }
-
             .report-card { border: none; box-shadow: none; padding: 0; }
             .admin-sub-label { border-bottom: 1px solid #333; margin-top: 10px; }
             table { border: 1px solid #eee; }
@@ -164,6 +201,66 @@
             @page { margin: 1cm; }
         }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const labels = [];
+            const dataPoints = [];
+            
+            // Get data from the table
+            const rows = Array.from(document.querySelectorAll('tbody tr')).filter(row => {
+                return row.cells.length > 1 && !row.innerText.includes('TOTAL');
+            });
+
+            // LIMIT DATA: Only take the last 7 rows to keep the graph size fixed
+            const limitedRows = rows.slice(0, 7);
+
+            limitedRows.forEach((row) => {
+                const timestamp = row.cells[0]?.innerText.trim();
+                const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
+
+                if(timestamp && amountStr && !isNaN(parseFloat(amountStr))) {
+                    // Extract just the Date (MM-DD) for shorter labels
+                    const shortDate = timestamp.split(' ')[0].slice(5); 
+                    labels.push(shortDate);
+                    dataPoints.push(parseFloat(amountStr));
+                }
+            });
+
+            // Reverse so they appear left-to-right (oldest to newest)
+            labels.reverse();
+            dataPoints.reverse();
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['No Data'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: dataPoints.length ? dataPoints : [0],
+                        borderColor: '#a67c52',
+                        backgroundColor: 'rgba(166, 124, 82, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allows CSS to control the height
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false, beginAtZero: true },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 
@@ -232,7 +329,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Date</th>
+                            <th>Date (Click to Edit)</th>
                             <th>Order ID</th>
                             <th>Customer</th>
                             <th>Product</th>
@@ -244,7 +341,7 @@
                     <tbody>
                         {% for item in sales %}
                         <tr>
-                            <td>{{ item.date }}</td>
+                            <td class="clickable-date" onclick="makeDateEditable(this, '{{ item.id }}')">{{ item.date }}</td>
                             <td>#{{ item.id }}</td>
                             <td>{{ item.customer }}</td>
                             <td>{{ item.product }}</td>
@@ -302,78 +399,111 @@
     </main>
 
     <script>
-           // --- Sales Graph Initialization ---
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('salesChart').getContext('2d');
+        // --- Sales Graph Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const labels = [];
+            const dataPoints = [];
+            const rows = Array.from(document.querySelectorAll('tbody tr')).slice(0, 7);
 
-    const labels = [];
-    const dataPoints = [];
+            rows.forEach((row, index) => {
+                const rawTimestamp = row.cells[0]?.innerText.trim();
+                const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
 
-    // 1. Grab the rows.
-    const rows = Array.from(document.querySelectorAll('tbody tr')).slice(0, 7);
+                if(rawTimestamp && amountStr) {
+                    const dateMatch = rawTimestamp.match(/(\d{2})-(\d{2})\s+(\d{2}:\d{2})/);
+                    let formattedLabel = dateMatch ? `${dateMatch[1]}/${dateMatch[2]} ${dateMatch[3]}` : rawTimestamp.slice(-11);
+                    labels.push(formattedLabel);
+                    dataPoints.push(parseFloat(amountStr));
+                }
+            });
 
-    rows.forEach((row, index) => {
-        const rawTimestamp = row.cells[0]?.innerText.trim();
-        const amountStr = row.cells[6]?.innerText.replace(/[₱,]/g, '');
+            labels.reverse();
+            dataPoints.reverse();
 
-        if(rawTimestamp && amountStr) {
-            const dateMatch = rawTimestamp.match(/(\d{2})-(\d{2})\s+(\d{2}:\d{2})/);
-
-            let formattedLabel = "";
-            if (dateMatch) {
-                formattedLabel = `${dateMatch[1]}/${dateMatch[2]} ${dateMatch[3]}`;
-            } else {
-                formattedLabel = rawTimestamp.slice(-11);
-            }
-
-            labels.push(formattedLabel);
-            dataPoints.push(parseFloat(amountStr));
-        }
-    });
-
-    labels.reverse();
-    dataPoints.reverse();
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels.length ? labels : ['No Data'],
-            datasets: [{
-                label: 'Sales (₱)',
-                data: dataPoints.length ? dataPoints : [0],
-                borderColor: '#a67c52',
-                backgroundColor: 'rgba(166, 124, 82, 0.1)',
-                borderWidth: 2,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#a67c52',
-                pointRadius: 4,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { display: false, beginAtZero: true },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        font: { size: 8 }, 
-                        maxRotation: 45,   
-                        minRotation: 45
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['No Data'],
+                    datasets: [{
+                        label: 'Sales (₱)',
+                        data: dataPoints.length ? dataPoints : [0],
+                        borderColor: '#a67c52',
+                        backgroundColor: 'rgba(166, 124, 82, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#a67c52',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false, beginAtZero: true },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 8 }, maxRotation: 45, minRotation: 45 }
+                        }
                     }
                 }
-            }
+            });
+        });
+
+        // --- NEW: EDIT DATE FUNCTIONALITY ---
+        function makeDateEditable(cell, orderId) {
+            if (cell.querySelector('input')) return; // Already editing
+
+            const originalDate = cell.innerText;
+            // Extract YYYY-MM-DD from the string (assuming your format is YYYY-MM-DD HH:MM:SS)
+            const dateValue = originalDate.split(' ')[0];
+
+            cell.innerHTML = `<input type="date" value="${dateValue}" class="calendar-input" style="width: 100%;" onblur="saveNewDate(this, '${orderId}', '${originalDate}')" onchange="saveNewDate(this, '${orderId}', '${originalDate}')">`;
+            cell.querySelector('input').focus();
         }
-    });
-});
+
+        function saveNewDate(input, orderId, originalDate) {
+            const newDate = input.value;
+            const cell = input.parentElement;
+
+            if (!newDate || newDate === originalDate.split(' ')[0]) {
+                cell.innerHTML = originalDate;
+                return;
+            }
+
+            // AJAX request to your Flask backend
+            fetch(`/update_order_date/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_date: newDate })
+            })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Date Updated',
+                        text: 'Order date has been changed successfully.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload(); // Refresh to update filter logic
+                    });
+                } else {
+                    Swal.fire('Error', 'Could not update the date in database.', 'error');
+                    cell.innerHTML = originalDate;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                cell.innerHTML = originalDate;
+            });
+        }
 
         function rippleNavigate(url) {
-            setTimeout(() => {
-                window.location.href = url;
-            }, 150);
+            setTimeout(() => { window.location.href = url; }, 150);
         }
 
         function applyRangeFilter() {
@@ -386,9 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = `{{ url_for('sales_report') }}?start_date=${start}&end_date=${end}`;
         }
 
-        function printReport() {
-            window.print();
-        }
+        function printReport() { window.print(); }
 
         function confirmLogout(event) {
             event.preventDefault();

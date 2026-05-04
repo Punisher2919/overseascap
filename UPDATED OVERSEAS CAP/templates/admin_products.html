@@ -8,11 +8,13 @@
     <style>
         /* --- MATCHING DASHBOARD STAGING --- */
         html, body {
-            height: 100vh;
+            /* Changed to min-height and auto overflow for mobile compatibility */
+            min-height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
+            overflow-x: hidden; 
+            overflow-y: auto;
             background-color: #f8f8f8;
             font-family: Arial, sans-serif;
             display: flex;
@@ -70,15 +72,33 @@
         .menu-toggle-btn:hover { color: #a67c52; }
         .menu-toggle-btn:active { transform: scale(0.9); }
 
-        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        /* --- MAIN LAYOUT --- */
+        main { 
+            flex: 1; 
+            display: flex; 
+            padding: 20px 50px; 
+            gap: 30px; 
+            align-items: flex-start;
+        }
 
-        .content-left { flex: 3; display: flex; flex-direction: column; overflow-y: auto; padding-right: 15px; }
-        .content-left::-webkit-scrollbar { width: 5px; }
-        .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+        .content-left { 
+            flex: 3; 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 0; /* Prevents flex items from breaking layout */
+        }
+
+        /* Custom scrollbar only for desktop */
+        @media (min-width: 1025px) {
+            .content-left { overflow-y: auto; height: auto; padding-right: 15px; }
+            .content-left::-webkit-scrollbar { width: 5px; }
+            .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+        }
 
         .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
         .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; }
 
+        /* --- FORM STYLES --- */
         .add-form { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -118,22 +138,32 @@
             background: white;
             border-radius: 8px;
             border: 1px solid #eee;
+            flex-wrap: wrap; /* Helps on very small screens */
         }
         .color-row span { font-size: 12px; font-weight: bold; color: #a67c52; min-width: 100px; }
 
-        .table-container { background: white; border-radius: 20px; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); animation: slideFadeIn 0.7s ease-out forwards; }
-        table { width: 100%; border-collapse: collapse; }
+        /* --- TABLE STYLES --- */
+        .table-container { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+            animation: slideFadeIn 0.7s ease-out forwards; 
+            overflow-x: auto; /* CRITICAL for mobile scrolling */
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; /* Ensures table doesn't squish */}
         th { text-align: left; color: #a67c52; padding: 12px; border-bottom: 2px solid #f8f8f8; font-size: 11px; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 13px; color: #333; }
         
         .prod-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; transition: transform 0.3s; }
         tr:hover .prod-img { transform: scale(1.2); }
 
-        .action-btn { padding: 8px 12px; border-radius: 6px; color: white; text-decoration: none; font-size: 12px; border: none; cursor: pointer; transition: opacity 0.3s; }
+        .action-btn { padding: 8px 12px; border-radius: 6px; color: white; text-decoration: none; font-size: 12px; border: none; cursor: pointer; transition: opacity 0.3s; white-space: nowrap; }
         .action-btn:hover { opacity: 0.8; }
 
-        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
+        /* --- SIDEBAR STYLES --- */
         .sidebar { flex: 1; max-width: 250px; }
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .card-main { background-color: #a67c52; color: white; border-radius: 25px; padding: 25px; text-align: center; margin-bottom: 20px; transition: transform 0.3s; }
@@ -147,30 +177,32 @@
         .nav-list a { text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
         .nav-list a:hover { color: #a67c52; padding-left: 5px; }
 
+        /* --- MODAL --- */
         .modal { display:none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); animation: fadeIn 0.3s; }
         .modal-content { background: white; margin: 5% auto; padding: 30px; width: 450px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.9); animation: popIn 0.3s forwards; max-height: 85vh; overflow-y: auto; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { to { transform: scale(1); } }
-        
-        .modal-content h3 { color: #bc9c7e; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Rating Filter Style */
-        .filter-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        /* --- RESPONSIVE BREAKPOINTS (CP FRIENDLY) --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; align-items: stretch; gap: 20px; }
+            .sidebar { max-width: 100%; order: 2; }
+            .content-left { order: 1; padding-right: 0; }
+            .add-form { grid-template-columns: 1fr; }
+            .variant-section { grid-column: span 1; }
         }
-        .rating-select {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 12px;
-            outline: none;
-            cursor: pointer;
-            font-weight: bold;
-            color: #333;
+
+        @media (max-width: 768px) {
+            .logo-main { font-size: 20px; }
+            .logo-admin { font-size: 11px; }
+            nav { display: none; } /* Standard practice to hide desktop nav on mobile */
+            
+            .modal-content { width: 90%; margin: 10% auto; padding: 20px; }
+            .page-title { font-size: 18px; text-align: center; }
+            .admin-sub-label { font-size: 12px; }
         }
     </style>
 </head>

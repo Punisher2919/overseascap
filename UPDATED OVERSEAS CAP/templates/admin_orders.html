@@ -8,11 +8,12 @@
     <style>
         /* --- MATCHING HOME.HTML STAGING --- */
         html, body {
-            height: 100vh;
+            min-height: 100vh;
             width: 100vw;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
+            overflow-x: hidden; 
+            overflow-y: auto; /* Allow scrolling on mobile */
             background-color: #f8f8f8;
             font-family: Arial, sans-serif;
             display: flex;
@@ -104,7 +105,6 @@
             display: flex;
             padding: 20px 50px;
             gap: 30px;
-            overflow: hidden; 
         }
 
         .content-left {
@@ -207,12 +207,12 @@
             border-radius: 25px;
             padding: 20px;
             flex: 1;
-            overflow-y: auto;
+            overflow-x: auto; /* Horizontal scroll for tables on small screens */
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             animation: slideFadeIn 0.7s ease-out forwards;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; text-align: center; font-size: 12px; }
         th { border-bottom: 2px solid white; padding-bottom: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         td { padding: 12px 5px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
@@ -313,6 +313,34 @@
             border-bottom: 1px solid #eee;
             color: #333;
             font-size: 12px;
+        }
+
+        /* --- MOBILE & TABLET RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; overflow-y: auto; }
+            .sidebar { max-width: 100%; order: 2; }
+            .content-left { overflow: visible; order: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .search-container { flex-direction: column; }
+            .filter-select { width: 100%; }
+            .logo-main { font-size: 20px; }
+            .logo-admin { font-size: 12px; }
+            
+            nav { width: 100%; justify-content: center; margin-top: 10px; }
+            nav a { margin: 0 10px; font-size: 11px; }
+
+            .manual-order-form { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+
+            /* Buttons/Inputs easier to tap */
+            .search-bar, .filter-select, .bulk-delete-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>

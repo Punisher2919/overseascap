@@ -8,11 +8,13 @@
     <style>
         /* --- MATCHING DASHBOARD STAGING --- */
         html, body { 
-            height: 100vh; 
+            /* Changed to min-height and auto overflow to allow mobile scrolling */
+            min-height: 100vh; 
             width: 100vw; 
             margin: 0; 
             padding: 0; 
-            overflow: hidden; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
             background-color: #f8f8f8; 
             font-family: Arial, sans-serif; 
             display: flex; 
@@ -53,7 +55,6 @@
             visibility: visible;
         }
 
-        /* State when menu is hidden */
         nav.menu-hidden {
             opacity: 0;
             transform: translateX(20px);
@@ -82,13 +83,19 @@
         .menu-toggle-btn:active { transform: scale(0.9); }
 
         /* MAIN CONTENT AREA */
-        main { flex: 1; display: flex; padding: 20px 50px; gap: 30px; overflow: hidden; }
+        main { 
+            flex: 1; 
+            display: flex; 
+            padding: 20px 50px; 
+            gap: 30px; 
+            /* PC layout remains side-by-side */
+        }
         
         .content-left { 
             flex: 3; 
             display: flex; 
             flex-direction: column; 
-            overflow: hidden;
+            min-width: 0; /* Prevents container from breaking flex layouts */
         }
         
         .page-title { 
@@ -130,14 +137,15 @@
             border-radius: 25px; 
             padding: 30px; 
             flex: 1; 
+            overflow-x: auto; /* Added horizontal scroll for mobile */
             overflow-y: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             animation: slideUpFade 0.6s ease-out;
         }
-        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar { width: 6px; height: 6px; }
         .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; min-width: 650px; /* Prevents squishing on mobile */}
         th { 
             border-right: 2px solid rgba(0,0,0,0.1); 
             padding: 15px 10px; 
@@ -154,7 +162,6 @@
         td { padding: 18px 10px; font-weight: bold; border-right: 2px solid rgba(0,0,0,0.05); }
         td:last-child { border-right: none; }
 
-        /* ENHANCED CLICKABLE SUPPLIER LINK */
         .supplier-link {
             color: #fff;
             text-decoration: none;
@@ -165,6 +172,7 @@
             display: inline-block;
             transition: all 0.3s ease;
             cursor: pointer;
+            white-space: nowrap;
         }
         .supplier-link:hover {
             background: #fff;
@@ -173,23 +181,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
-        /* Custom sizing for the compact Logout alert */
-        .small-swal-title {
-            font-size: 18px !important;
-            font-weight: bold !important;
-            padding-top: 10px !important;
-        }
-        .small-swal-text {
-            font-size: 13px !important;
-            margin: 10px 0 !important;
-        }
-        .small-swal-button {
-            font-size: 12px !important;
-            padding: 8px 20px !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         /* SIDEBAR & FORM STYLING */
         .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; }
         .sidebar-header { font-weight: bold; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
@@ -197,8 +188,8 @@
         .sidebar-box { 
             background: #fff; 
             border: 1px solid #ddd; 
-            padding: 10px; 
-            margin-bottom: 10px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
             border-radius: 12px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
@@ -224,7 +215,7 @@
         
         input[type="text"] { 
             width: 100%; 
-            padding: 10px; 
+            padding: 12px; 
             margin-bottom: 10px; 
             border: 1px solid #eee; 
             border-radius: 8px; 
@@ -249,6 +240,23 @@
             transition: all 0.3s;
         }
         .btn-add:hover { background: #8e6843; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* --- RESPONSIVE / CP FRIENDLY ADJUSTMENTS --- */
+        @media (max-width: 1024px) {
+            header { padding: 10px 20px; }
+            main { padding: 20px; flex-direction: column; overflow: visible; }
+            .sidebar { max-width: 100%; order: 2; } /* Sidebar moves below table */
+            .content-left { order: 1; margin-bottom: 20px; }
+            .table-container { padding: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            .logo-main { font-size: 20px; }
+            .logo-admin { font-size: 11px; }
+            nav { display: none; } /* Standard for mobile; uses burger menu usually */
+            .page-title { font-size: 18px; text-align: center; }
+            .header-pill { padding: 10px 25px; font-size: 12px; }
+        }
 
         /* KEYFRAMES */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }

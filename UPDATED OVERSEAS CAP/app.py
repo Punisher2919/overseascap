@@ -1167,6 +1167,32 @@ def sales_report():
                            start_date=start_date,
                            end_date=end_date)
 
+@app.route('/update_order_date/<int:order_id>', methods=['POST'])
+def update_order_date(order_id):
+    # Security check: Ensure only admin can change dates
+    if session.get('user') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+        
+    data = request.get_json()
+    new_date_str = data.get('new_date') # Format: YYYY-MM-DD
+    
+    order = CustomOrder.query.get_or_404(order_id)
+    
+    try:
+        if new_date_str:
+            # Convert string from <input type="date"> to a Python datetime object
+            # We keep the current time or set to midnight to avoid logic errors
+            new_date = datetime.strptime(new_date_str, '%Y-%m-%d')
+            order.date_ordered = new_date
+            
+            db.session.commit()
+            return jsonify({"status": "success"})
+        return jsonify({"status": "error", "message": "No date provided"}), 400
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/admin/export_orders_csv')
 def export_orders_csv():
     if session.get('user') != 'admin':
@@ -1493,7 +1519,7 @@ def submit_review():
 
     # --- UPDATE ORDER STATUS HERE ---
     # You can change 'COMPLETED' to whatever status name you prefer
-    order.status = 'COMPLETED' 
+    order.status = 'DONE' 
     
     # Handle Review Image Upload
     review_image_filename = None
