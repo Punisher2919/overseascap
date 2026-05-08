@@ -32,7 +32,7 @@ db = SQLAlchemy(app)
 with app.app_context():
     db.create_all()
 
-    
+
 # Configuration for where to save photos
 UPLOAD_FOLDER = 'static/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -40,7 +40,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-db = SQLAlchemy(app)
 
 # --- Database Models ---
 
