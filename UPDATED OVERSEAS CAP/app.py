@@ -30,8 +30,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 with app.app_context():
-    db.drop_all()   # This deletes all existing tables
-    db.create_all() # This recreates them empty
+    db.create_all()
 
 
 # Configuration for where to save photos
