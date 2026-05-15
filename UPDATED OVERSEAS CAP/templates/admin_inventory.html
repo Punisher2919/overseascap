@@ -15,7 +15,8 @@
             padding: 0;
             overflow-x: hidden;
             overflow-y: auto; 
-            background-color: #f8f8f8;
+            /* Enhanced with a warm alabaster/cream tinted background to make golds and dark blues pop organically */
+            background-color: #fcfbf9;
             font-family: Arial, sans-serif; 
             display: flex; 
             flex-direction: column;
@@ -28,7 +29,7 @@
             justify-content: space-between;
             align-items: center;
             background: white;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e5e5e0;
             z-index: 1000;
         }
 
@@ -42,8 +43,8 @@
             flex-direction: column;
             line-height: 1.1;
         }
-        .logo-main { font-size: 26px; font-weight: bold; }
-        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        .logo-main { font-size: 26px; font-weight: bold; color: #0f172a; }
+        .logo-admin { color: #c5a059; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; }
 
         /* --- NAVIGATION TOGGLE LOGIC --- */
         nav {
@@ -62,17 +63,17 @@
             pointer-events: none;
         }
 
-        nav a { color: #000; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
-        nav a:hover { color: #a67c52; }
+        nav a { color: #334155; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
+        nav a:hover { color: #c5a059; }
 
         .menu-toggle-btn {
             cursor: pointer;
             font-size: 22px;
             margin-left: 25px;
-            color: #333;
+            color: #334155;
             transition: transform 0.2s, color 0.2s;
         }
-        .menu-toggle-btn:hover { color: #a67c52; }
+        .menu-toggle-btn:hover { color: #c5a059; }
         .menu-toggle-btn:active { transform: scale(0.9); }
 
         /* --- MAIN LAYOUT --- */
@@ -85,13 +86,13 @@
         }
         
         .content-left { flex: 3; display: flex; flex-direction: column; min-width: 0; }
-        .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
-        .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; }
+        .page-title { color: #0f172a; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .admin-sub-label { color: #c5a059; font-weight: bold; font-size: 14px; border-bottom: 2px solid #0f172a; padding-bottom: 5px; margin-bottom: 20px; }
 
         /* --- ENHANCED INVENTORY SECTION --- */
         .inventory-header-pill {
-            background: #a67c52; 
-            color: white; 
+            background: #0f172a; /* Velvet Midnight Navy Blue */
+            color: #ffffff; 
             width: fit-content;
             padding: 12px 60px; 
             border-radius: 50px; 
@@ -100,39 +101,42 @@
             letter-spacing: 2px;
             font-size: 16px;
             text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(166, 124, 82, 0.3);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.25);
             animation: fadeInDown 0.5s ease-out;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .table-container {
-            background: #a67c52; 
+            background: #1e293b; /* Sleek Deep Slate Blue */
             color: white; 
             border-radius: 30px; 
             padding: 30px; 
             flex: 1; 
             overflow-x: auto; /* CRITICAL for CP: Allows horizontal scroll on table */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
             animation: slideUpFade 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .table-container::-webkit-scrollbar { height: 6px; width: 6px; }
-        .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
         table { width: 100%; border-collapse: collapse; text-align: center; min-width: 800px; /* Prevents column squishing */}
 
         th { 
-            border-right: 2px solid rgba(0,0,0,0.1); 
+            border-right: 2px solid rgba(255,255,255,0.08); 
             padding: 15px; 
             text-transform: uppercase; 
             font-size: 13px;
             letter-spacing: 1px;
-            background: rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.15);
+            color: #e2e8f0;
         }
         th:last-child { border-right: none; }
 
         tr { transition: background 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        tr:hover { background: rgba(255, 255, 255, 0.05); }
+        tr:hover { background: rgba(255, 255, 255, 0.04); }
 
         td { 
             padding: 15px 10px; 
@@ -144,26 +148,27 @@
         .stock-detail-link {
             color: #fff;
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             padding: 8px 15px;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: inline-block;
             transition: all 0.3s ease;
             cursor: pointer;
             white-space: nowrap;
         }
         .stock-detail-link:hover {
-            background: #fff;
-            color: #a67c52;
+            background: #ffffff;
+            color: #1e293b;
             transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .restock-action-btn {
             display: inline-block;
             margin-top: 8px;
             padding: 5px 10px;
-            background: #ff5252;
+            background: #e11d48; /* Crimson / Ruby Alert Tone */
             color: white !important;
             border-radius: 4px;
             font-size: 10px;
@@ -173,46 +178,64 @@
             letter-spacing: 1px;
             transition: 0.3s;
         }
+        .restock-action-btn:hover {
+            background: #f43f5e;
+            transform: translateY(-1px);
+        }
 
         .qty-input {
             width: 60px; 
             padding: 6px; 
             text-align: center; 
             border-radius: 6px; 
-            border: 1px solid rgba(255,255,255,0.2); 
-            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15); 
+            background: rgba(255,255,255,0.08);
             color: white;
             font-weight: bold;
             outline: none;
         }
+        .qty-input:focus {
+            border-color: #c5a059;
+            background: rgba(255,255,255,0.12);
+        }
 
         /* --- COMPACT SIDEBAR --- */
         .sidebar { flex: 1; max-width: 250px; animation: fadeInRight 0.5s ease-out; }
-        .sidebar-header { font-weight: bold; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header { font-weight: bold; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; color: #0f172a; }
         
         .sidebar-box { 
             background: #fff; 
-            border: 1px solid #ddd; 
+            border: 1px solid #e5e5e0; 
             padding: 15px; 
             border-radius: 12px;
-            box-shadow: 0 4px 5px rgba(0,0,0,0.03);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04);
             margin-bottom: 15px;
         }
         
         .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
-        .nav-list a { text-decoration: none; color: #333; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .nav-list li { padding: 8px 0; border-bottom: 1px solid #f8f8f6; }
+        .nav-list a { text-decoration: none; color: #475569; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; transition: color 0.2s; }
+        .nav-list a:hover { color: #c5a059; }
 
         .sidebar-box input {
             width: 100%; padding: 10px; margin-bottom: 10px;
-            border: 1px solid #eee; border-radius: 6px; box-sizing: border-box;
-            background: #fcfcfc; font-size: 12px;
+            border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box;
+            background: #fcfcfc; font-size: 12px; color: #0f172a; outline: none;
+            transition: border-color 0.2s;
+        }
+        .sidebar-box input:focus {
+            border-color: #c5a059;
         }
 
         .add-btn {
-            width: 100%; background: #a67c52; color: white; border: none; 
+            width: 100%; background: #0f172a; color: white; border: none; 
             padding: 12px; cursor: pointer; font-weight: bold; border-radius: 6px;
             font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .add-btn:hover {
+            background: #b48c57;
+            box-shadow: 0 4px 10px rgba(180, 140, 87, 0.3);
         }
 
         /* --- RESPONSIVE MEDIA QUERIES (CP FRIENDLY) --- */
@@ -240,7 +263,7 @@
         {% for item in inventory %}
         tr:nth-child({{ loop.index }}) { animation: slideUpFade {{ 0.3 + (loop.index0 * 0.05) }}s ease-out; }
         {% endfor %}
-    </style>
+</style>
 </head>
 <body>
 

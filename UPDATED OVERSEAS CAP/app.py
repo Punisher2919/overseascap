@@ -41,6 +41,9 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     color_variants = db.relationship('ProductColorImage', backref='product', lazy=True, cascade="all, delete-orphan")
     size_variants = db.relationship('ProductSize', backref='product', lazy=True, cascade="all, delete-orphan")
+    material_id = db.Column(db.String(100), nullable=True)
+    material_deduction = db.Column(db.Integer, default=1) # How many units to deduct per order
+
 
     # Relationships to get "Accurate" ratings and sales
     reviews = db.relationship('Review', backref='product', lazy=True)
@@ -258,6 +261,9 @@ def register():
 
 @app.route('/home')
 def home():
+    # Security: Redirect to login if user session is not found
+    if 'user' not in session:
+        return redirect(url_for('login'))
     # 1. Start the query
     query = Product.query
     
@@ -833,17 +839,7 @@ def admin_products():
         'pending': CustomOrder.query.filter_by(status='PENDING').count(),
         'completed': CustomOrder.query.filter_by(status='COMPLETED').count()
     }
-    colors_input = request.form.get('colors', '')
-    if colors_input:
-            color_list = [c.strip() for c in colors_input.split(',') if c.strip()]
-            for color in color_list:
-                # Generate the key used in the HTML
-                safe_color = color.replace(' ', '_')
-                
-                # Get the specific price for this color
-                variant_price = request.form.get(f'color_price_{safe_color}')
-                variant_image = request.files.get(f'color_image_{safe_color}')
-
+    
     if request.method == 'POST':
         # ADD NEW PRODUCT LOGIC
         name = request.form.get('name')
@@ -852,6 +848,18 @@ def admin_products():
         file = request.files.get('image_file')
         sizes_input = request.form.get('sizes', '') 
         colors_input = request.form.get('colors', '')
+        
+        # --- UPDATED: MULTI-MATERIAL SAVING LOGIC ---
+        selected_materials = request.form.getlist('material_ids[]')
+        material_data = []
+        for m_id in selected_materials:
+            if m_id:
+                # Get the specific deduction for this specific ID from the dynamic inputs
+                spec_deduction = request.form.get(f'deduction_{m_id}', '1')
+                material_data.append(f"{m_id}:{spec_deduction}")
+        
+        # Join into string format "ID:AMT,ID:AMT"
+        final_material_string = ",".join(material_data) if material_data else None
 
         if file and name and price:
             filename = secure_filename(file.filename)
@@ -861,7 +869,9 @@ def admin_products():
                 name=name, 
                 price=float(price), 
                 description=description, 
-                image_file=filename
+                image_file=filename,
+                material_id=final_material_string, # Now saves with specific amounts
+                material_deduction=0 # We use the specific amounts in the string now
             )
             db.session.add(new_product)
             db.session.flush()
@@ -875,7 +885,6 @@ def admin_products():
             # Add Color Variants
             if colors_input:
                 for c in [x.strip() for x in colors_input.split(',') if x.strip()]:
-                    # Admin UI usually provides a specific image/price per color
                     safe_c = c.replace(' ', '_')
                     c_price = request.form.get(f'color_price_{safe_c}') or price
                     c_file = request.files.get(f'color_image_{safe_c}')
@@ -897,8 +906,9 @@ def admin_products():
             flash('Product added successfully!')
             return redirect(url_for('admin_products'))
 
-    products = Product.query.all() # This pulls all products for the table
-    return render_template('admin_products.html', products=products, stats=stats)
+    products = Product.query.all()
+    materials = Inventory.query.all() 
+    return render_template('admin_products.html', products=products, stats=stats, materials=materials)
 
 @app.route('/admin/delete_product/<int:id>')
 def delete_product(id):
@@ -918,6 +928,25 @@ def update_product(id):
     product.price = float(request.form.get('price', 0))
     product.description = request.form.get('description')
     
+    # --- UPDATED: MULTI-MATERIAL SAVING LOGIC ---
+    # Retrieve the list of selected material IDs from the checkboxes
+    selected_materials = request.form.getlist('material_ids[]')
+    material_data = []
+    
+    for m_id in selected_materials:
+        if m_id:
+            # Matches the 'name' attribute in your HTML: name="deduction_{{ material.id }}"
+            # We default to '1' if the field is empty
+            spec_deduction = request.form.get(f'deduction_{m_id}', '1')
+            # Store as "ID:AMOUNT" for easier parsing later
+            material_data.append(f"{m_id}:{spec_deduction}")
+    
+    # Save the joined string (e.g., "5:1,12:0.5") to the database
+    product.material_id = ",".join(material_data) if material_data else None
+    
+    # Optional: Reset the legacy single-deduction field to avoid confusion
+    product.material_deduction = 0 
+    
     # 1. Update Main Image
     file = request.files.get('image_file')
     if file and file.filename != '':
@@ -931,21 +960,17 @@ def update_product(id):
     for s_val in new_sizes:
         db.session.add(ProductSize(size_value=s_val, product_id=id))
 
-    # 3. Update COLORS (The "Keep Image" logic)
+    # 3. Update COLORS
     new_colors_str = request.form.get('colors', '')
     new_colors = [c.strip() for c in new_colors_str.split(',') if c.strip()]
     
-    # Corrected dictionary name to match the logic below
     existing_variants = {v.color_name: v.image_file for v in ProductColorImage.query.filter_by(product_id=id).all()}
-    
     ProductColorImage.query.filter_by(product_id=id).delete()
     
     for c_name in new_colors:
-        # Replace spaces with underscores to match potential HTML input names
         safe_name = c_name.replace(' ', '_')
         c_file = request.files.get(f'color_image_{safe_name}')
         
-        # Priority Logic: New Upload > Existing Image > Main Product Image
         if c_file and c_file.filename != '':
             c_filename = secure_filename(c_file.filename)
             c_file.save(os.path.join(app.config['UPLOAD_FOLDER'], c_filename))
@@ -955,7 +980,6 @@ def update_product(id):
             c_filename = product.image_file
 
         c_price = request.form.get(f'color_price_{safe_name}')
-        # Use color-specific price if provided, otherwise use the main product price
         final_price = float(c_price) if (c_price and c_price.strip()) else product.price
 
         db.session.add(ProductColorImage(
@@ -965,7 +989,6 @@ def update_product(id):
             product_id=id
         ))
 
-    # 4. Final Save
     db.session.commit()
     flash('Product and variants updated successfully!')
     return redirect(url_for('admin_products'))
@@ -1057,7 +1080,7 @@ def update_order_status(order_id, new_status):
     # 1. Capture price from query string (?price=...)
     price_input = request.args.get('price')
     
-    # 2. Update status (forced to upper to match ACCEPTED)
+    # 2. Update status
     order.status = new_status.upper() 
     
     # 3. Save price to database if present
@@ -1067,10 +1090,60 @@ def update_order_status(order_id, new_status):
         except (ValueError, TypeError):
             pass 
 
+    # --- UPDATED: SPECIFIC MULTI-MATERIAL INVENTORY DEDUCTION LOGIC ---
+    if order.status in ['DONE', 'COMPLETED']:
+        product = Product.query.get(order.product_id)
+        
+        # Check if product exists and has material data (format: "ID:QTY,ID:QTY")
+        if product and product.material_id:
+            # Split by comma to get individual "ID:DEDUCTION" pairs
+            material_pairs = [p.strip() for p in str(product.material_id).split(',') if p.strip()]
+            
+            for pair in material_pairs:
+                try:
+                    # Split the pair into material ID and its specific deduction amount
+                    if ':' in pair:
+                        m_id, spec_deduction = pair.split(':')
+                        material = Inventory.query.get(int(m_id))
+                        
+                        if material:
+                            qty_ordered = order.quantity if order.quantity else 1
+                            # Deduction = (Specific amount for THIS material) * (Quantity customer ordered)
+                            total_deduction = float(spec_deduction) * qty_ordered
+                            
+                            material.qty -= total_deduction
+                            
+                            # Logic to update inventory status based on new quantity
+                            if material.qty <= 0:
+                                material.qty = 0
+                                material.status = "Out of Stock"
+                            elif material.qty <= 5: 
+                                material.status = "Low Stock"
+                            else:
+                                material.status = "In Stock"
+                    else:
+                        # Fallback for old data format (just ID without colon)
+                        material = Inventory.query.get(int(pair))
+                        if material:
+                            qty_ordered = order.quantity if order.quantity else 1
+                            # Use the global material_deduction as fallback
+                            fallback_deduction = (product.material_deduction or 1) * qty_ordered
+                            material.qty -= fallback_deduction
+                            
+                            if material.qty <= 0:
+                                material.qty = 0
+                                material.status = "Out of Stock"
+                            elif material.qty <= 5:
+                                material.status = "Low Stock"
+                            else:
+                                material.status = "In Stock"
+                                
+                except (ValueError, TypeError):
+                    continue # Skip if data is corrupted or invalid
+
     db.session.commit()
     flash(f"Order #{order_id} updated successfully.")
     
-    # After saving, we go back to the list of orders
     return redirect(url_for('admin_orders'))
 
 @app.route('/admin/orders/create-manual', methods=['POST'])

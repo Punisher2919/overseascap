@@ -13,24 +13,26 @@
             width: 100vw; margin: 0; padding: 0;
             overflow-x: hidden; 
             overflow-y: auto; 
-            background-color: #f8f8f8;
-            font-family: Arial, sans-serif; display: flex; flex-direction: column;
+            /* Enhanced with a clean, light cream/alabaster background tint to complement the dark theme elements */
+            background-color: #fcfbfa;
+            font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column;
         }
 
         header {
             padding: 10px 50px; display: flex; justify-content: space-between;
-            align-items: center; background: white; border-bottom: 1px solid #ddd; z-index: 1000;
+            align-items: center; background: white; border-bottom: 1px solid #e5e5e0; z-index: 1000;
         }
         .logo-wrapper { display: flex; align-items: center; gap: 15px; }
         .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
-        .logo-main { font-size: 26px; font-weight: bold; }
-        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        .logo-main { font-size: 26px; font-weight: bold; color: #0f172a; }
+        .logo-admin { color: #c5a059; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; }
 
         nav { display: flex; align-items: center; transition: all 0.4s ease-in-out; }
         nav.menu-hidden { opacity: 0; transform: translateX(20px); visibility: hidden; pointer-events: none; }
-        nav a { color: #000; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
-        nav a:hover { color: #a67c52; }
-        .menu-toggle-btn { cursor: pointer; font-size: 22px; margin-left: 25px; color: #333; }
+        nav a { color: #334155; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
+        nav a:hover { color: #c5a059; }
+        .menu-toggle-btn { cursor: pointer; font-size: 22px; margin-left: 25px; color: #334155; transition: color 0.2s; }
+        .menu-toggle-btn:hover { color: #c5a059; }
 
         /* --- ADVANCED ANIMATIONS --- */
         @keyframes slideUpFade {
@@ -52,10 +54,10 @@
 
         .content-left { flex: 3; display: flex; flex-direction: column; padding-right: 10px; }
         .content-left::-webkit-scrollbar { width: 5px; }
-        .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+        .content-left::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
-        .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .page-title { color: #0f172a; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .admin-sub-label { color: #c5a059; font-weight: bold; font-size: 14px; border-bottom: 2px solid #0f172a; padding-bottom: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 
         /* --- INTERACTIVE ELEMENTS --- */
         .report-card, .filter-nav, .sidebar-box, .graph-box {
@@ -78,78 +80,81 @@
         .report-card:hover::after { animation: shine 0.8s; }
 
         /* --- DATE RANGE BAR --- */
-        .filter-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .filter-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e0; box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.04); }
         .filter-btn {
-            padding: 6px 15px; border-radius: 20px; border: 1px solid #bc9c7e;
-            background: white; color: #bc9c7e; text-decoration: none;
+            padding: 6px 15px; border-radius: 20px; border: 1px solid #c5a059;
+            background: white; color: #c5a059; text-decoration: none;
             font-size: 11px; font-weight: bold; transition: all 0.3s;
         }
-        .filter-btn.active, .filter-btn:hover { background: #bc9c7e; color: white; transform: translateY(-2px); }
+        .filter-btn.active, .filter-btn:hover { background: #c5a059; color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2); }
 
         .calendar-wrapper { display: flex; align-items: center; gap: 10px; margin-left: auto; }
         .calendar-input {
-            border: 1px solid #ddd; border-radius: 5px; padding: 5px 8px;
-            font-size: 11px; color: #333; outline: none; font-family: inherit;
+            border: 1px solid #cbd5e1; border-radius: 5px; padding: 5px 8px;
+            font-size: 11px; color: #334155; outline: none; font-family: inherit;
         }
+        .calendar-input:focus { border-color: #c5a059; }
         .apply-filter-btn {
-            background: #a67c52; color: white; border: none; padding: 6px 15px;
+            background: #0f172a; color: white; border: none; padding: 6px 15px;
             border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
+        .apply-filter-btn:hover { background: #1e293b; }
         .apply-filter-btn:active { transform: scale(0.95); }
 
         /* --- TABLE STYLING --- */
         .report-card { 
-            background: white; border-radius: 15px; border: 1px solid #ddd; padding: 20px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            background: white; border-radius: 15px; border: 1px solid #e5e5e0; padding: 20px; 
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04); 
             overflow-x: auto; /* Required for mobile table scrolling */
         }
         table { width: 100%; min-width: 600px; border-collapse: collapse; }
-        th { text-align: left; padding: 15px; color: #888; text-transform: uppercase; font-size: 11px; border-bottom: 2px solid #f4f4f4; }
-        td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #444; font-size: 13px; }
-        tr:hover { background-color: #fdfaf7; }
+        th { text-align: left; padding: 15px; color: #64748b; text-transform: uppercase; font-size: 11px; border-bottom: 2px solid #f1f5f9; letter-spacing: 0.5px; }
+        td { padding: 15px; border-bottom: 1px solid #f8fafc; color: #334155; font-size: 13px; }
+        tr:hover { background-color: #fdfbf7; } /* Warm cream accent row selection */
         
         /* Interactive Date Cell */
         .clickable-date {
             cursor: pointer;
-            color: #a67c52;
-            text-decoration: underline dotted;
+            color: #0f172a;
+            text-decoration: underline dotted #c5a059;
             font-weight: bold;
             transition: 0.2s;
         }
         .clickable-date:hover {
-            color: #bc9c7e;
-            background: #fff5eb;
+            color: #c5a059;
+            background: #fdfbf7;
         }
 
-        .total-row td { border-top: 2px solid #bc9c7e; border-bottom: none; padding-top: 20px; }
-        .revenue-highlight { color: #00AA00; font-weight: bold; font-size: 18px; }
+        .total-row td { border-top: 2px solid #c5a059; border-bottom: none; padding-top: 20px; color: #0f172a; font-weight: bold; }
+        .revenue-highlight { color: #16a34a; font-weight: bold; font-size: 18px; } /* Refined modern green */
 
         /* --- SIDEBAR --- */
         .sidebar { flex: 1; max-width: 250px; display: flex; flex-direction: column; gap: 20px; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
-        .sidebar-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; color: #0f172a; }
+        .sidebar-box { background: #fff; border: 1px solid #e5e5e0; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04); }
         
         /* FIXED GRAPH BOX TO PREVENT EXPANSION */
         .graph-box { 
-            background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); animation: slideUpFade 0.7s ease forwards; animation-delay: 0.4s; opacity: 0;
+            background: #fff; border: 1px solid #e5e5e0; padding: 15px; border-radius: 10px; 
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04); animation: slideUpFade 0.7s ease forwards; animation-delay: 0.4s; opacity: 0;
             height: 200px; /* Fixed height */
             max-width: 100%; /* Prevents horizontal growth */
         }
-        .graph-box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(166, 124, 82, 0.15); }
+        .graph-box:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08); }
 
         .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .nav-list li { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
         .nav-list a {
             text-decoration: none;
-            color: #333;
+            color: #475569;
             font-size: 13px;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
             transition: all 0.3s;
         }
-        .nav-list a:hover { color: #a67c52; padding-left: 8px; }
+        .nav-list a:hover { color: #c5a059; padding-left: 8px; }
         .nav-list a:active { transform: scale(0.95); filter: brightness(0.8); }
 
         .print-header { display: none; }
@@ -200,7 +205,7 @@
             .total-row td { border-top: 2px solid #000; }
             @page { margin: 1cm; }
         }
-    </style>
+</style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

@@ -13,8 +13,8 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            /* Using a slightly darker overlay (0.9) to keep the admin data legible */
-            background: linear-gradient(rgba(248, 248, 248, 0.9), rgba(248, 248, 248, 0.9)),
+            /* Enhanced with a warm alabaster/cream overlay to make the gold pop perfectly */
+            background: linear-gradient(rgba(250, 249, 246, 0.93), rgba(250, 249, 246, 0.93)),
                         url("{{ url_for('static', filename='bg2.png') }}");
             background-size: cover;
             background-position: center;
@@ -26,9 +26,9 @@
 
         /* --- OPTIONAL: GLASS EFFECT FOR CARDS --- */
         .dashboard-card, .stats-container {
-            background: rgba(255, 255, 255, 0.8) !important;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.88) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
         /* --- HEADER --- */
@@ -37,8 +37,8 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: white;
-    border-bottom: 1px solid #ddd;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e5e0;
     z-index: 1000;
 }
 
@@ -52,8 +52,8 @@ header {
     flex-direction: column;
     line-height: 1.1;
 }
-.logo-main { font-size: 26px; font-weight: bold; }
-.logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+.logo-main { font-size: 26px; font-weight: bold; color: #0f172a; }
+.logo-admin { color: #c5a059; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; }
 
 /* --- NAVIGATION --- */
 nav {
@@ -73,24 +73,24 @@ nav.menu-hidden {
 }
 
 nav a { 
-    color: #000; 
+    color: #334155; 
     text-decoration: none; 
     margin-left: 20px; 
     font-size: 13px; 
     font-weight: bold; 
     transition: color 0.3s; 
 }
-nav a:hover { color: #a67c52; }
+nav a:hover { color: #c5a059; }
 
 .menu-toggle-btn {
     cursor: pointer;
     font-size: 22px;
     margin-left: 25px;
-    color: #333;
+    color: #334155;
     transition: transform 0.2s, color 0.2s;
     position: relative;
 }
-.menu-toggle-btn:hover { color: #a67c52; }
+.menu-toggle-btn:hover { color: #c5a059; }
 .menu-toggle-btn:active { transform: scale(0.9); }
 
         /* --- BADGE STYLING --- */
@@ -98,7 +98,7 @@ nav a:hover { color: #a67c52; }
             position: absolute;
             top: -10px;
             right: -10px;
-            background: #ff4d4d;
+            background: #e11d48;
             color: white;
             font-size: 9px;
             padding: 2px 5px;
@@ -124,10 +124,10 @@ nav a:hover { color: #a67c52; }
         }
 
         .content-left::-webkit-scrollbar { width: 5px; }
-        .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+        .content-left::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
         .page-title {
-            color: #bc9c7e;
+            color: #0f172a;
             letter-spacing: 3px;
             font-size: 22px;
             margin-bottom: 10px;
@@ -136,10 +136,10 @@ nav a:hover { color: #a67c52; }
         }
 
         .admin-sub-label {
-            color: #a67c52;
+            color: #c5a059;
             font-weight: bold;
             font-size: 14px;
-            border-bottom: 2px solid #000;
+            border-bottom: 2px solid #0f172a;
             padding-bottom: 5px;
             margin-bottom: 20px;
         }
@@ -193,13 +193,13 @@ nav a:hover { color: #a67c52; }
 
         .card-main:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(166, 124, 82, 0.4);
+            box-shadow: 0 20px 35px rgba(15, 23, 42, 0.18);
         }
 
         .overview-box:hover {
             transform: scale(1.03);
-            background-color: #8e6843;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            background-color: #c5a059;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
         }
 
         /* Click "Press" Animation */
@@ -218,11 +218,12 @@ nav a:hover { color: #a67c52; }
         }
 
         .card-main {
-            background-color: #a67c52;
-            color: white;
+            background-color: #0f172a; /* Rich Velvet Midnight Navy Blue */
+            color: #ffffff;
             border-radius: 25px; 
             padding: 25px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .card-inner-flex {
@@ -231,8 +232,8 @@ nav a:hover { color: #a67c52; }
             align-items: center;
         }
 
-        .stat-value { font-size: 28px; font-weight: bold; display: block; }
-        .stat-label { font-size: 10px; text-transform: uppercase; opacity: 0.9; }
+        .stat-value { font-size: 28px; font-weight: bold; display: block; color: #ffffff; }
+        .stat-label { font-size: 10px; text-transform: uppercase; opacity: 0.75; letter-spacing: 0.8px; }
 
         .overview-grid {
             display: grid;
@@ -241,18 +242,19 @@ nav a:hover { color: #a67c52; }
         }
 
         .overview-box {
-            background-color: #a67c52;
+            background-color: #1e293b; /* Sleek Deep Slate Blue */
             color: white;
             border-radius: 20px;
             padding: 20px;
             display: flex;
             align-items: center;
             gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
-        .overview-box i { font-size: 24px; }
+        .overview-box i { font-size: 24px; color: #c5a059; } /* Accented Icons inside the grid */
         .overview-box div { font-size: 20px; font-weight: bold; }
-        .overview-box span { font-size: 10px; display: block; text-transform: uppercase; }
+        .overview-box span { font-size: 10px; display: block; text-transform: uppercase; opacity: 0.75; letter-spacing: 0.5px; }
 
         /* --- SIDEBAR --- */
         .sidebar { flex: 1; max-width: 250px; opacity: 1; }
@@ -263,21 +265,22 @@ nav a:hover { color: #a67c52; }
             font-weight: bold;
             margin-bottom: 15px;
             font-size: 14px;
+            color: #0f172a;
         }
 
         .sidebar-box {
-            background: #fff;
-            border: 1px solid #ddd;
+            background: #ffffff;
+            border: 1px solid #e5e5e0;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04);
         }
 
         .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .nav-list li { padding: 10px 0; border-bottom: 1px solid #f8f8f6; }
         .nav-list a {
             text-decoration: none;
-            color: #333;
+            color: #475569;
             font-size: 13px;
             font-weight: bold;
             display: flex;
@@ -286,11 +289,11 @@ nav a:hover { color: #a67c52; }
             transition: all 0.3s;
             position: relative;
         }
-        .nav-list a:hover { color: #a67c52; padding-left: 8px; }
+        .nav-list a:hover { color: #c5a059; padding-left: 8px; }
 
         /* Sidebar Badge specific */
         .sidebar-badge {
-            background: #ff4d4d;
+            background: #e11d48;
             color: white;
             font-size: 9px;
             padding: 1px 5px;
@@ -345,7 +348,7 @@ nav a:hover { color: #a67c52; }
             .card-main { border-radius: 15px; }
             .overview-box { border-radius: 15px; }
         }
-    </style>
+</style>
 </head>
 <body>
 

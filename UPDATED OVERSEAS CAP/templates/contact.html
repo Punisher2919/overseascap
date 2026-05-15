@@ -15,7 +15,8 @@
             padding: 0;
             overflow-x: hidden;
             overflow-y: auto; 
-            background: linear-gradient(rgba(248, 248, 248, 0.85), rgba(248, 248, 248, 0.85)),
+            /* Enhanced with a warm alabaster/cream overlay to make the gold pop perfectly */
+            background: linear-gradient(rgba(250, 249, 246, 0.93), rgba(250, 249, 246, 0.93)),
                         url("{{ url_for('static', filename='bg2.png') }}");
             background-size: cover;
             background-position: center;
@@ -32,7 +33,7 @@
             justify-content: space-between;
             align-items: center;
             background: white;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e5e5e0;
             z-index: 100;
         }
 
@@ -42,11 +43,11 @@
             gap: 12px;
         }
 
-        .logo { font-size: 26px; font-weight: bold; color: #000; text-decoration: none; }
+        .logo { font-size: 26px; font-weight: bold; color: #0f172a; text-decoration: none; }
 
         /* Functional Search Bar */
         .search-container {
-            border: 1px solid #000;
+            border: 1px solid #1e293b;
             border-radius: 20px;
             padding: 5px 15px;
             width: 250px;
@@ -55,25 +56,25 @@
             justify-content: space-between;
             background: white;
         }
-        .search-container input { border: none; outline: none; width: 100%; font-size: 13px; }
-        .search-container button { background: none; border: none; cursor: pointer; color: #000; }
+        .search-container input { border: none; outline: none; width: 100%; font-size: 13px; color: #0f172a; }
+        .search-container button { background: none; border: none; cursor: pointer; color: #1e293b; }
 
         /* Sliding Menu Logic */
         nav { display: flex; align-items: center; transition: all 0.4s ease-in-out; }
         nav.menu-hidden { opacity: 0; transform: translateX(20px); visibility: hidden; pointer-events: none; }
 
         nav a {
-            color: #000;
+            color: #334155;
             text-decoration: none;
             margin-left: 20px;
             font-size: 13px;
             font-weight: bold;
             transition: 0.3s;
         }
-        nav a:hover { color: #bc9c7e; }
+        nav a:hover { color: #c5a059; }
 
-        .menu-toggle-btn { cursor: pointer; font-size: 20px; margin-left: 20px; color: #333; transition: 0.3s; }
-        .menu-toggle-btn:hover { color: #bc9c7e; }
+        .menu-toggle-btn { cursor: pointer; font-size: 20px; margin-left: 20px; color: #334155; transition: 0.3s; }
+        .menu-toggle-btn:hover { color: #c5a059; }
 
         /* --- STAGE 3: MAIN LAYOUT --- */
         main {
@@ -100,7 +101,7 @@
         }
 
         .page-subtitle {
-            color: #bc9c7e;
+            color: #c5a059;
             letter-spacing: 5px;
             font-size: 14px;
             margin-bottom: 5px;
@@ -113,7 +114,7 @@
             letter-spacing: 2px;
             margin: 0 0 40px 0;
             font-weight: 800;
-            color: #222;
+            color: #0f172a;
             line-height: 1.1;
             transition: font-size 0.3s ease;
         }
@@ -128,7 +129,7 @@
 
         .info-panel {
             text-align: left;
-            border-left: 3px solid #bc9c7e;
+            border-left: 3px solid #c5a059;
             padding-left: 25px;
         }
 
@@ -136,7 +137,7 @@
 
         .info-label {
             font-size: 11px;
-            color: #aaa;
+            color: #94a3b8;
             letter-spacing: 2px;
             text-transform: uppercase;
             display: block;
@@ -146,18 +147,18 @@
         .info-value {
             font-size: 18px;
             font-weight: bold;
-            color: #444;
+            color: #334155;
             text-decoration: none;
             transition: color 0.3s;
         }
 
-        .info-value:hover { color: #bc9c7e; }
+        .info-value:hover { color: #c5a059; }
 
         .qr-container {
             background: white;
             padding: 15px;
-            border: 1px solid #eee;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border: 1px solid #e5e5e0;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
             border-radius: 12px;
             transition: transform 0.3s;
             cursor: pointer;
@@ -192,15 +193,17 @@
             font-weight: bold;
             text-decoration: none;
             color: #fff;
-            background-color: #bc9c7e;
+            background-color: #0f172a; /* Velvet Navy Button Base */
             border-radius: 50px;
             letter-spacing: 2px;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(188, 156, 126, 0.3);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .forms-link:hover {
-            background-color: #a68a6d;
+            background-color: #c5a059; /* Metallic Gold on hover */
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3);
             transform: translateY(-2px);
         }
 
@@ -214,7 +217,7 @@
 
         .about-us h4 {
             font-size: 12px;
-            color: #bc9c7e;
+            color: #c5a059;
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-bottom: 12px;
@@ -230,7 +233,7 @@
             right: 0;
             width: 40px;
             height: 2px;
-            background-color: #bc9c7e;
+            background-color: #c5a059;
         }
 
         .social-links {
@@ -241,7 +244,7 @@
 
         .social-links a {
             font-size: 10px;
-            color: #444;
+            color: #475569;
             text-decoration: none;
             font-weight: bold;
             letter-spacing: 1px;
@@ -254,19 +257,19 @@
 
         .social-links a i {
             font-size: 14px;
-            color: #bc9c7e;
+            color: #c5a059;
             width: 18px;
             text-align: center;
         }
 
         .social-links a:hover {
-            color: #bc9c7e;
+            color: #c5a059;
         }
 
         /* SweetAlert Compact Styles */
-        .small-swal-title { font-size: 18px !important; font-weight: bold !important; }
-        .small-swal-text { font-size: 13px !important; }
-        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; }
+        .small-swal-title { font-size: 18px !important; font-weight: bold !important; color: #0f172a; }
+        .small-swal-text { font-size: 13px !important; color: #475569; }
+        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; background-color: #0f172a !important; }
 
         /* --- STAGE 5: MOBILE & TABLET RESPONSIVENESS --- */
         @media (max-width: 1024px) {
@@ -294,7 +297,7 @@
 
             .info-panel {
                 border-left: none;
-                border-top: 3px solid #bc9c7e;
+                border-top: 3px solid #c5a059;
                 padding-left: 0;
                 padding-top: 20px;
                 text-align: center;
@@ -316,7 +319,7 @@
             .page-subtitle { font-size: 12px; letter-spacing: 3px; }
             .logo { font-size: 22px; }
         }
-    </style>
+</style>
 </head>
 <body>
 

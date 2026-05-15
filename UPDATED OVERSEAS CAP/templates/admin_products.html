@@ -15,7 +15,8 @@
             padding: 0;
             overflow-x: hidden; 
             overflow-y: auto;
-            background-color: #f8f8f8;
+            /* Warm alabaster tint background overlay for premium gold pop */
+            background-color: #f8f8f6;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -28,7 +29,7 @@
             justify-content: space-between;
             align-items: center;
             background: white;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e5e5e0;
             z-index: 1000;
         }
 
@@ -42,8 +43,8 @@
             flex-direction: column;
             line-height: 1.1;
         }
-        .logo-main { font-size: 26px; font-weight: bold; }
-        .logo-admin { color: #a67c52; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        .logo-main { font-size: 26px; font-weight: bold; color: #0f172a; }
+        .logo-admin { color: #c5a059; font-size: 14px; font-weight: bold; letter-spacing: 1.5px; }
 
         nav {
             display: flex;
@@ -61,15 +62,15 @@
             pointer-events: none;
         }
 
-        .small-swal-title { font-size: 18px !important; font-weight: bold !important; padding-top: 10px !important; }
-        .small-swal-text { font-size: 13px !important; margin: 10px 0 !important; }
-        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; letter-spacing: 1px; }
+        .small-swal-title { font-size: 18px !important; font-weight: bold !important; padding-top: 10px !important; color: #0f172a; }
+        .small-swal-text { font-size: 13px !important; margin: 10px 0 !important; color: #475569; }
+        .small-swal-button { font-size: 12px !important; padding: 8px 20px !important; text-transform: uppercase; letter-spacing: 1px; background-color: #0f172a !important; }
 
-        nav a { color: #000; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
-        nav a:hover { color: #a67c52; }
+        nav a { color: #334155; text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: bold; transition: color 0.3s; }
+        nav a:hover { color: #c5a059; }
 
-        .menu-toggle-btn { cursor: pointer; font-size: 22px; margin-left: 25px; color: #333; transition: transform 0.2s, color 0.2s; }
-        .menu-toggle-btn:hover { color: #a67c52; }
+        .menu-toggle-btn { cursor: pointer; font-size: 22px; margin-left: 25px; color: #334155; transition: transform 0.2s, color 0.2s; }
+        .menu-toggle-btn:hover { color: #c5a059; }
         .menu-toggle-btn:active { transform: scale(0.9); }
 
         /* --- MAIN LAYOUT --- */
@@ -92,11 +93,11 @@
         @media (min-width: 1025px) {
             .content-left { overflow-y: auto; height: auto; padding-right: 15px; }
             .content-left::-webkit-scrollbar { width: 5px; }
-            .content-left::-webkit-scrollbar-thumb { background: #bc9c7e; border-radius: 10px; }
+            .content-left::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         }
 
-        .page-title { color: #bc9c7e; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
-        .admin-sub-label { color: #a67c52; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 20px; }
+        .page-title { color: #0f172a; letter-spacing: 3px; font-size: 22px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .admin-sub-label { color: #c5a059; font-weight: bold; font-size: 14px; border-bottom: 2px solid #0f172a; padding-bottom: 5px; margin-bottom: 20px; }
 
         /* --- FORM STYLES --- */
         .add-form { 
@@ -106,26 +107,26 @@
             margin-bottom: 30px; 
             padding: 25px; 
             background: white; 
-            border: 1px solid #ddd; 
+            border: 1px solid #e5e5e0; 
             border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04);
             animation: slideFadeIn 0.5s ease-out forwards;
         }
         .add-form input, .add-form textarea { 
-            padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fcfcfc; outline: none; transition: border-color 0.3s; width: 100%; box-sizing: border-box;
+            padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fcfcfc; outline: none; transition: border-color 0.3s, box-shadow 0.3s; width: 100%; box-sizing: border-box; color: #0f172a;
         }
-        .add-form input:focus { border-color: #bc9c7e; }
+        .add-form input:focus, .add-form textarea:focus { border-color: #c5a059; box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1); }
         
-        .upload-btn { background: #a67c52; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
-        .upload-btn:hover { background: #8e6843; transform: scale(1.01); }
+        .upload-btn { background: #0f172a; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
+        .upload-btn:hover { background: #1e293b; transform: scale(1.01); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
 
         /* --- VARIANT STYLES --- */
         .variant-section {
             grid-column: span 2;
-            background: #f9f9f9;
+            background: #f8f8f6;
             padding: 15px;
             border-radius: 12px;
-            border: 1px dashed #ccc;
+            border: 1px dashed #cbd5e1;
             margin-top: 5px;
         }
         .color-row {
@@ -137,49 +138,50 @@
             padding: 10px;
             background: white;
             border-radius: 8px;
-            border: 1px solid #eee;
+            border: 1px solid #e2e8f0;
             flex-wrap: wrap; /* Helps on very small screens */
         }
-        .color-row span { font-size: 12px; font-weight: bold; color: #a67c52; min-width: 100px; }
+        .color-row span { font-size: 12px; font-weight: bold; color: #c5a059; min-width: 100px; }
 
         /* --- TABLE STYLES --- */
         .table-container { 
             background: white; 
             border-radius: 20px; 
             padding: 20px; 
-            border: 1px solid #ddd; 
+            border: 1px solid #e5e5e0; 
             margin-bottom: 20px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04); 
             animation: slideFadeIn 0.7s ease-out forwards; 
             overflow-x: auto; /* CRITICAL for mobile scrolling */
         }
         table { width: 100%; border-collapse: collapse; min-width: 700px; /* Ensures table doesn't squish */}
-        th { text-align: left; color: #a67c52; padding: 12px; border-bottom: 2px solid #f8f8f8; font-size: 11px; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 13px; color: #333; }
+        th { text-align: left; color: #c5a059; padding: 12px; border-bottom: 2px solid #f8f8f6; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 12px; border-bottom: 1px solid #f8f8f6; font-size: 13px; color: #334155; }
+        tr:hover td { background-color: #fdfdfb; }
         
-        .prod-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; transition: transform 0.3s; }
-        tr:hover .prod-img { transform: scale(1.2); }
+        .prod-img { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; transition: transform 0.3s; }
+        tr:hover .prod-img { transform: scale(1.15); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        .action-btn { padding: 8px 12px; border-radius: 6px; color: white; text-decoration: none; font-size: 12px; border: none; cursor: pointer; transition: opacity 0.3s; white-space: nowrap; }
-        .action-btn:hover { opacity: 0.8; }
+        .action-btn { padding: 8px 12px; border-radius: 6px; color: white; text-decoration: none; font-size: 12px; border: none; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
         /* --- SIDEBAR STYLES --- */
         .sidebar { flex: 1; max-width: 250px; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
-        .card-main { background-color: #a67c52; color: white; border-radius: 25px; padding: 25px; text-align: center; margin-bottom: 20px; transition: transform 0.3s; }
-        .card-main:hover { transform: translateY(-5px); }
-        .stat-value { font-size: 40px; font-weight: bold; display: block; }
-        .stat-label { font-size: 10px; text-transform: uppercase; opacity: 0.9; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; color: #0f172a; }
+        .card-main { background-color: #0f172a; color: white; border-radius: 25px; padding: 25px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.3s, box-shadow 0.3s; }
+        .card-main:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.15); }
+        .stat-value { font-size: 40px; font-weight: bold; display: block; color: #ffffff; }
+        .stat-label { font-size: 10px; text-transform: uppercase; opacity: 0.75; letter-spacing: 0.8px; }
 
-        .sidebar-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .sidebar-box { background: #fff; border: 1px solid #e5e5e0; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04); }
         .nav-list { list-style: none; padding: 0; margin: 0; }
-        .nav-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
-        .nav-list a { text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
-        .nav-list a:hover { color: #a67c52; padding-left: 5px; }
+        .nav-list li { padding: 10px 0; border-bottom: 1px solid #f8f8f6; }
+        .nav-list a { text-decoration: none; color: #475569; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; transition: 0.3s; }
+        .nav-list a:hover { color: #c5a059; padding-left: 5px; }
 
         /* --- MODAL --- */
-        .modal { display:none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); animation: fadeIn 0.3s; }
-        .modal-content { background: white; margin: 5% auto; padding: 30px; width: 450px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.9); animation: popIn 0.3s forwards; max-height: 85vh; overflow-y: auto; }
+        .modal { display:none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); animation: fadeIn 0.3s; }
+        .modal-content { background: white; margin: 5% auto; padding: 30px; width: 450px; border-radius: 25px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); transform: scale(0.9); animation: popIn 0.3s forwards; max-height: 85vh; overflow-y: auto; border: 1px solid #e5e5e0; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { to { transform: scale(1); } }
@@ -204,7 +206,7 @@
             .page-title { font-size: 18px; text-align: center; }
             .admin-sub-label { font-size: 12px; }
         }
-    </style>
+</style>
 </head>
 <body>
 
@@ -232,161 +234,192 @@
     </header>
 
     <main>
-        <div class="content-left">
-            <div class="page-title">Inventory</div>
-            <div class="admin-sub-label">ADD NEW STORE ITEM</div>
+    <div class="content-left">
+        <div class="page-title">Inventory</div>
+        <div class="admin-sub-label">ADD NEW STORE ITEM</div>
 
-            <form class="add-form" method="POST" enctype="multipart/form-data">
-                <input type="text" name="name" placeholder="Product Name" required>
-                <input type="number" step="0.01" name="price" placeholder="Default Price (₱)" required>
-                <textarea name="description" placeholder="Product Description..." style="grid-column: span 2; height: 60px;"></textarea>
-                
-                <input type="text" name="sizes" placeholder="Available Sizes (e.g. 53, 54, 55)" title="Separate sizes with commas">
-                <input type="text" id="colorInput" name="colors" placeholder="Available Colors (e.g. Blue, Black)" title="Separate colors with commas" oninput="updateColorImageUploads()">
+        <form class="add-form" method="POST" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Product Name" required>
+            <input type="number" step="0.01" name="price" placeholder="Default Price (₱)" required>
+            <textarea name="description" placeholder="Product Description..." style="grid-column: span 2; height: 60px;"></textarea>
+            
+            <input type="text" name="sizes" placeholder="Available Sizes (e.g. 53, 54, 55)" title="Separate sizes with commas">
+            <input type="text" id="colorInput" name="colors" placeholder="Available Colors (e.g. Blue, Black)" title="Separate colors with commas" oninput="updateColorImageUploads()">
 
-                <div style="grid-column: span 2;">
-                    <p style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: 5px;">DEFAULT STORE IMAGE</p>
-                    <input type="file" name="image_file" accept="image/*" required style="width: 100%; padding: 8px;">
-                </div>
-
-                <div id="colorImageSection" class="variant-section" style="display: none;">
-                    <p style="font-size: 11px; font-weight: bold; color: #a67c52; margin-bottom: 10px;">UPLOAD IMAGES & SET PRICE FOR EACH COLOR</p>
-                    <div id="colorRowsContainer"></div>
-                </div>
-
-                <button type="submit" class="upload-btn" style="grid-column: span 2;">UPLOAD TO STORE</button>
-            </form>
-
-            <div class="filter-container">
-                <div class="admin-sub-label" style="margin-bottom: 0; border: none;">LIVE STORE PRODUCTS</div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-star" style="color: #a67c52; font-size: 12px;"></i>
-                    <select id="ratingFilter" class="rating-select" onchange="filterByRating()">
-                        <option value="all">ALL RATINGS</option>
-                        <option value="5">5 STARS</option>
-                        <option value="4">4 STARS</option>
-                        <option value="3">3 STARS</option>
-                        <option value="2">2 STARS</option>
-                        <option value="1">1 STAR</option>
-                        <option value="0">UNRATED</option>
-                    </select>
-                </div>
+            <div style="grid-column: span 1;">
+                <p style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: 5px;">DEFAULT STORE IMAGE</p>
+                <input type="file" name="image_file" accept="image/*" required style="width: 100%; padding: 8px; border: 1px solid #eee; border-radius: 8px; background: #fcfcfc;">
             </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Name & Rating</th>
-                            <th>Base Price</th>
-                            <th>Variants</th>
-                            <th style="text-align: right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody">
-                        {% for p in products %}
-                        {% set total_reviews = p.reviews|length %}
-                        {% set avg_rating = (p.reviews|map(attribute='rating')|sum / total_reviews)|round|int if total_reviews > 0 else 0 %}
-                        
-                        <tr class="product-row" data-rating="{{ avg_rating }}">
-                            <td><img src="{{ url_for('static', filename='uploads/' + p.image_file) }}" class="prod-img"></td>
-                            <td style="font-weight: bold;">
-                                {{ p.name }}
-                                <div style="display: block; font-size: 10px; margin-top: 4px;">
-                                    {% if total_reviews > 0 %}
-                                        <span style="color: #ffa500;">
-                                            {{ "★" * avg_rating }}{{ "☆" * (5 - avg_rating) }}
-                                        </span>
-                                        <span style="color: #888; font-weight: normal; margin-left: 4px;">({{ total_reviews }})</span>
-                                    {% else %}
-                                        <span style="color: #ccc; font-weight: normal;">No reviews yet</span>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td style="color: #a67c52; font-weight: bold;">₱{{ "{:,.2f}".format(p.price) }}</td>
-                            <td style="font-size: 11px; color: #666;">
-                                {% if p.color_variants %} 
-                                    {{ p.color_variants|length }} Colors 
-                                    (₱{{ "{:,.2f}".format(p.color_variants|map(attribute='price')|min) }} - ₱{{ "{:,.2f}".format(p.color_variants|map(attribute='price')|max) }})
-                                {% endif %}
-                                {% if p.size_variants %} | {{ p.size_variants|length }} Sizes {% endif %}
-                            </td>
-                            <td style="text-align: right;">
-                                <button onclick="openEditModal('{{p.id}}')" class="action-btn" style="background: #2196F3;"><i class="fas fa-edit"></i></button>
-                                <a href="{{ url_for('delete_product', id=p.id) }}" onclick="return confirm('Delete this product?')" class="action-btn" style="background: #f44336;"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
+            <div style="grid-column: span 1;">
+                <label style="font-size: 11px; font-weight: bold; color: #888;">LINK TO MATERIALS (INVENTORY)</label>
+                <p style="font-size: 10px; color: #aaa; margin: 2px 0 5px 0;">Hold Ctrl/Cmd to select multiple</p>
+                <select id="addMaterialSelect" name="material_ids[]" multiple onchange="updateDeductionInputs('addMaterialSelect', 'addDeductionContainer')" 
+                        style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fcfcfc; min-height: 100px;">
+                    {% for item in materials %}
+                    <option value="{{ item.id }}" data-name="{{ item.material }}">{{ item.material }} (Stock: {{ item.qty }})</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-                        <div id="modal-{{p.id}}" class="modal">
-                            <div class="modal-content">
-                                <h3>Update Product</h3>
-                                <form action="{{ url_for('update_product', id=p.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px;">
-                                    <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">PRODUCT NAME</label>
-                                    <input type="text" name="name" value="{{p.name}}" placeholder="Name">
-                                    
-                                    <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">BASE PRICE (₱)</label>
-                                    <input type="number" step="0.01" name="price" value="{{p.price}}" placeholder="Price">
-                                    
-                                    <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">DESCRIPTION</label>
-                                    <textarea name="description" style="height: 80px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">{{p.description}}</textarea>
+            <div id="addDeductionContainer" style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                </div>
 
-                                    <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">SIZES (Comma separated)</label>
-                                    <input type="text" name="sizes" value="{% for s in p.size_variants %}{{ s.size_value }}{% if not loop.last %}, {% endif %}{% endfor %}" placeholder="e.g. 53, 54, S, M">
+            <div id="colorImageSection" class="variant-section" style="display: none; grid-column: span 2;">
+                <p style="font-size: 11px; font-weight: bold; color: #a67c52; margin-bottom: 10px;">UPLOAD IMAGES & SET PRICE FOR EACH COLOR</p>
+                <div id="colorRowsContainer"></div>
+            </div>
 
-                                    <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">COLORS (Comma separated)</label>
-                                    <input type="text" name="colors" value="{% for c in p.color_variants %}{{ c.color_name }}{% if not loop.last %}, {% endif %}{% endfor %}" placeholder="e.g. Blue, Black" oninput="updateEditColorRows('{{p.id}}', this.value)">
+            <button type="submit" class="upload-btn" style="grid-column: span 2;">UPLOAD TO STORE</button>
+        </form>
 
-                                    <p style="font-size: 11px; margin: 5px 0 0 0; font-weight: bold; color: #888;">UPDATE DEFAULT IMAGE</p>
-                                    <input type="file" name="image_file" style="font-size: 12px; border: none; background: #f9f9f9; padding: 5px;">
-
-                                    <div id="editColorSection-{{p.id}}" class="variant-section" style="margin-top: 10px; {% if not p.color_variants %}display: none;{% endif %}">
-                                        <p style="font-size: 10px; font-weight: bold; color: #a67c52; margin-bottom: 10px;">COLOR VARIANT SETTINGS</p>
-                                        <div id="editColorRowsContainer-{{p.id}}">
-                                            {% for c in p.color_variants %}
-                                            <div class="color-row">
-                                                <div style="display:flex; flex-direction:column; gap:5px; flex:1;">
-                                                    <span>{{ c.color_name }}:</span>
-                                                    <div style="display:flex; gap:10px; align-items:center;">
-                                                        <input type="file" name="color_image_{{ c.color_name|replace(' ', '_') }}" accept="image/*" style="font-size: 10px; border: none; background: transparent; padding: 0; flex: 2;">
-                                                        <input type="number" step="0.01" name="color_price_{{ c.color_name|replace(' ', '_') }}" value="{{ c.price }}" placeholder="Price" 
-                                                               style="flex: 1; padding: 5px; border: 1px solid #eee; border-radius: 4px; font-size: 11px;">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-
-                                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                        <button type="submit" class="upload-btn" style="flex: 1;">SAVE CHANGES</button>
-                                        <button type="button" onclick="closeModal('{{p.id}}')" class="upload-btn" style="background:#888; flex: 1;">CANCEL</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="filter-container">
+            <div class="admin-sub-label" style="margin-bottom: 0; border: none;">LIVE STORE PRODUCTS</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-star" style="color: #a67c52; font-size: 12px;"></i>
+                <select id="ratingFilter" class="rating-select" onchange="filterByRating()">
+                    <option value="all">ALL RATINGS</option>
+                    <option value="5">5 STARS</option>
+                    <option value="4">4 STARS</option>
+                    <option value="3">3 STARS</option>
+                    <option value="2">2 STARS</option>
+                    <option value="1">1 STAR</option>
+                    <option value="0">UNRATED</option>
+                </select>
             </div>
         </div>
 
-        <aside class="sidebar">
-            <div class="sidebar-header"><span>STORE STATS</span><i class="fas fa-box-open"></i></div>
-            <div class="card-main">
-                <span class="stat-label">TOTAL PRODUCTS</span>
-                <span class="stat-value">{{ products|length }}</span>
-            </div>
-            <div class="sidebar-header"><span>QUICK NAVIGATION</span><i class="fas fa-th-large"></i></div>
-            <div class="sidebar-box">
-                <ul class="nav-list">
-                    <li><a href="{{ url_for('admin_orders') }}">Manage Orders <i class="fas fa-chevron-right"></i></a></li>
-                    <li><a href="{{ url_for('admin_inventory') }}">Stock Inventory <i class="fas fa-chevron-right"></i></a></li>
-                    <li><a href="{{ url_for('admin_reviews') }}">User Feedback <i class="fas fa-chevron-right"></i></a></li>
-                </ul>
-            </div>
-        </aside>
-    </main>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name & Rating</th>
+                        <th>Base Price</th>
+                        <th>Variants</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    {% for p in products %}
+                    {% set total_reviews = p.reviews|length %}
+                    {% set avg_rating = (p.reviews|map(attribute='rating')|sum / total_reviews)|round|int if total_reviews > 0 else 0 %}
+                    
+                    <tr class="product-row" data-rating="{{ avg_rating }}">
+                        <td><img src="{{ url_for('static', filename='uploads/' + p.image_file) }}" class="prod-img"></td>
+                        <td style="font-weight: bold;">
+                            {{ p.name }}
+                            <div style="display: block; font-size: 10px; margin-top: 4px;">
+                                {% if total_reviews > 0 %}
+                                    <span style="color: #ffa500;">
+                                        {{ "★" * avg_rating }}{{ "☆" * (5 - avg_rating) }}
+                                    </span>
+                                    <span style="color: #888; font-weight: normal; margin-left: 4px;">({{ total_reviews }})</span>
+                                {% else %}
+                                    <span style="color: #ccc; font-weight: normal;">No reviews yet</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="color: #a67c52; font-weight: bold;">₱{{ "{:,.2f}".format(p.price) }}</td>
+                        <td style="font-size: 11px; color: #666;">
+                            {% if p.color_variants %} 
+                                {{ p.color_variants|length }} Colors 
+                                (₱{{ "{:,.2f}".format(p.color_variants|map(attribute='price')|min) }} - ₱{{ "{:,.2f}".format(p.color_variants|map(attribute='price')|max) }})
+                            {% endif %}
+                            {% if p.size_variants %} | {{ p.size_variants|length }} Sizes {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <button onclick="openEditModal('{{p.id}}')" class="action-btn" style="background: #2196F3;"><i class="fas fa-edit"></i></button>
+                            <a href="{{ url_for('delete_product', id=p.id) }}" onclick="return confirm('Delete this product?')" class="action-btn" style="background: #f44336;"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+
+                    <div id="modal-{{p.id}}" class="modal">
+                        <div class="modal-content">
+                            <h3>Update Product</h3>
+                            <form action="{{ url_for('update_product', id=p.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px;">
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">PRODUCT NAME</label>
+                                <input type="text" name="name" value="{{p.name}}" placeholder="Name">
+                                
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">BASE PRICE (₱)</label>
+                                <input type="number" step="0.01" name="price" value="{{p.price}}" placeholder="Price">
+                                
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">DESCRIPTION</label>
+                                <textarea name="description" style="height: 80px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">{{p.description}}</textarea>
+
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">LINK TO MATERIALS & DEDUCTIONS</label>
+                                <p style="font-size: 9px; color: #aaa; margin: 0;">Hold Ctrl/Cmd to select multiple</p>
+                                <select id="editMaterialSelect-{{p.id}}" name="material_ids[]" 
+        data-saved-vals="{{ p.material_id if p.material_id else '' }}" 
+        multiple onchange="updateDeductionInputs('editMaterialSelect-{{p.id}}', 'editDeductionContainer-{{p.id}}')">
+                                    <option value="">-- No Material Deduction --</option>
+                                    {% for item in materials %}
+                                    <option value="{{ item.id }}" data-name="{{ item.material }}"
+                                        {% if p.material_id and item.id|string in (p.material_id|string).split(',') %}selected{% endif %}>
+                                        {{ item.material }} (Current Stock: {{ item.qty }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div id="editDeductionContainer-{{p.id}}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                                    </div>
+
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">SIZES (Comma separated)</label>
+                                <input type="text" name="sizes" value="{% for s in p.size_variants %}{{ s.size_value }}{% if not loop.last %}, {% endif %}{% endfor %}" placeholder="e.g. 53, 54, S, M">
+
+                                <label style="font-size: 11px; font-weight: bold; color: #888; margin-bottom: -5px;">COLORS (Comma separated)</label>
+                                <input type="text" name="colors" value="{% for c in p.color_variants %}{{ c.color_name }}{% if not loop.last %}, {% endif %}{% endfor %}" placeholder="e.g. Blue, Black" oninput="updateEditColorRows('{{p.id}}', this.value)">
+
+                                <p style="font-size: 11px; margin: 5px 0 0 0; font-weight: bold; color: #888;">UPDATE DEFAULT IMAGE</p>
+                                <input type="file" name="image_file" style="font-size: 12px; border: none; background: #f9f9f9; padding: 5px;">
+
+                                <div id="editColorSection-{{p.id}}" class="variant-section" style="margin-top: 10px; {% if not p.color_variants %}display: none;{% endif %}">
+                                    <p style="font-size: 10px; font-weight: bold; color: #a67c52; margin-bottom: 10px;">COLOR VARIANT SETTINGS</p>
+                                    <div id="editColorRowsContainer-{{p.id}}">
+                                        {% for c in p.color_variants %}
+                                        <div class="color-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
+                                            <div style="display:flex; flex-direction:column; gap:5px; flex:1;">
+                                                <span style="font-size: 11px; font-weight: bold;">{{ c.color_name }}:</span>
+                                                <div style="display:flex; gap:10px; align-items:center;">
+                                                    <input type="file" name="color_image_{{ c.color_name|replace(' ', '_') }}" accept="image/*" style="font-size: 10px; border: none; background: transparent; padding: 0; flex: 2;">
+                                                    <input type="number" step="0.01" name="color_price_{{ c.color_name|replace(' ', '_') }}" value="{{ c.price }}" placeholder="Price" 
+                                                           style="flex: 1; padding: 5px; border: 1px solid #eee; border-radius: 4px; font-size: 11px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button type="submit" class="upload-btn" style="flex: 1;">SAVE CHANGES</button>
+                                    <button type="button" onclick="closeModal('{{p.id}}')" class="upload-btn" style="background:#888; flex: 1;">CANCEL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-header"><span>STORE STATS</span><i class="fas fa-box-open"></i></div>
+        <div class="card-main">
+            <span class="stat-label">TOTAL PRODUCTS</span>
+            <span class="stat-value">{{ products|length }}</span>
+        </div>
+        <div class="sidebar-header"><span>QUICK NAVIGATION</span><i class="fas fa-th-large"></i></div>
+        <div class="sidebar-box">
+            <ul class="nav-list">
+                <li><a href="{{ url_for('admin_orders') }}">Manage Orders <i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="{{ url_for('admin_inventory') }}">Stock Inventory <i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="{{ url_for('admin_reviews') }}">User Feedback <i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+    </aside>
+</main>
 
     <script>
         // --- NEW FILTER FUNCTION ---
@@ -503,7 +536,27 @@
             nav.classList.toggle('menu-hidden');
         }
 
-        function openEditModal(id) { document.getElementById('modal-' + id).style.display = 'block'; }
+        function openEditModal(id) {
+    const modal = document.getElementById('modal-' + id);
+    modal.style.display = 'block';
+    
+    // Logic to parse the "ID:AMT,ID:AMT" string stored in the database
+    // We fetch the material_id string that was rendered in the template (hidden or logic-based)
+    const selectElement = document.getElementById('editMaterialSelect-' + id);
+    const materialString = selectElement.getAttribute('data-saved-vals') || ""; 
+    
+    let existingData = {};
+    if (materialString) {
+        // Splits "5:2,3:1" into { "5": "2", "3": "1" }
+        materialString.split(',').forEach(pair => {
+            const [mId, amt] = pair.split(':');
+            if (mId && amt) existingData[mId] = amt;
+        });
+    }
+
+    // Trigger the input generator with the saved data
+    updateDeductionInputs('editMaterialSelect-' + id, 'editDeductionContainer-' + id, existingData);
+}
         function closeModal(id) { document.getElementById('modal-' + id).style.display = 'none'; }
         
         window.onclick = function(event) {
@@ -511,6 +564,52 @@
                 event.target.style.display = "none";
             }
         }
+        function updateDeductionInputs(selectId, containerId, existingData = null) {
+    const select = document.getElementById(selectId);
+    const container = document.getElementById(containerId);
+    const selectedOptions = Array.from(select.selectedOptions);
+    
+    // Save current values so they don't disappear if user just clicks around
+    const currentValues = {};
+    container.querySelectorAll('input').forEach(inp => {
+        currentValues[inp.name] = inp.value;
+    });
+
+    container.innerHTML = '';
+
+    selectedOptions.forEach(option => {
+        if(option.value === "" || option.value === "None") return;
+
+        const mId = option.value;
+        const inputName = `deduction_${mId}`;
+        
+        // Priority: 1. Data from Database (on open) 2. Typed value 3. Default "1"
+        let savedValue = "1";
+        if (existingData && existingData[mId]) {
+            savedValue = existingData[mId];
+        } else if (currentValues[inputName]) {
+            savedValue = currentValues[inputName];
+        }
+
+        const div = document.createElement('div');
+        div.style = "background: #fdfdfd; padding: 8px; border-radius: 6px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 4px;";
+        div.innerHTML = `
+            <label style="font-size: 10px; font-weight: bold; color: #a67c52; display: block;">
+                DEDUCT ${option.getAttribute('data-name').toUpperCase()}
+            </label>
+            <input type="number" name="${inputName}" value="${savedValue}" step="0.01" 
+                   style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 11px;"
+                   placeholder="Qty per order">
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Initial trigger for modals to show existing deductions if any (optional based on your backend integration)
+window.addEventListener('DOMContentLoaded', () => {
+    // You can call the update function here for each modal if you want to pre-populate 
+    // deduction fields based on database values when the page loads.
+});
     </script>
 </body>
 </html>

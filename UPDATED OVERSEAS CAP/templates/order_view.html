@@ -321,15 +321,15 @@
         </button>
     {% endif %}
 
-    {% if not order.product_id %}
-        <button onclick="acceptWithPrice('{{ order.id }}')" class="btn btn-accept">
-            <i class="fas fa-check"></i> ACCEPT ORDER
-        </button>
-    {% else %}
-        <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
-            <i class="fas fa-check"></i> ACCEPT ORDER
-        </a>
-    {% endif %}
+   {% if not order.product_id %}
+    <button onclick="acceptWithPrice('{{ order.id }}', '{{ order.quantity or 1 }}')" class="btn btn-accept">
+        <i class="fas fa-check"></i> ACCEPT ORDER
+    </button>
+{% else %}
+    <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ACCEPTED') }}" class="btn btn-accept">
+        <i class="fas fa-check"></i> ACCEPT ORDER
+    </a>
+{% endif %}
 
     <a href="{{ url_for('update_order_status', order_id=order.id, new_status='ON DELIVERY') }}" class="btn btn-delivery">
         <i class="fas fa-truck"></i> ON DELIVERY
@@ -359,25 +359,69 @@ function confirmCancel(orderId) {
     });
 }
 
-function acceptWithPrice(orderId) {
+function acceptWithPrice(orderId, customerQty) {
     Swal.fire({
-        title: 'Set Price for Custom Order',
-        input: 'number',
-        inputLabel: 'Total Price (PHP)',
-        inputPlaceholder: 'Enter amount...',
+        title: 'Calculate Total Price',
+        html: `
+            <div style="text-align: left; padding: 0 10px;">
+                <label style="font-size: 12px; font-weight: bold; color: #a67c52; text-transform: uppercase;">
+                    Price per Unit (₱)
+                </label>
+                <input id="swal-price" class="swal2-input" type="number" placeholder="0.00" step="0.01" 
+                       style="margin: 5px 0 15px 0; width: 100%; box-sizing: border-box;">
+                
+                <label style="font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase;">
+                    Quantity Ordered by Customer
+                </label>
+                <input id="swal-qty" class="swal2-input" type="number" value="${customerQty}" readonly 
+                       style="margin: 5px 0 15px 0; width: 100%; box-sizing: border-box; background-color: #f9f9f9; color: #777; cursor: not-allowed;">
+                
+                <div style="border-top: 2px solid #eee; margin-top: 10px; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: bold; color: #333;">GRAND TOTAL:</span>
+                    <span id="swal-total" style="color: #2ecc71; font-weight: 800; font-size: 22px;">₱0.00</span>
+                </div>
+            </div>
+        `,
+        focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: 'Confirm & Accept',
         confirmButtonColor: '#3498db',
-        inputValidator: (value) => {
-            if (!value || value <= 0) {
-                return 'Please enter a valid price!'
+        didOpen: () => {
+            const priceInp = document.getElementById('swal-price');
+            const qtyInp = document.getElementById('swal-qty');
+            const totalDisp = document.getElementById('swal-total');
+
+            // Auto-focus the price field so you can start typing immediately
+            priceInp.focus();
+
+            const calculate = () => {
+                const p = parseFloat(priceInp.value) || 0;
+                const q = parseFloat(qtyInp.value) || 0;
+                const total = p * q;
+                totalDisp.innerText = '₱' + total.toLocaleString(undefined, {
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2
+                });
+            };
+
+            priceInp.addEventListener('input', calculate);
+        },
+        preConfirm: () => {
+            const price = parseFloat(document.getElementById('swal-price').value);
+            const qty = parseFloat(document.getElementById('swal-qty').value);
+            
+            if (!price || price <= 0) {
+                Swal.showValidationMessage('Please enter a valid price per unit');
+                return false;
             }
+            
+            return (price * qty).toFixed(2);
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            const price = result.value;
+            const finalPrice = result.value;
             const baseUrl = `/admin/order/update/${orderId}/ACCEPTED`;
-            window.location.href = `${baseUrl}?price=${price}`;
+            window.location.href = `${baseUrl}?price=${finalPrice}`;
         }
     });
 }
